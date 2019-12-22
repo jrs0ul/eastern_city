@@ -159,8 +159,10 @@ void Game::init(){
     {
 #ifdef __ANDROID__
         itemDB.load("data/items.xml", AssetManager);
+        recipes.load("data/recipes.xml", AssetManager);
 #else
         itemDB.load("data/items.xml");
+        recipes.load("data/recipes.xml");
 #endif
      /*   itemsInWorld.load("data/itemLocations.xml");
         map.load("data/room.xml", &itemsInWorld);
@@ -232,6 +234,7 @@ void Game::destroy(){
     map.destroy();
     path.destroy();
 
+    recipes.destroy();
     itemDB.destroy();
     dude.destroy();
     itemsInWorld.destroy();
@@ -260,8 +263,6 @@ void Game::onBack()
 
 }
 
-//------------------------------------
-
 void Game::renderGame()
 {
     map.draw(mapPosX, mapPosY, pics, itemDB, DebugMode);
@@ -282,12 +283,27 @@ void Game::renderGame()
     
     dude.drawInventory(pics, itemDB);
 
+
+    char buf[256];
+    WriteText(10, 10, pics, 0, "Craft:", 0.8f, 0.8f);
+
+    for (unsigned i = 0; i < recipes.getRecipeCount(); ++i)
+    {
+
+        Recipe* recipe = recipes.getRecipe(i);
+
+        pics.draw(2, 10, 32 + i * 34, 0, false, 0.25f, 0.5);
+        pics.draw(2, 10 + 16, 32 + i * 34, 1, false, 0.25f, 0.5);
+
+        pics.draw(4, 10, 32 + i * 34, recipe->indexOfItemToMake);
+        
+    }
+
     if (DebugMode)
     {
         DrawDebugText();
     }
     
-    char buf[256];
     sprintf(buf, "Satiation:%d", dude.getSatiation());
     WriteText(500, 2, pics, 0, buf, 0.8f, 0.8f);
     sprintf(buf, "Health:%d", dude.getHealth());
@@ -330,6 +346,19 @@ void Game::gameLogic()
                )
             {
                 dude.useItem(i, itemDB);
+            }
+        }
+
+        for (unsigned i = 0; i < recipes.getRecipeCount(); ++i)
+        {
+            
+            if (touches.up[0].x > 10 && touches.up[0].x < 42 &&
+                touches.up[0].y > 32 + i * 34 && touches.up[0].y < 64 + i * 34)
+            {
+                printf("let's craft some shit\n");
+
+                Recipe* recipe = recipes.getRecipe(i);
+                dude.craftItem(recipe, itemDB);
             }
         }
 

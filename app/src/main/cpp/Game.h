@@ -25,6 +25,7 @@
 #include "FindPath.h"
 #include "GameStuff/Dude.h"
 #include "GameStuff/ItemDatabase.h"
+#include "GameStuff/CraftingRecipes.h"
 #include "GameStuff/GlobalItemList.h"
 #include "GameStuff/GameMap.h"
 #include "GameStuff/GameMapGraph.h"
@@ -200,6 +201,7 @@ private:
     bool    ignoreRegion;
 
     ItemDatabase itemDB;
+    CraftingRecipes recipes;
     GlobalItemList itemsInWorld;
 
     GameMapGraph   mapGraph;

@@ -340,6 +340,62 @@ void Dude::useItem(unsigned index, ItemDatabase& itemDb)
     }
 }
 
+void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
+{
+    if (!recipe)
+    {
+        return;
+    }
+
+    int ingredientCount = recipe->ingredients.count();
+    DArray<int> itemsToRemove;
+
+    for (unsigned i = 0; i < recipe->ingredients.count(); ++i)
+    {
+        Ingredient* ingredient = &recipe->ingredients[i];
+
+        int itemCountToFind = ingredient->count;
+
+        for (unsigned j = 0; j < items.count(); ++j)
+        {
+            if (items[j].getIndex() == ingredient->itemIndex && !items[j].isRemoved())
+            {
+                itemsToRemove.add(j);
+                --itemCountToFind;
+                if (!itemCountToFind)
+                {
+                    --ingredientCount;
+                    break;
+                }
+            }
+        }
+
+        if (itemCountToFind)
+        {
+            printf("You don't have required items\n");
+            return;
+        }
+
+    }
+
+    if (ingredientCount)
+    {
+        printf("You don't have required items\n");
+        itemsToRemove.destroy();
+        return;
+
+    }
+
+    for (unsigned i = 0; i < itemsToRemove.count(); ++i)
+    {
+        items[itemsToRemove[i]].setAsRemoved();
+    }
+
+    
+
+    itemsToRemove.destroy();
+}
+
 bool Dude::colidesWithRegion(GameMap& map, unsigned* regionIndex, unsigned* entryIndex)
 {
     Vector3D newPos = pos + Vector3D(0, 39, 0);

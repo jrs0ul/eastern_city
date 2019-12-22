@@ -5,6 +5,7 @@
 #include "../TextureLoader.h"
 #include "../FindPath.h"
 #include "GameMap.h"
+#include "CraftingRecipes.h"
 #include "ItemInstance.h"
 
 class Dude
@@ -18,6 +19,7 @@ public:
                    bool debugInfo = false);
     void      drawInventory(PicsContainer& pics, ItemDatabase& itemDb);
     void      useItem(unsigned index, ItemDatabase& itemDb);
+    void      craftItem(Recipe* recipe, ItemDatabase& itemDb);
     bool      colidesWithRegion(GameMap& map, unsigned* regionIndex, unsigned* entryIndex);
     void      setPosition(Vector3D& position);
     void      resetPathIndex(){pathIndex = 0;}
