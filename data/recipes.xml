@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<Recipes>
+    <Recipe resultItemIndex="2">
+        <Ingredient itemIndex="4" count="5"/>
+        <Ingredient itemIndex="5" count="1"/>
+    </Recipe>
+    <Recipe resultItemIndex="9">
+        <Ingredient itemIndex="6" count="3"/>
+        <Ingredient itemIndex="7" count="2"/>
+    </Recipe>
+    <Recipe resultItemIndex="3">
+        <Ingredient itemIndex="10" count="1"/>
+        <Ingredient itemIndex="11" count="2"/>
+    </Recipe>
+</Recipes>

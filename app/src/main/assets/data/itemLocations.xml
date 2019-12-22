@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+    <ItemLocations>
+        <ItemGroup map="room.xml">
+            <Item x="400.000000" y="380.000000" >0</Item>
+            <Item x="360.000000" y="380.000000" >3</Item>
+            <Item x="200.000000" y="380.000000" >2</Item>
+        </ItemGroup>
+        <ItemGroup map="stairwell.xml">
+            <Item x="120.000000" y="250.000000" >0</Item>
+        </ItemGroup>
+        <ItemGroup map="outside.xml">
+            <Item x="100.000000" y="360.000000" >1</Item>
+            <Item x="400.000000" y="300.000000" >1</Item>
+            <Item x="500.000000" y="270.000000" >1</Item>
+        </ItemGroup>
+    </ItemLocations>

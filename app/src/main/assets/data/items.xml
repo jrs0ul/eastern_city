@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Items>
+    <Item name="Canned food" isWearable="0" coldDecrease="0" spoilageSpeed="0" imageIndex="0" hungerDecrease="10" hpUp="1"/>
+    <Item name="Rat meat" isWearable="0" coldDecrease="0" spoilageSpeed="1" imageIndex="1" hungerDecrease="5" hpUp="0"/>
+    <Item name="Coat" isWearable="1" coldDecrease="3" spoilageSpeed="1.5" imageIndex="2" hungerDecrease="0" hpUp="0"/>
+    <Item name="Medicine" isWearable="0" coldDecrease="0" spoilageSpeed="0" imageIndex="3" hungerDecrease="0" hpUp="30"/>
+</Items>
+
