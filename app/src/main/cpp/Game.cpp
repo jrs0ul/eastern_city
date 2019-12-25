@@ -164,10 +164,6 @@ void Game::init(){
         itemDB.load("data/items.xml");
         recipes.load("data/recipes.xml");
 #endif
-     /*   itemsInWorld.load("data/itemLocations.xml");
-        map.load("data/room.xml", &itemsInWorld);
-        dude.init(*map.getPlayerPos());
-        ignoreRegion = false;*/
     }
 
 }
@@ -266,6 +262,9 @@ void Game::onBack()
 void Game::renderGame()
 {
     map.draw(mapPosX, mapPosY, pics, itemDB, DebugMode);
+   
+    actors.draw(mapPosX, mapPosY, pics, DebugMode);
+
     dude.draw(mapPosX, mapPosY, pics, DebugMode);
 
     if (DebugMode)
@@ -282,6 +281,13 @@ void Game::renderGame()
     }
     
     dude.drawInventory(pics, itemDB);
+
+
+    if (itemSelected)
+    {
+        ItemInstance* item = dude.getItem(selectedItem);
+        pics.draw(4, selectedItemPos.x, selectedItemPos.y, item->getIndex(), true);
+    }
 
 
     char buf[256];
@@ -326,8 +332,58 @@ void Game::gameLogic()
     mapPosX = (SCREEN_WIDTH / 2 ) - (map.getWidth() * 32) / 2;
     mapPosY = (SCREEN_HEIGHT / 2) - (map.getHeight() * 32) / 2;
 
+    if (touches.down.count())
+    {
+        for (int i = 0; i < 10; ++i)
+        {
+            if (touches.down[0].x > 100 + i * 34 && touches.down[0].x < 100 + i * 34 + 32 &&
+                    touches.down[0].y > 445 && touches.down[0].y < 477 && !itemSelected
+               )
+            {
+                if (i < (int)dude.getItemCount() && !dude.getItem(i)->isRemoved())
+                {
+                    selectedItem = i;
+                    itemSelected = true;
+                    selectedItemPos = Vector3D(touches.down[0].x, touches.down[0].y, 0);
+                }
+            }
+        }
+    }
+
+    if (touches.move.count())
+    {
+        if (itemSelected)
+        {
+            selectedItemPos = touches.move[0];
+        }
+    }
+
     if (touches.up.count())
     {
+
+        for (int i = 0; i < 10; ++i)
+        {
+            if (touches.up[0].x > 100 + i * 34 && touches.up[0].x < 100 + i * 34 + 32 &&
+                    touches.up[0].y > 445 && touches.up[0].y < 477
+               )
+            {
+                dude.useItem(i, itemDB);
+                itemSelected = false;
+                return;
+            }
+        }
+
+        if (itemSelected)
+        {
+            ItemInstance* item = dude.getItem(selectedItem);
+            currentRoom->addItem(Vector3D(selectedItemPos.x - mapPosX, selectedItemPos.y - mapPosY, 0),
+                                 item->getIndex());
+            map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+            item->setAsRemoved();
+            itemSelected = false;
+            return;
+        }
+
         _Point src;
         Vector3D* dudePos = dude.getPos();
         src.x = dudePos->x / 32; 
@@ -339,19 +395,10 @@ void Game::gameLogic()
         path.findPath(src, dest, map.getCollisionData(), map.getWidth(), map.getHeight());
         dude.resetPathIndex();
 
-        for (int i = 0; i < 10; ++i)
-        {
-            if (touches.up[0].x > 100 + i * 34 && touches.up[0].x < 100 + i * 34 + 32 &&
-                    touches.up[0].y > 445 && touches.up[0].y < 477
-               )
-            {
-                dude.useItem(i, itemDB);
-            }
-        }
+        
 
         for (unsigned i = 0; i < recipes.getRecipeCount(); ++i)
         {
-            
             if (touches.up[0].x > 10 && touches.up[0].x < 42 &&
                 touches.up[0].y > 32 + i * 34 && touches.up[0].y < 64 + i * 34)
             {
@@ -366,6 +413,13 @@ void Game::gameLogic()
 
 
     dude.update(DeltaTime, Keys, map, itemDB, path);
+    
+    for (unsigned i = 0; i < actors.getActorCount(); ++i)
+    {
+        Rat* rat = static_cast<Rat*>(actors.getActor(i));
+        rat->update(DeltaTime, map, dude, actors);
+    }
+
     unsigned entryIndex = 0;
     unsigned regionIndex = 0;
 
@@ -455,6 +509,16 @@ void Game::titleLogic()
         map.load(currentRoom->getMapName(), &itemsInWorld, currentRoom);
 #endif
         dude.init(*map.getPlayerPos(0));
+
+        actors.destroy();
+        Vector3D ratPos = Vector3D(280, 300, 0);
+        for (int i = 0; i < 4; ++i)
+        {
+            Rat rat;
+            ratPos.y -= 16;
+            rat.init(ratPos);
+            actors.addActor(rat);
+        }
         ignoreRegion = false;
     }
 

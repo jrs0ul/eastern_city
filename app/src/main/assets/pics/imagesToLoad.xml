@@ -12,6 +12,11 @@
             <Sprite name="closet" x="152" y="2" width="78" height="200"/>
             <Sprite name="doorway" x="2" y="128" width="78" height="124"/>
             <Sprite name="stairs" x="235" y="3" width="268" height="222"/>
+            <Sprite name="doorway_right" x="0" y="256" width="73" height="167"/>
+            <Sprite name="doorway_left" x="81" y="239" width="68" height="176"/>
+            <Sprite name="room_doorway_left" x="161" y="236" width="86" height="173"/>
+            <Sprite name="room_doorway_right" x="256" y="239" width="68" height="181"/>
+            <Sprite name="window" x="344" y="245" width="199" height="134"/>
         </Sprites>
     </Img>
     <Img src="pics/room.tga" width="600" height="406" filter="0" />

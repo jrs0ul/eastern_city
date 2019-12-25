@@ -19,6 +19,35 @@ void Dude::init(Vector3D& position)
     satiation = 100;
     health = 100.f;
     equipedBodyItem = nullptr;
+    collisionBodyOffset = Vector3D(0.f, 39.f, 0.f);
+    collisionBodyRadius = 16.f;
+    strcpy(spriteName, "pics/dude.tga");
+
+    FrameSet up;
+    up.frames.add(0);
+    up.frames.add(1);
+    up.frames.add(2);
+    up.frames.add(1);
+    FrameSet down;
+    down.frames.add(3);
+    down.frames.add(4);
+    down.frames.add(5);
+    down.frames.add(4);
+    FrameSet side;
+    side.frames.add(6);
+    side.frames.add(7);
+    side.frames.add(8);
+    side.frames.add(7);
+
+    animations.add(up);
+    animations.add(down);
+    animations.add(side);
+}
+
+void Dude::destroy()
+{
+    items.destroy();
+    Actor::destroy();
 }
 
 void Dude::update(float deltaTime, 
@@ -165,7 +194,7 @@ void Dude::update(float deltaTime,
             animationSubset = 0;
         }
 
-        if (isColiding(pos + shift, map))
+        if (Actor::isColiding(pos + shift, map))
         {
             shift.y = 0.f;
         }
@@ -184,7 +213,7 @@ void Dude::update(float deltaTime,
             isFlipedX = true;
         }
 
-        if (isColiding(pos + shift, map))
+        if (Actor::isColiding(pos + shift, map))
         {
             shift.x = 0.f;
         }
@@ -193,7 +222,7 @@ void Dude::update(float deltaTime,
 
     Vector3D newPos = pos + shift;
 
-    if (!isColiding(newPos, map))
+    if (!Actor::isColiding(newPos, map))
     {
         pos = newPos;
     }
@@ -221,24 +250,13 @@ void Dude::update(float deltaTime,
     //picking up items ----
     Vector3D shiftedPos = pos + Vector3D(0, 39, 0);
 
-
-    int replacableItemIndex = -1;
-
-    for (unsigned i = 0; i < items.count(); ++i)
-    {
-        if (items[i].isRemoved())
-        {
-            replacableItemIndex = i;
-            break;
-        }
-    }
-
+    int replacableItemIndex = findFreedInventorySlot();
 
     for (int i = 0; i < map.getItemCount(); ++i)
     {
         ItemInstance* itm = map.getItem(i);
 
-        bool noMorePlaceInBag = ((int)items.count() >= maxItems) ? (replacableItemIndex == -1 ?  true : false) : false;
+        bool noMorePlaceInBag = isNoMorePlaceInBag(replacableItemIndex);
         
         if (itm->isRemoved() || noMorePlaceInBag)
         {
@@ -247,38 +265,11 @@ void Dude::update(float deltaTime,
 
         if (CollisionCircleCircle(shiftedPos.x, shiftedPos.y, 16, itm->getPosition()->x, itm->getPosition()->y, 8))
         {
-
-            if (replacableItemIndex != -1)
-            {
-                items[replacableItemIndex] = *itm;
-            }
-            else if ((int)items.count() < maxItems)
-            {
-                ItemInstance itemToAdd = *itm;
-                items.add(itemToAdd);
-            }
-
-            
+            addItemToInventory(itm, replacableItemIndex);
             itm->setAsRemoved();
         }
     }
 
-}
-
-void Dude::draw(float posX, float posY,
-                PicsContainer& pics, bool debugInfo)
-{
-    int frames[][4] = {{0, 1, 2, 1}, {3, 4, 5, 4}, {6, 7, 8, 7}};
-
-    int frame = frames[animationSubset][animationFrame];
-    pics.draw(pics.findByName("pics/dude.tga"), 
-              pos.x + posX, pos.y + posY,
-              frame, true, (isFlipedX)? -1.f: 1.f, 1.f);
-
-    if (debugInfo)
-    {
-        pics.draw(-1, pos.x + posX, pos.y + posY + 39, 0, true, 32, 32, 0.f, COLOR(1,0,0,0.5f), COLOR(1,0,0,0.5f));
-    }
 }
 
 void Dude::drawInventory(PicsContainer& pics, ItemDatabase& itemDb)
@@ -391,7 +382,14 @@ void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
         items[itemsToRemove[i]].setAsRemoved();
     }
 
-    
+    ItemInstance craftedItem;
+    craftedItem.init(Vector3D(0, 0, 0), recipe->indexOfItemToMake);
+
+    int freeSlot = findFreedInventorySlot();
+    if (!isNoMorePlaceInBag(freeSlot))
+    {
+        addItemToInventory(&craftedItem, freeSlot);
+    }
 
     itemsToRemove.destroy();
 }
@@ -424,47 +422,49 @@ void Dude::setPosition(Vector3D& position)
     pos = position;
 }
 
-bool Dude::isColiding(Vector3D newPos, GameMap& map)
+ItemInstance* Dude::getItem(unsigned index)
 {
-
-    newPos = newPos + Vector3D(0, 39, 0);
-
-    int topX = newPos.x - 16;
-    int topY = newPos.y - 16;
-    int bottomX = newPos.x + 16;
-    int bottomY = newPos.y + 16;
-
-    bool colides = false;
-
-    int fromY = topY / 32;
-    int toY = bottomY / 32;
-    int fromX = topX / 32;
-    int toX = bottomX / 32;
-
-    for (int i = fromY; i <= toY; ++i)
+    if (index < items.count())
     {
-        for (int j = fromX; j <= toX; ++j)
+        return &items[index];
+    }
+
+    return nullptr;
+}
+
+void Dude::addItemToInventory(ItemInstance* item, int inventorySlotIndex)
+{
+    if (inventorySlotIndex != -1)
+    {
+        items[inventorySlotIndex] = *item;
+    }
+    else if ((int)items.count() < maxItems)
+    {
+        ItemInstance itemToAdd = *item;
+        items.add(itemToAdd);
+    }
+
+}
+
+
+int Dude::findFreedInventorySlot()
+{
+    int replacableItemIndex = -1;
+
+    for (unsigned i = 0; i < items.count(); ++i)
+    {
+        if (items[i].isRemoved())
         {
-            int res = map.canTraverse(j, i);
-
-            if (res == 0)
-            {
-                colides = CollisionCircleRectangle(newPos.x, newPos.y, 15.f, j * 32, i * 32, 32, 32);
-
-                if (colides)
-                {
-                    return true;
-                }
-
-            }
-            else if (res == -1)
-            {
-                return true;
-            }
+            replacableItemIndex = i;
+            break;
         }
     }
 
+    return replacableItemIndex;
 
-    return false;
+}
 
+bool Dude::isNoMorePlaceInBag(int freedSlotIndex)
+{
+    return ((int)items.count() >= maxItems) ? (freedSlotIndex == -1 ?  true : false) : false;
 }

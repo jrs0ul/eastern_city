@@ -26,7 +26,7 @@ public:
 #ifndef __ANDROID__
     void     load(const char* filename);
 #else
-    void     load(const char* filename, AssetManager& assman);
+    void     load(const char* filename, AAssetManager* assman);
 #endif
     unsigned getRecipeCount();
     Recipe*  getRecipe(unsigned index);

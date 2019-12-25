@@ -6,7 +6,7 @@
 #ifndef __ANDROID__
 void CraftingRecipes::load(const char* filename)
 #else
-void CraftingRecipes::load(const char* filename, AssetManager& assman)
+void CraftingRecipes::load(const char* filename, AAssetManager* assman)
 #endif
 {
     Xml recipeFile;

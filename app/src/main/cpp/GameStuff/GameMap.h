@@ -28,6 +28,7 @@ public:
                      PicsContainer& pics, 
                      ItemDatabase& itemDb, 
                      bool debugInfo = false);
+    void        addItem(ItemInstance* item);
     int         canTraverse(int x, int y);
     bool*       getCollisionData(){return collision;}
     void        setCollision(int x, int y, bool bColide);

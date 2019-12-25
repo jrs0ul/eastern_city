@@ -28,7 +28,9 @@
 #include "GameStuff/CraftingRecipes.h"
 #include "GameStuff/GlobalItemList.h"
 #include "GameStuff/GameMap.h"
+#include "GameStuff/Rat.h"
 #include "GameStuff/GameMapGraph.h"
+#include "GameStuff/ActorContainer.h"
 
 
 
@@ -194,6 +196,7 @@ private:
 
 
     Dude dude;
+    ActorContainer actors;
     GameMap map;
     float mapPosX;
     float mapPosY;
@@ -207,6 +210,9 @@ private:
     GameMapGraph   mapGraph;
     Room* currentRoom;
 
+    int selectedItem;
+    bool itemSelected;
+    Vector3D selectedItemPos;
 
 
 };

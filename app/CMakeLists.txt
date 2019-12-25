@@ -44,6 +44,7 @@ add_library(game SHARED
              src/main/cpp/GameStuff/ItemInstance.cpp
              src/main/cpp/GameStuff/GlobalItemList.cpp
              src/main/cpp/GameStuff/ItemDatabase.cpp
+             src/main/cpp/GameStuff/CraftingRecipes.cpp
              src/main/cpp/GameStuff/Dude.cpp
              src/main/cpp/FindPath.cpp
 

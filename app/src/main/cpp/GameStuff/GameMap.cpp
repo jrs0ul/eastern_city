@@ -507,6 +507,11 @@ void GameMap::draw(float posX, float posY, PicsContainer& pics, ItemDatabase& it
 
 }
 
+void GameMap::addItem(ItemInstance* item)
+{
+    items.add(item);
+}
+
 int GameMap::canTraverse(int x, int y)
 {
 

@@ -3,7 +3,6 @@
         <ItemGroup map="room.xml">
             <Item x="400.000000" y="380.000000" >0</Item>
             <Item x="360.000000" y="380.000000" >3</Item>
-            <Item x="200.000000" y="380.000000" >2</Item>
         </ItemGroup>
         <ItemGroup map="stairwell.xml">
             <Item x="120.000000" y="250.000000" >0</Item>

@@ -277,8 +277,10 @@
     <Temperature>20</Temperature>
     <Assets >
         <Asset x="0.000000" y="0.000000">pics/room.tga</Asset>
+        <Asset x="250.000000" y="130.000000" index="8">pics/test.tga</Asset>
         <Asset x="130.000000" y="190.000000" index="0">pics/test.tga</Asset>
         <Asset x="480.000000" y="180.000000" index="1">pics/test.tga</Asset>
+        <Asset x="25.000000" y="190.000000" index="6">pics/test.tga</Asset>
     </Assets>
     <Entries >
         <Entry x="350.000000" y="310.000000"/>
