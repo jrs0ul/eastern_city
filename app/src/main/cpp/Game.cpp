@@ -227,6 +227,7 @@ void Game::destroy(){
 #endif
     pics.destroy();
 
+    actors.destroy();
     map.destroy();
     path.destroy();
 
@@ -441,6 +442,7 @@ void Game::gameLogic()
 #endif
             path.destroy();
             dude.setPosition(*map.getPlayerPos(rae->entryIndex));
+            createEnemies();
 
             if (dude.colidesWithRegion(map, &regionIndex, &entryIndex))
             {
@@ -510,16 +512,23 @@ void Game::titleLogic()
 #endif
         dude.init(*map.getPlayerPos(0));
 
-        actors.destroy();
-        Vector3D ratPos = Vector3D(280, 300, 0);
-        for (int i = 0; i < 4; ++i)
-        {
-            Rat rat;
-            ratPos.y -= 16;
-            rat.init(ratPos);
-            actors.addActor(rat);
-        }
+        createEnemies();
+
+        
         ignoreRegion = false;
+    }
+
+}
+
+void Game::createEnemies()
+{
+    actors.destroy();
+    for (unsigned i = 0; i < currentRoom->getEnemyCount(); ++i)
+    {
+        Rat rat;
+        Vector3D* ratPos = currentRoom->getEnemyPosition(i);
+        rat.init(*ratPos);
+        actors.addActor(rat);
     }
 
 }

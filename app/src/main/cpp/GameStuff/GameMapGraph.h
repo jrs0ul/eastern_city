@@ -21,18 +21,21 @@ public:
     void              addChildRoom(const char* name, unsigned entry, unsigned region);
     void              addChildRoom(Room* node, unsigned entry, unsigned region);
     void              addItem(Vector3D pos, int index);
+    void              addEnemyPosition(Vector3D pos);
     void              addAsset(Vector3D pos, const char* name, unsigned spriteIndex);
     void              addCollision(unsigned x, unsigned y, bool isColliding);
     void              addRegion(Vector3D pos, Vector3D size);
     void              addEntry(Vector3D pos);
     void              removeItem(unsigned index);
     unsigned          getItemCount();
+    unsigned          getEnemyCount();
     unsigned          getChildRoomCount();
     unsigned          getAssetCount();
     unsigned          getAdditionalCollisionCount();
     unsigned          getAdditionalRegionsCount();
     unsigned          getAdditionalEntriesCount();
     ItemInstance*     getItem(unsigned index);
+    Vector3D*         getEnemyPosition(unsigned index);
     RoomAndEntry*     getChildRoom(unsigned index);
     RoomAndEntry*     findChildRoomByRegionIndex(unsigned regionIndex);
     Asset*            getAsset(unsigned index);
@@ -47,11 +50,12 @@ private:
     DArray<RoomAndEntry>  childRooms;
     
     //data
-    DArray<ItemInstance>  items;
-    DArray<Asset>         assets;
-    DArray<CollisionTile> additionalCollision;
-    DArray<Region>        additionalRegions;
-    DArray<Vector3D>      additionalEntries;
+    DArray<ItemInstance>   items;
+    DArray<Vector3D>       enemies;
+    DArray<Asset>          assets;
+    DArray<CollisionTile>  additionalCollision;
+    DArray<Region>         additionalRegions;
+    DArray<Vector3D>       additionalEntries;
     char mapName[256];
 };
 

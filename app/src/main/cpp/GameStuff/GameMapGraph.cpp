@@ -27,6 +27,11 @@ void Room::addItem(Vector3D pos, int index)
     items.add(item);
 }
 
+void Room::addEnemyPosition(Vector3D pos)
+{
+    enemies.add(pos);
+}
+
 void Room::addAsset(Vector3D pos, const char* name, unsigned spriteIndex)
 {
     Asset ass;
@@ -71,6 +76,11 @@ unsigned Room::getItemCount()
     return items.count();
 }
 
+unsigned Room::getEnemyCount()
+{
+    return enemies.count();
+}
+
 unsigned Room::getChildRoomCount()
 {
     return childRooms.count();
@@ -105,6 +115,17 @@ ItemInstance* Room::getItem(unsigned index)
 
     return nullptr;
 }
+
+Vector3D* Room::getEnemyPosition(unsigned index)
+{
+    if (index < enemies.count())
+    {
+        return &enemies[index];
+    }
+
+    return nullptr;
+}
+
 
 RoomAndEntry* Room::getChildRoom(unsigned index)
 {
@@ -212,6 +233,7 @@ void Room::destroy(Room* parent, int level)
 
     childRooms.destroy();
     items.destroy();
+    enemies.destroy();
     assets.destroy();
     additionalCollision.destroy();
     additionalRegions.destroy();
@@ -279,6 +301,11 @@ void GameMapGraph::init()
 
 
     outside->addChildRoom(stairwell, 0, 0);
+
+    for (int i = 0; i < 10; ++i)
+    {
+        outside->addEnemyPosition(Vector3D(200 + rand() % 100, 300 + rand() % 100, 0 ));
+    }
     addDoorway(stairwell, 288, 98, 3, 0, 3, 0, nullptr, 2);
     addDoorway(stairwell, 544, 96, 4, 0, 4, 0,  nullptr, 2);
     printf("done generating\n");
@@ -320,6 +347,11 @@ void GameMapGraph::addDoorway(Room* floor,
         genericRoom->addItem(Vector3D(250 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 10]);
         genericRoom->addItem(Vector3D(350 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 10]);
         genericRoom->addItem(Vector3D(200 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 10]);
+        
+        for (int i = 0; i < rand() % 5; ++i)
+        {
+            genericRoom->addEnemyPosition(Vector3D(200 + rand() % 100, 300 + rand() % 100, 0 ));
+        }
 
 
         if (isLeft)

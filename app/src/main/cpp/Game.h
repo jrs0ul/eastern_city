@@ -162,6 +162,8 @@ public:
     void destroy();
     void onBack();
 
+private:
+
     void renderGame();
     void renderEditing();
     void renderTitle();
@@ -169,8 +171,9 @@ public:
     void gameLogic();
     void editingLogic();
     void titleLogic();
+
+    void createEnemies();
     
-private:
 
     void LoadShader(ShaderProgram* shader, const char* name);
 
