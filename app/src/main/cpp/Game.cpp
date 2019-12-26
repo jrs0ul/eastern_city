@@ -330,8 +330,19 @@ void Game::renderTitle()
 
 void Game::gameLogic()
 {
-    mapPosX = (SCREEN_WIDTH / 2 ) - (map.getWidth() * 32) / 2;
-    mapPosY = (SCREEN_HEIGHT / 2) - (map.getHeight() * 32) / 2;
+    mapPosX = SCREEN_WIDTH / 2 - dude.pos.x;
+
+    if (mapPosX > 0)
+    {
+        mapPosX = 0;
+    }
+
+    mapPosY = SCREEN_HEIGHT / 2 - dude.pos.y;
+
+    if (mapPosY > 0)
+    {
+        mapPosY = 0;
+    }
 
     if (touches.down.count())
     {

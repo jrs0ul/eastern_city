@@ -306,7 +306,7 @@ void GameMapGraph::init()
 
     for (int i = 0; i < 10; ++i)
     {
-        outside->addEnemyPosition(Vector3D(200 + i * 32, 300 + rand() % 100, 0 ));
+        outside->addEnemyPosition(Vector3D(300 + i * 32, 300 + rand() % 100, 0 ));
     }
     addDoorway(stairwell, 288, 98, 3, 0, 3, 0, nullptr, 2);
     addDoorway(stairwell, 544, 96, 4, 0, 4, 0,  nullptr, 2);
