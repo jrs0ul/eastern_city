@@ -14,11 +14,14 @@ class GameMap;
 class Actor
 {
 public:
-    void    destroy();
-    void    draw(float offsetX, float offsetY,
-                 PicsContainer& pics, 
-                 bool debugInfo = false);
-    bool    isColiding(Vector3D newPos, GameMap& map);
+    virtual         ~Actor();
+    void            destroy();
+    void            kill(){isDead = true;}
+    void            draw(float offsetX, float offsetY,
+                         PicsContainer& pics, 
+                         bool debugInfo = false);
+    bool            isColiding(Vector3D newPos, GameMap& map);
+    virtual int     getType(){return -1;}
 
     DArray<FrameSet> animations;
     char             spriteName[256];
@@ -30,6 +33,7 @@ public:
     int              animationFrame;
     int              animationSubset;
     bool             isFlipedX;
+    bool             isDead;
 
 };
 

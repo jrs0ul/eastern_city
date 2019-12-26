@@ -12,27 +12,38 @@
 class Dude : public Actor
 {
 public:
-    void      init(Vector3D& position);
-    void      destroy();
-    void      update(float deltaTime, unsigned char* Keys, GameMap& map, ItemDatabase& itemDb, Path& path);
-    void      drawInventory(PicsContainer& pics, ItemDatabase& itemDb);
-    void      useItem(unsigned index, ItemDatabase& itemDb);
-    void      craftItem(Recipe* recipe, ItemDatabase& itemDb);
-    bool      colidesWithRegion(GameMap& map, unsigned* regionIndex, unsigned* entryIndex);
-    void      setPosition(Vector3D& position);
-    void      setHealth(float newHealth){health = newHealth;}
-    void      resetPathIndex(){pathIndex = 0;}
-    unsigned  getItemCount(){return items.count();}
+    void          init(Vector3D& position);
+    void          destroy();
+    void          update(float deltaTime, unsigned char* Keys, GameMap& map, ItemDatabase& itemDb, Path& path);
+
+    void          drawInventory(PicsContainer& pics, ItemDatabase& itemDb);
+    int           hasItem(unsigned itemId);
+    void          removeItem(unsigned index);
+    void          useItem(unsigned index, ItemDatabase& itemDb);
+    void          craftItem(Recipe* recipe, ItemDatabase& itemDb);
+
+    bool          colidesWithRegion(GameMap& map, unsigned* regionIndex, unsigned* entryIndex);
+    void          setPosition(Vector3D& position);
+    void          setHealth(float newHealth){health = newHealth;}
+    void          resetPathIndex(){pathIndex = 0;}
+
+    int           isWeaponEquiped(){return (equipedWeapon.isRemoved()) ? -1 : equipedWeapon.getIndex();}
+    unsigned      getItemCount(){return items.count();}
     ItemInstance* getItem(unsigned index);
-    Vector3D* getPos(){return &pos;}
-    int       getHealth(){return health;}
-    int       getSatiation(){return satiation;}
+    Vector3D*     getPos(){return &pos;}
+    int           getHealth(){return health;}
+    int           getSatiation(){return satiation;}
+
+    virtual int   getType() override {return 0;}
 private:
 
     bool isColiding(Vector3D newPos, GameMap& map);
     void addItemToInventory(ItemInstance* item, int inventorySlotIndex);
     int  findFreedInventorySlot();
     bool isNoMorePlaceInBag(int freedSlotIndex);
+    void wearClothes(float deltaTime, ItemDatabase& itemdb);
+    void doTemperatureDamage(float deltaTime, int temperature, ItemDatabase& itemdb);
+    void doHungerDamage(float deltaTime);
 
 private:
     DArray<ItemInstance> items;
@@ -42,7 +53,8 @@ private:
     float                satiationProgress;
     float                freezingProgress;
 
-    ItemInstance*        equipedBodyItem;
+    ItemInstance         equipedClothes;
+    ItemInstance         equipedWeapon;
 
     int                  maxItems;
     int                  satiation;

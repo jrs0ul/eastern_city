@@ -173,6 +173,9 @@ private:
     void titleLogic();
 
     void createEnemies();
+
+    bool handleShooting(float x, float y);
+    bool handleCrafting(float x, float y);
     
 
     void LoadShader(ShaderProgram* shader, const char* name);

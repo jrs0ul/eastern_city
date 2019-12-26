@@ -293,8 +293,10 @@ void GameMapGraph::init()
     Room* lastFloor = currentFloor;
     lastFloor->addChildRoom(previousFloor, 1, 0);
     addDoorway(lastFloor, 288, 98, 2, 0, 2, 0, nullptr, 2);
-    lastFloor->addItem(Vector3D(300, 300, 0), rand() % 2);
-    lastFloor->addItem(Vector3D(360, 320, 0), rand() % 2);
+    lastFloor->addItem(Vector3D(300, 300, 0), 8);
+    lastFloor->addItem(Vector3D(360, 320, 0), 8);
+    lastFloor->addItem(Vector3D(320, 340, 0), 8);
+    lastFloor->addItem(Vector3D(360, 305, 0), 8);
     lastFloor->addCollision(5, 5, true);
     lastFloor->addCollision(6, 5, true);
     lastFloor->addCollision(7, 5, true);
@@ -304,7 +306,7 @@ void GameMapGraph::init()
 
     for (int i = 0; i < 10; ++i)
     {
-        outside->addEnemyPosition(Vector3D(200 + rand() % 100, 300 + rand() % 100, 0 ));
+        outside->addEnemyPosition(Vector3D(200 + i * 32, 300 + rand() % 100, 0 ));
     }
     addDoorway(stairwell, 288, 98, 3, 0, 3, 0, nullptr, 2);
     addDoorway(stairwell, 544, 96, 4, 0, 4, 0,  nullptr, 2);
@@ -343,14 +345,14 @@ void GameMapGraph::addDoorway(Room* floor,
         floor->addChildRoom("data/genericroom.xml", entryPoint, doorRegion);
         Room* genericRoom = floor->getChildRoom(floor->getChildRoomCount() - 1)->room;
 
-        int itemArray[] = {5, 1, 3, 8, 0, 6, 7, 10, 11, 4};
-        genericRoom->addItem(Vector3D(250 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 10]);
-        genericRoom->addItem(Vector3D(350 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 10]);
-        genericRoom->addItem(Vector3D(200 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 10]);
+        int itemArray[] = {5, 3, 8, 0, 6, 7, 10, 11, 4};
+        genericRoom->addItem(Vector3D(250 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
+        genericRoom->addItem(Vector3D(350 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
+        genericRoom->addItem(Vector3D(200 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
         
         for (int i = 0; i < rand() % 5; ++i)
         {
-            genericRoom->addEnemyPosition(Vector3D(200 + rand() % 100, 300 + rand() % 100, 0 ));
+            genericRoom->addEnemyPosition(Vector3D(200 + i * 32, 300 + rand() % 100, 0 ));
         }
 
 

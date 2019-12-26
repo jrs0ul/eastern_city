@@ -27,7 +27,6 @@
 
     public:
         float musicVolume;
-        int useLineTension;
 
         int ScreenWidth;
         int ScreenHeight;

@@ -266,7 +266,7 @@ void Game::renderGame()
    
     actors.draw(mapPosX, mapPosY, pics, DebugMode);
 
-    dude.draw(mapPosX, mapPosY, pics, DebugMode);
+    //dude.draw(mapPosX, mapPosY, pics, DebugMode);
 
     if (DebugMode)
     {
@@ -384,6 +384,16 @@ void Game::gameLogic()
             itemSelected = false;
             return;
         }
+        
+        if (handleCrafting(touches.up[0].x, touches.up[0].y))
+        {
+            return;
+        }
+
+        if (handleShooting(touches.up[0].x - mapPosX, touches.up[0].y - mapPosY))
+        {
+            return;
+        }
 
         _Point src;
         Vector3D* dudePos = dude.getPos();
@@ -397,19 +407,6 @@ void Game::gameLogic()
         dude.resetPathIndex();
 
         
-
-        for (unsigned i = 0; i < recipes.getRecipeCount(); ++i)
-        {
-            if (touches.up[0].x > 10 && touches.up[0].x < 42 &&
-                touches.up[0].y > 32 + i * 34 && touches.up[0].y < 64 + i * 34)
-            {
-                printf("let's craft some shit\n");
-
-                Recipe* recipe = recipes.getRecipe(i);
-                dude.craftItem(recipe, itemDB);
-            }
-        }
-
     }
 
 
@@ -417,8 +414,16 @@ void Game::gameLogic()
     
     for (unsigned i = 0; i < actors.getActorCount(); ++i)
     {
-        Rat* rat = static_cast<Rat*>(actors.getActor(i));
-        rat->update(DeltaTime, map, dude, actors);
+        Actor* actr = actors.getActor(i);
+
+        if (actr)
+        {
+            if (actr->getType() == 1)
+            {
+                Rat* rat = static_cast<Rat*>(actr);
+                rat->update(DeltaTime, map, dude, actors);
+            }
+        }
     }
 
     unsigned entryIndex = 0;
@@ -523,13 +528,80 @@ void Game::titleLogic()
 void Game::createEnemies()
 {
     actors.destroy();
+
     for (unsigned i = 0; i < currentRoom->getEnemyCount(); ++i)
     {
-        Rat rat;
+        Rat* rat;
         Vector3D* ratPos = currentRoom->getEnemyPosition(i);
-        rat.init(*ratPos);
+        rat = new Rat();
+        rat->init(*ratPos);
         actors.addActor(rat);
     }
+
+    actors.addActor(&dude);
+
+}
+
+bool Game::handleShooting(float x, float y)
+{
+    for (unsigned i = 0; i < actors.getActorCount(); ++i)
+    {
+        Actor* actor = actors.getActor(i);
+
+        if (actor->getType() != 1)
+        {
+            continue;
+        }
+
+
+        if (CollisionCircleCircle(x, y, 1.f, actor->pos.x, actor->pos.y, 30))
+        {
+            int weaponEquiped = dude.isWeaponEquiped();
+
+            if (weaponEquiped != -1)
+            {
+                ItemData* weaponInfo = itemDB.get(weaponEquiped); 
+
+                int ammoSlot = dude.hasItem(weaponInfo->ammoItemIndex);
+
+                if (ammoSlot != -1)
+                { 
+                    if (actor->isDead)
+                    {
+                        return false;
+                    }
+            
+                    dude.removeItem(ammoSlot);
+                    actor->kill();
+                    currentRoom->addItem(Vector3D(actor->pos.x, actor->pos.y, 0), 1);
+                    map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+                }
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+bool Game::handleCrafting(float x, float y)
+{
+    for (unsigned i = 0; i < recipes.getRecipeCount(); ++i)
+    {
+        if (x > 10 && x < 42 &&
+                y > 32 + i * 34 && y < 64 + i * 34)
+        {
+            printf("let's craft some shit\n");
+
+            Recipe* recipe = recipes.getRecipe(i);
+            dude.craftItem(recipe, itemDB);
+            return true;
+        }
+    }
+
+    return false;
 
 }
 

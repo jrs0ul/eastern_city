@@ -25,5 +25,5 @@
     <Img src="pics/outside.tga" width="600" height="406" filter="0" />
     <Img src="pics/dude.tga" width="64" height="110" filter="0" />
     <Img src="pics/title.tga" width="256" height="256" filter="0" />
-    <Img src="pics/rat.tga" width="69" height="37" filter="0" />
+    <Img src="pics/rat.tga" width="69" height="41" filter="0" />
 </Images>

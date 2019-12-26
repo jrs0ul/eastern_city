@@ -3,10 +3,17 @@
 
 void ActorContainer::destroy()
 {
+    for (unsigned i = 0; i < actors.count(); ++i)
+    {
+        if (actors[i]->getType())//don't delete main character
+        {
+            delete actors[i];
+        }
+    }
     actors.destroy();
 }
 
-void ActorContainer::addActor(Actor& actor)
+void ActorContainer::addActor(Actor* actor)
 {
     actors.add(actor);
 }
@@ -20,7 +27,13 @@ void ActorContainer::draw(float offsetX, float offsetY,
 
     for (unsigned i = 0; i < actors.count(); ++i)
     {
-        Actor* dude = &actors[i];
+        Actor* dude = actors[i];
+        
+        if (dude->isDead)
+        {
+            continue;
+        }
+
         renderUnits.add(dude);
     }
 
@@ -33,7 +46,7 @@ void ActorContainer::draw(float offsetX, float offsetY,
 
         for (int i = 0; i < (int)renderUnits.count(); ++i)
         {
-            float currentY = renderUnits[i]->pos.y;
+            float currentY = renderUnits[i]->pos.y + renderUnits[i]->collisionBodyOffset.y;
 
             if ( currentY < minY)
             {
@@ -59,7 +72,7 @@ Actor* ActorContainer::getActor(unsigned index)
 {
     if (index < actors.count())
     {
-        return &actors[index];
+        return actors[index];
     }
 
     return nullptr;
@@ -69,15 +82,17 @@ bool ActorContainer::isColidingWithOthers(Actor* actor, Vector3D& offset)
 {
     for (unsigned i = 0; i < actors.count(); ++i)
     {
-        Actor* pActor = &actors[i];
+        Actor* pActor = actors[i];
 
-        if (pActor == actor)
+        if (pActor == actor || pActor->isDead)
         {
-            return false;
+            continue;
         }
 
         if (CollisionCircleCircle(actor->pos.x + offset.x, actor->pos.y + offset.y, actor->collisionBodyRadius,
-                                  actors[i].pos.x, actors[i].pos.y, actors[i].collisionBodyRadius))
+                                  actors[i]->pos.x, 
+                                  actors[i]->pos.y, 
+                                  actors[i]->collisionBodyRadius))
         {
             return true;
         }

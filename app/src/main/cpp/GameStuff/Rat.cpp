@@ -9,6 +9,7 @@ void Rat::init(Vector3D& position)
     animationFrame = 0.f;
     collisionBodyRadius = 10;
     collisionBodyOffset = Vector3D(0, 0, 0);
+    isDead = false;
 
     FrameSet up;
     up.frames.add(0);
@@ -25,22 +26,40 @@ void Rat::init(Vector3D& position)
     side.frames.add(11);
     side.frames.add(12);
     side.frames.add(11);
-    FrameSet attack;
-    attack.frames.add(11);
-    attack.frames.add(13);
-    attack.frames.add(14);
-    attack.frames.add(11);
 
+    FrameSet attackUp;
+    attackUp.frames.add(1);
+    attackUp.frames.add(3);
+    attackUp.frames.add(4);
+    attackUp.frames.add(1);
+
+    FrameSet attackDown;
+    attackDown.frames.add(6);
+    attackDown.frames.add(8);
+    attackDown.frames.add(9);
+    attackDown.frames.add(6);
+
+    FrameSet attackSide;
+    attackSide.frames.add(11);
+    attackSide.frames.add(13);
+    attackSide.frames.add(14);
+    attackSide.frames.add(11);
 
     animations.add(up);
     animations.add(down);
     animations.add(side);
-    animations.add(attack);
+    animations.add(attackUp);
+    animations.add(attackDown);
+    animations.add(attackSide);
     strcpy(spriteName, "pics/rat.tga");
 }
 
 void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& actors)
 {
+    if (isDead)
+    {
+        return;
+    }
 
     Vector3D dudPos = *dude.getPos();
     dudPos.y += 39.f;
@@ -75,18 +94,28 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
         }
     }
 
-    Vector3D newPos = pos + direction;
-
-    if (!Actor::isColiding(newPos, map) && !actors.isColidingWithOthers(this, direction))
-    {
-        pos = newPos;
-    }
-    
+    bool colidesWithHero = false;
 
     if (CollisionCircleCircle(pos.x, pos.y, 8, dudPos.x, dudPos.y, 38))
     {
-        animationSubset = 3;
+        switch(animationSubset)
+        {
+            case 0 : animationSubset = 3; break;
+            case 1 : animationSubset = 4; break;
+            case 2 : animationSubset = 5; break;
+        }
+
+        colidesWithHero = true;
+
     }
+
+    Vector3D newPos = pos + direction;
+
+    if (!Actor::isColiding(newPos, map) && !actors.isColidingWithOthers(this, direction) && !colidesWithHero)
+    {
+        pos = newPos;
+    }
+
 
     animationProgress += deltaTime * 6.f;
 

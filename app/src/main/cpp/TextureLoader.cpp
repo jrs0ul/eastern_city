@@ -861,27 +861,50 @@ bool PicsContainer::initContainer(const char *list, AAssetManager* assman)
                 {
                     XmlAttribute *atr = node->getAttribute(j);
 
-                    if (wcscmp(atr->getName(), L"src") == 0)
+                    if (atr)
                     {
-                        sprintf(data.name, "%ls", atr->getValue());
-                    }
-                    else if (wcscmp(atr->getName(), L"width") == 0)
-                    {
-                        char buffer[100];
-                        sprintf(buffer, "%ls", atr->getValue());
-                        data.twidth = atoi(buffer);
-                    }
-                    else if (wcscmp(atr->getName(), L"height") == 0)
-                    {
-                        char buffer[100];
-                        sprintf(buffer, "%ls", atr->getValue());
-                        data.theight = atoi(buffer);
-                    }
-                    else if (wcscmp(atr->getName(), L"filter") == 0)
-                    {
-                        char buffer[100];
-                        sprintf(buffer, "%ls", atr->getValue());
-                        data.filter = atoi(buffer);
+                        if (wcscmp(atr->getName(), L"src") == 0)
+                        {
+                            wchar_t* value = atr->getValue();
+                            
+                            if (value)
+                            {
+                                sprintf(data.name, "%ls", value);
+                            }
+                        }
+                        else if (wcscmp(atr->getName(), L"width") == 0)
+                        {
+                            char buffer[100];
+                            wchar_t* value = atr->getValue();
+
+                            if (value)
+                            {
+                                sprintf(buffer, "%ls", value);
+                                data.twidth = atoi(buffer);
+                            }
+                        }
+                        else if (wcscmp(atr->getName(), L"height") == 0)
+                        {
+                            char buffer[100];
+                            wchar_t* value = atr->getValue();
+                            
+                            if (value)
+                            {
+                                sprintf(buffer, "%ls", value);
+                                data.theight = atoi(buffer);
+                            }
+                        }
+                        else if (wcscmp(atr->getName(), L"filter") == 0)
+                        {
+                            char buffer[100];
+                            wchar_t* value = atr->getValue();
+                            
+                            if (value)
+                            {
+                                sprintf(buffer, "%ls", value);
+                                data.filter = atoi(buffer);
+                            }
+                        }
                     }
                 }
                 

@@ -9,7 +9,7 @@ class ActorContainer
 {
 public:
     void     destroy();
-    void     addActor(Actor& actor);
+    void     addActor(Actor* actor);
     void     draw(float offsetX, float offsetY, PicsContainer& pics, bool debug);
     unsigned getActorCount();
     Actor*   getActor(unsigned index);
@@ -18,7 +18,7 @@ public:
 
 private:
 
-    DArray<Actor> actors;
+    DArray<Actor*> actors;
 };
 
 

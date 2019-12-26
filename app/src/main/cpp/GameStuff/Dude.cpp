@@ -1,6 +1,7 @@
 #include "Dude.h"
 #include "../TextureLoader.h"
 #include "../Usefull.h"
+#include "../gui/Text.h"
 #include <cmath>
 
 void Dude::init(Vector3D& position)
@@ -18,7 +19,8 @@ void Dude::init(Vector3D& position)
     freezingProgress = 0.f;
     satiation = 100;
     health = 100.f;
-    equipedBodyItem = nullptr;
+    equipedClothes.setAsRemoved();
+    equipedWeapon.setAsRemoved();
     collisionBodyOffset = Vector3D(0.f, 39.f, 0.f);
     collisionBodyRadius = 16.f;
     strcpy(spriteName, "pics/dude.tga");
@@ -57,66 +59,9 @@ void Dude::update(float deltaTime,
                   Path& path)
 {
 
-    ItemData* clothingInfo = nullptr;
-
-    if (equipedBodyItem)
-    {
-        clothingInfo = itemdb.get(equipedBodyItem->getIndex());
-        equipedBodyItem->setQuality(equipedBodyItem->getQuality() - deltaTime * clothingInfo->spoilageSpeed);
-
-
-        //printf("clothing quality: %f\n", equipedBodyItem->getQuality());
-
-        if (equipedBodyItem->getQuality() <= 0.f)
-        {
-            equipedBodyItem->setAsRemoved();
-            equipedBodyItem = nullptr;
-        }
-    }
-
-    satiationProgress += deltaTime;
-
-    freezingProgress += deltaTime * 1.2f;
-
-    if (satiationProgress >= 1.f)
-    {
-        if (satiation > 0)
-        {
-            --satiation;
-        }
-        else
-        {
-            if (health > 0.f)
-            {
-                health -= 1.f;
-            }
-        }
-
-        satiationProgress = 0.f;
-    }
-
-    if (freezingProgress >= 1.f)
-    {
-
-        int clothingTemperature = 0;
-
-        if (equipedBodyItem)
-        {
-            clothingTemperature = itemdb.get(equipedBodyItem->getIndex())->coldDecrease;
-        }
-
-        float temperatureDamage = (map.getTemperature() + clothingTemperature) / 20.f;
-
-        if (temperatureDamage < 0.f)
-        {
-            //printf("Temperature damage %f\n", temperatureDamage);
-            health += temperatureDamage;
-        }
-
-        freezingProgress = 0.f;
-    }
-    
-    //-----
+    wearClothes(deltaTime, itemdb);
+    doHungerDamage(deltaTime);
+    doTemperatureDamage(deltaTime, map.getTemperature(), itemdb);
 
     float dudeSpeed = 1.8f;
     const bool useKeys = Keys[0] + Keys[1] + Keys[2] + Keys[3];
@@ -290,6 +235,51 @@ void Dude::drawInventory(PicsContainer& pics, ItemDatabase& itemDb)
             pics.draw(4, 100 + i * 34, 445, data->imageIndex);
         }
     }
+
+
+    pics.draw(2, 100 + 19 * 34, 445, 0, false, 0.25f, 0.5);
+    pics.draw(2, 100 + 19 * 34 + 16, 445, 1, false, 0.25f, 0.5);
+    
+    if (!equipedClothes.isRemoved())
+    {
+        ItemData* data = itemDb.get(equipedClothes.getIndex());
+        pics.draw(4, 100 + 19 * 34, 445, data->imageIndex);
+        char buf[100];
+        sprintf(buf, "%.1f", equipedClothes.getQuality());
+        WriteShadedText(746, 445 + 20, pics, 0, buf, 0.6f, 0.6f);
+    }
+
+    pics.draw(2, 100 + 20 * 34, 445, 0, false, 0.25f, 0.5);
+    pics.draw(2, 100 + 20 * 34 + 16, 445, 1, false, 0.25f, 0.5);
+
+    if (!equipedWeapon.isRemoved())
+    {
+        ItemData* data = itemDb.get(equipedWeapon.getIndex());
+        pics.draw(4, 100 + 20 * 34, 445, data->imageIndex);
+    }
+}
+
+
+int Dude::hasItem(unsigned itemId)
+{
+    for (unsigned j = 0; j < items.count(); ++j)
+    {
+        if (items[j].getIndex() == (int)itemId && !items[j].isRemoved())
+        {
+            return j;
+        }
+    }
+
+    return -1;
+
+}
+
+void Dude::removeItem(unsigned index)
+{
+    if (index < items.count())
+    {
+        items[index].setAsRemoved();
+    }
 }
 
 void Dude::useItem(unsigned index, ItemDatabase& itemDb)
@@ -298,13 +288,8 @@ void Dude::useItem(unsigned index, ItemDatabase& itemDb)
     {
         ItemData* data = itemDb.get(items[index].getIndex());
 
-        if (!data->isWearable)
+        if (data->isConsumable)
         {
-            if (!data->isConsumable)
-            {
-                return;
-            }
-
             printf("satiationUp:%d hpUp:%d\n", data->hungerDecrease, data->hpUp);
 
             satiation += data->hungerDecrease;
@@ -320,13 +305,38 @@ void Dude::useItem(unsigned index, ItemDatabase& itemDb)
             {
                 health = 100;
             }
-            
+           
+            if (data->clothingQualityIncrease > 0.f)
+            {
+                if (!equipedClothes.isRemoved())
+                {
+                    float quality = equipedClothes.getQuality();
+                    quality += data->clothingQualityIncrease;
+
+                    if (quality > 100.f)
+                    {
+                        quality = 100.f;
+                    }
+
+                    equipedClothes.setQuality(quality);
+                }
+                else
+                {
+                    return;
+                }
+            }
 
             items[index].setAsRemoved();
         }
-        else
+        else if (data->isWearable)
         {
-            equipedBodyItem = &items[index];
+            equipedClothes = items[index];
+            items[index].setAsRemoved();
+        }
+        else if (data->isWeapon)
+        {
+            equipedWeapon = items[index];
+            items[index].setAsRemoved();
         }
     }
 }
@@ -468,3 +478,72 @@ bool Dude::isNoMorePlaceInBag(int freedSlotIndex)
 {
     return ((int)items.count() >= maxItems) ? (freedSlotIndex == -1 ?  true : false) : false;
 }
+
+void Dude::wearClothes(float deltaTime, ItemDatabase& itemdb)
+{
+    ItemData* clothingInfo = nullptr;
+
+    if (!equipedClothes.isRemoved())
+    {
+        clothingInfo = itemdb.get(equipedClothes.getIndex());
+        equipedClothes.setQuality(equipedClothes.getQuality() - deltaTime * clothingInfo->spoilageSpeed);
+
+
+        //printf("clothing quality: %f\n", equipedBodyItem->getQuality());
+
+        if (equipedClothes.getQuality() <= 0.f)
+        {
+            equipedClothes.setAsRemoved();
+        }
+    }
+}
+
+void Dude::doTemperatureDamage(float deltaTime, int temperature, ItemDatabase& itemdb)
+{
+    freezingProgress += deltaTime * 1.2f;
+
+    if (freezingProgress >= 1.f)
+    {
+
+        int clothingTemperature = 0;
+
+        if (!equipedClothes.isRemoved())
+        {
+            clothingTemperature = itemdb.get(equipedClothes.getIndex())->coldDecrease;
+        }
+
+        float temperatureDamage = (temperature + clothingTemperature) / 20.f;
+
+        if (temperatureDamage < 0.f)
+        {
+            //printf("Temperature damage %f\n", temperatureDamage);
+            health += temperatureDamage;
+        }
+
+        freezingProgress = 0.f;
+    }
+
+}
+
+void Dude::doHungerDamage(float deltaTime)
+{
+    satiationProgress += deltaTime;
+
+    if (satiationProgress >= 1.f)
+    {
+        if (satiation > 0)
+        {
+            --satiation;
+        }
+        else
+        {
+            if (health > 0.f)
+            {
+                health -= 1.f;
+            }
+        }
+
+        satiationProgress = 0.f;
+    }
+}
+

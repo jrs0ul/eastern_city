@@ -3,6 +3,7 @@ import sys
 
 OBJ_DIR = os.path.join(os.getcwd(), 'obj/');
 env = Environment(ENV=os.environ,
+                  #CCFLAGS=['-ggdb', '-O0'],
                   CCFLAGS=['-O3','-Wall'],
                   OBJPREFIX = OBJ_DIR)
 

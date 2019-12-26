@@ -49,7 +49,11 @@ void ItemDatabase::load(const char* filename)
                         sprintf(buffer, "%ls", at->getValue());
                         data.isConsumable = atoi(buffer);
                     }
-
+                    else  if (strcmp(buffer, "isWeapon") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        data.isWeapon = atoi(buffer);
+                    }
                     else  if (strcmp(buffer, "coldDecrease") == 0)
                     {
                         sprintf(buffer, "%ls", at->getValue());
@@ -60,10 +64,20 @@ void ItemDatabase::load(const char* filename)
                         sprintf(buffer, "%ls", at->getValue());
                         data.spoilageSpeed = atof(buffer);
                     }
+                    else  if (strcmp(buffer, "clothingQualityIncrease") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        data.clothingQualityIncrease = atof(buffer);
+                    }
                     else  if (strcmp(buffer, "imageIndex") == 0)
                     {
                         sprintf(buffer, "%ls", at->getValue());
                         data.imageIndex = atoi(buffer);
+                    }
+                    else  if (strcmp(buffer, "ammoItemIndex") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        data.ammoItemIndex = atoi(buffer);
                     }
                     else  if (strcmp(buffer, "hungerDecrease") == 0)
                     {

@@ -1,6 +1,11 @@
 #include "Actor.h"
 #include "../Usefull.h"
 
+Actor::~Actor()
+{
+    destroy();
+}
+
 void Actor::destroy()
 {
     for (unsigned i = 0; i < animations.count(); ++i)
