@@ -283,11 +283,11 @@ void Game::renderGame()
     
     dude.drawInventory(pics, itemDB);
 
+    drawActiveContainer();
 
     if (itemSelected)
     {
-        ItemInstance* item = dude.getItem(selectedItem);
-        pics.draw(4, selectedItemPos.x, selectedItemPos.y, item->getIndex(), true);
+        pics.draw(4, selectedItemPos.x, selectedItemPos.y, selectedItem->getIndex(), true);
     }
 
 
@@ -325,25 +325,21 @@ void Game::renderEditing()
 
 void Game::renderTitle()
 {
-    pics.draw(11, SCREEN_WIDTH/2.f, SCREEN_HEIGHT/2.f, 0, true);
+    pics.draw(3, SCREEN_WIDTH/2.f, SCREEN_HEIGHT/2.f, 0, true);
 }
 
 void Game::gameLogic()
 {
-    mapPosX = SCREEN_WIDTH / 2 - dude.pos.x;
+    centerCamera(dude.pos.x, dude.pos.y);
 
-    if (mapPosX > 0)
+    if (activeContainer)
     {
-        mapPosX = 0;
+        if (activeContainer->checkInput(touches, &selectedItem, itemSelected, selectedItemPos))
+        {
+            return;
+        }
     }
-
-    mapPosY = SCREEN_HEIGHT / 2 - dude.pos.y;
-
-    if (mapPosY > 0)
-    {
-        mapPosY = 0;
-    }
-
+  
     if (touches.down.count())
     {
         for (int i = 0; i < 10; ++i)
@@ -354,12 +350,14 @@ void Game::gameLogic()
             {
                 if (i < (int)dude.getItemCount() && !dude.getItem(i)->isRemoved())
                 {
-                    selectedItem = i;
+                    printf("Item selected\n");
+                    selectedItem = dude.getItem(i);
                     itemSelected = true;
                     selectedItemPos = Vector3D(touches.down[0].x, touches.down[0].y, 0);
                 }
             }
         }
+
     }
 
     if (touches.move.count())
@@ -372,6 +370,23 @@ void Game::gameLogic()
 
     if (touches.up.count())
     {
+        Asset * ass = map.getClickedAsset(mapPosX, mapPosY, 
+                                          pics, 
+                                          touches.up[0].x, touches.up[1].y);
+
+        if (ass)
+        {
+            printf("clicked on asset %s sprite:%d container:%d\n", ass->name, ass->spriteIndex, ass->containerIndex);
+
+            if (ass->containerIndex != -1)
+            {
+                printf("Activating item container\n");
+                activeContainer = map.getItemContainer(ass->containerIndex);
+                activeContainer->setPosition(Vector3D(touches.up[0].x, touches.up[1].y, 0));
+                activeContainer->setActive(true);
+                return;
+            }
+        }
 
         for (int i = 0; i < 10; ++i)
         {
@@ -379,6 +394,7 @@ void Game::gameLogic()
                     touches.up[0].y > 445 && touches.up[0].y < 477
                )
             {
+                printf("using item %d\n", i);
                 dude.useItem(i, itemDB);
                 itemSelected = false;
                 return;
@@ -387,11 +403,11 @@ void Game::gameLogic()
 
         if (itemSelected)
         {
-            ItemInstance* item = dude.getItem(selectedItem);
+            printf("adding selected item to map\n");
             currentRoom->addItem(Vector3D(selectedItemPos.x - mapPosX, selectedItemPos.y - mapPosY, 0),
-                                 item->getIndex());
+                                 selectedItem->getIndex());
             map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
-            item->setAsRemoved();
+            selectedItem->setAsRemoved();
             itemSelected = false;
             return;
         }
@@ -449,6 +465,7 @@ void Game::gameLogic()
 
         if (rae != nullptr)
         {
+            activeContainer = nullptr;
             currentRoom = rae->room;
             printf("THERE'S A ROOM CONNECTED TO THIS REGION\n");
 #ifdef __ANDROID__
@@ -480,25 +497,46 @@ void Game::gameLogic()
 
 void Game::editingLogic()
 {
-    //printf("%f %f\n", mapPosX, mapPosY);
-
     if (touches.down.count())
     {
-        int x = (touches.down[0].x + mapPosX) / 32;
-        int y = (touches.down[0].y + mapPosY) / 32;
+        int x = (touches.down[0].x - mapPosX) / 32;
+        int y = (touches.down[0].y - mapPosY) / 32;
 
-        map.setCollision(x, y, map.canTraverse(x, y));
+        //printf("%d %d\n", x, y);
+
+        map.setCollision(x, y, Keys[4]);
 
     }
     else if (touches.move.count())
     {
-        int x = (touches.move[0].x + mapPosX) / 32;
-        int y = (touches.move[0].y + mapPosY) / 32;
+        int x = (touches.move[0].x - mapPosX) / 32;
+        int y = (touches.move[0].y - mapPosY) / 32;
 
-        map.setCollision(x, y, map.canTraverse(x, y));
+        //printf("%d %d\n", x, y);
+        map.setCollision(x, y, Keys[4]);
     }
 
-    if (OldKeys[1] && !Keys[1])
+    if (Keys[0])
+    {
+        mapPosY += 4;
+    }
+
+    if (Keys[1])
+    {
+        mapPosY -= 4;
+    }
+
+    if (Keys[2])
+    {
+        mapPosX += 4;
+    }
+
+    if (Keys[3])
+    {
+        mapPosX -= 4;
+    }
+
+    if (OldKeys[5] && !Keys[5])
     {
         printf("SAVING %s...\n", fileName);
         map.save(fileName);
@@ -532,7 +570,75 @@ void Game::titleLogic()
 
         
         ignoreRegion = false;
+        selectedItem = nullptr;
+        itemSelected = false;
+        selectedItemPos = Vector3D(0,0,0);
+        activeContainer = nullptr;
     }
+
+}
+
+
+void Game::drawActiveContainer()
+{
+    if (!activeContainer)
+    {
+        return;
+    }
+
+    if (!activeContainer->isActive())
+    {
+        return;
+    }
+
+    activeContainer->draw(pics, itemDB, selectedItem);
+
+}
+
+
+void Game::centerCamera(float x, float y)
+{
+    const float mapWidth = map.getWidth() * 32.f;
+    const float mapHeight = map.getHeight() * 32.f;
+
+    if (mapWidth > SCREEN_WIDTH)
+    {
+        mapPosX = SCREEN_WIDTH / 2.f - dude.pos.x;
+
+        if (mapPosX > 0)
+        {
+            mapPosX = 0;
+        }
+
+        if (mapPosX + mapWidth < SCREEN_WIDTH)
+        {
+            mapPosX =  SCREEN_WIDTH - mapWidth;
+        }
+    }
+    else
+    {
+        mapPosX = SCREEN_WIDTH / 2.f - mapWidth / 2.f;
+    }
+//----
+    if (mapHeight > SCREEN_HEIGHT)
+    {
+        mapPosY = SCREEN_HEIGHT / 2.f - dude.pos.y;
+
+        if (mapPosY > 0)
+        {
+            mapPosY = 0;
+        }
+
+        if (mapPosY + mapHeight < SCREEN_HEIGHT)
+        {
+            mapPosY = SCREEN_HEIGHT - mapHeight;
+        }
+    }
+    else
+    {
+        mapPosY = SCREEN_HEIGHT / 2.f  - mapHeight / 2.f;
+    }
+
 
 }
 

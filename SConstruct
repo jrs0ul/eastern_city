@@ -10,6 +10,7 @@ env = Environment(ENV=os.environ,
 
 code = [
         "app/src/main/cpp/GameStuff/GameMap.cpp",
+        "app/src/main/cpp/GameStuff/ItemContainer.cpp",
         "app/src/main/cpp/GameStuff/CraftingRecipes.cpp",
         "app/src/main/cpp/GameStuff/GameMapGraph.cpp",
         "app/src/main/cpp/GameStuff/ItemInstance.cpp",

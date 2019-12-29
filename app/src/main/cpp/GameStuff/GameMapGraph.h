@@ -72,8 +72,10 @@ class GameMapGraph
 {
 public:
     GameMapGraph(): root(nullptr){}
+
     void init();
 
+    Room* addFloors(Room* mainfloor, unsigned entranceIndex);
 
     void addDoorway(Room* floor,
                     unsigned x,
@@ -85,6 +87,12 @@ public:
                     Room*    destination,
                     unsigned assetIndex,
                     bool isLeft = true);
+    
+    void generateRoom(Room* floor, 
+                      unsigned entryPoint, 
+                      unsigned doorRegion,
+                      unsigned returnPoint,
+                      bool isLeft = true);
 
     void destroy();
 

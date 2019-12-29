@@ -96,7 +96,7 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
 
     bool colidesWithHero = false;
 
-    if (CollisionCircleCircle(pos.x, pos.y, 8, dudPos.x, dudPos.y, 38))
+    if (CollisionCircleCircle(pos.x, pos.y, 8, dudPos.x, dudPos.y, 30))
     {
         switch(animationSubset)
         {
@@ -126,7 +126,9 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
 
         if (animationFrame > 3)
         {
-            if (animationSubset == 3)
+            if (animationSubset >= 3 
+                && animationSubset <= 5 
+                && CollisionCircleCircle(pos.x, pos.y, 8, dudPos.x, dudPos.y, 30))
             {
                 dude.setHealth(dude.getHealth() - 1);
             }

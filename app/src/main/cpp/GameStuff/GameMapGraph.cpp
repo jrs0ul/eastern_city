@@ -252,22 +252,61 @@ void GameMapGraph::init()
     Room* stairwell = root->getChildRoom(0)->room;
 
     stairwell->addChildRoom("data/outside.xml", 0, 0);
-    addDoorway(stairwell, 672, 120, 2, 1, 2, 50, root, 4);
-    stairwell->addChildRoom("data/stairwell2.xml", 0, 1);
-
     Room* outside = stairwell->getChildRoom(0)->room;
+
+    addDoorway(stairwell, 672, 120, 2, 1, 2, 50, root, 4);
+
+    Room* lastFloor = addFloors(stairwell, 2);
+
+    addDoorway(lastFloor, 288, 98, 2, 0, 2, 0, nullptr, 2);
+    lastFloor->addItem(Vector3D(300, 300, 0), 8);
+    lastFloor->addItem(Vector3D(360, 320, 0), 8);
+    lastFloor->addItem(Vector3D(320, 340, 0), 8);
+    lastFloor->addItem(Vector3D(360, 305, 0), 8);
+    lastFloor->addCollision(5, 5, true);
+    lastFloor->addCollision(6, 5, true);
+    lastFloor->addCollision(7, 5, true);
+
+    addDoorway(stairwell, 288, 98, 3, 0, 3, 0, nullptr, 2);
+    addDoorway(stairwell, 544, 96, 4, 0, 4, 0,  nullptr, 2);
+
+    outside->addChildRoom(stairwell, 0, 0);
+    
+    outside->addChildRoom("data/stairwell.xml", 0, 1);
+    outside->addChildRoom("data/stairwell.xml", 0, 2);
+
+    Room* buildingLeft = outside->getChildRoom(1)->room;
+    Room* buildingRight = outside->getChildRoom(2)->room;
+    buildingLeft->addChildRoom(outside, 1, 0);
+    buildingRight->addChildRoom(outside, 2, 0);
+
+    addFloors(buildingLeft, 1);
+    addFloors(buildingRight, 1);
+
+
+    for (int i = 0; i < 15; ++i)
+    {
+        outside->addEnemyPosition(Vector3D(400 + i * 32, 400 + rand() % 100, 0 ));
+    }
+
+    printf("done generating\n");
+}
+
+Room* GameMapGraph::addFloors(Room* mainfloor, unsigned entranceIndex)
+{
+    mainfloor->addChildRoom("data/stairwell2.xml", 0, 1);
 
     int additionalFloors = rand() % 3 + 1;
     printf("BUILDING FLOORS: %d\n", additionalFloors + 2);
 
-    Room* previousFloor = stairwell;
-    Room* currentFloor = stairwell->getChildRoom(2)->room;;
+    Room* previousFloor = mainfloor;
+    Room* currentFloor = mainfloor->getChildRoom(entranceIndex)->room;;
 
     for (int i = 0; i < additionalFloors; ++i)
     {
         printf("floor %d\n", 1 + i);
 
-        if (previousFloor == stairwell)
+        if (previousFloor == mainfloor)
         {
             currentFloor->addChildRoom(previousFloor, 1, 0);
         }
@@ -278,8 +317,8 @@ void GameMapGraph::init()
 
         currentFloor->addChildRoom("data/stairwell2.xml", 0, 1);
         currentFloor->addAsset(Vector3D(0, 0, 0), "pics/test.tga", 3); //stairs
-        
-        
+
+
         addDoorway(currentFloor, 288, 98, 2, 0, 2, 0, nullptr, 2);
         addDoorway(currentFloor, 672, 115, 3, 0, 3, 50, nullptr, 4);
         addDoorway(currentFloor, 40, 128, 4, 0, 4, 50, nullptr, 5, false);
@@ -292,25 +331,8 @@ void GameMapGraph::init()
 
     Room* lastFloor = currentFloor;
     lastFloor->addChildRoom(previousFloor, 1, 0);
-    addDoorway(lastFloor, 288, 98, 2, 0, 2, 0, nullptr, 2);
-    lastFloor->addItem(Vector3D(300, 300, 0), 8);
-    lastFloor->addItem(Vector3D(360, 320, 0), 8);
-    lastFloor->addItem(Vector3D(320, 340, 0), 8);
-    lastFloor->addItem(Vector3D(360, 305, 0), 8);
-    lastFloor->addCollision(5, 5, true);
-    lastFloor->addCollision(6, 5, true);
-    lastFloor->addCollision(7, 5, true);
 
-
-    outside->addChildRoom(stairwell, 0, 0);
-
-    for (int i = 0; i < 10; ++i)
-    {
-        outside->addEnemyPosition(Vector3D(300 + i * 32, 300 + rand() % 100, 0 ));
-    }
-    addDoorway(stairwell, 288, 98, 3, 0, 3, 0, nullptr, 2);
-    addDoorway(stairwell, 544, 96, 4, 0, 4, 0,  nullptr, 2);
-    printf("done generating\n");
+    return lastFloor;
 }
 
 void GameMapGraph::addDoorway(Room* floor,
@@ -320,12 +342,13 @@ void GameMapGraph::addDoorway(Room* floor,
                               unsigned entryPoint,
                               unsigned returnPoint, 
                               unsigned regionOffsetY,
-                              Room*    destination,
+                              Room*    destination, 
                               unsigned assetIndex,
                               bool isLeft)
 {
     const unsigned x = rx / 32;
     const unsigned y = ry / 32;
+
     floor->addAsset(Vector3D(rx, ry, 0), "pics/test.tga", assetIndex);
 
     for (int i = 0; i < 3; ++i)
@@ -336,43 +359,54 @@ void GameMapGraph::addDoorway(Room* floor,
 
     floor->addRegion(Vector3D(x * 32, (y + 2) * 32 + regionOffsetY, 0), Vector3D(64,32,0));
     floor->addEntry(Vector3D(x * 32 + 32, (y + 2) * 32 + 4 + regionOffsetY, 0));
+
     if (destination)
     {
         floor->addChildRoom(destination, entryPoint, doorRegion);
     }
     else
     {
-        floor->addChildRoom("data/genericroom.xml", entryPoint, doorRegion);
-        Room* genericRoom = floor->getChildRoom(floor->getChildRoomCount() - 1)->room;
-
-        int itemArray[] = {5, 3, 8, 0, 6, 7, 10, 11, 4};
-        genericRoom->addItem(Vector3D(250 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
-        genericRoom->addItem(Vector3D(350 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
-        genericRoom->addItem(Vector3D(200 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
-        
-        for (int i = 0; i < rand() % 5; ++i)
-        {
-            genericRoom->addEnemyPosition(Vector3D(200 + i * 32, 300 + rand() % 100, 0 ));
-        }
-
-
-        if (isLeft)
-        {
-            addDoorway(genericRoom, 33, 180, 0, returnPoint, 0, 50, floor, 6);
-            
-        }
-        else
-        {
-            addDoorway(genericRoom, 500, 195, 0, returnPoint, 0, 30, floor, 7);
-            genericRoom->addAsset(Vector3D(30, 240, 0), "pics/test.tga", 0);
-            genericRoom->addCollision(3, 240 / 32 + 2, true);
-            genericRoom->addCollision(4, 240 / 32 + 2, true);
-            genericRoom->addCollision(5, 240 / 32 + 1, true);
-            genericRoom->addCollision(1, 240 / 32 + 3, true);
-            genericRoom->addCollision(2, 240 / 32 + 3, true);
-            genericRoom->addCollision(3, 240 / 32 + 3, true);
-        }
+        generateRoom(floor, entryPoint, doorRegion, returnPoint, isLeft);
     }
+}
+
+void GameMapGraph::generateRoom(Room* floor,
+                                unsigned entryPoint, 
+                                unsigned doorRegion,
+                                unsigned returnPoint,
+                                bool isLeft)
+{
+    floor->addChildRoom("data/genericroom.xml", entryPoint, doorRegion);
+    Room* genericRoom = floor->getChildRoom(floor->getChildRoomCount() - 1)->room;
+
+    int itemArray[] = {5, 3, 8, 0, 6, 7, 10, 11, 4};
+    genericRoom->addItem(Vector3D(250 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
+    genericRoom->addItem(Vector3D(350 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
+    genericRoom->addItem(Vector3D(200 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
+
+    for (int i = 0; i < rand() % 5; ++i)
+    {
+        genericRoom->addEnemyPosition(Vector3D(200 + i * 32, 300 + rand() % 100, 0 ));
+    }
+
+
+    if (isLeft)
+    {
+        addDoorway(genericRoom, 33, 180, 0, returnPoint, 0, 50, floor, 6);
+    }
+    else
+    {
+        addDoorway(genericRoom, 500, 195, 0, returnPoint, 0, 30, floor, 7);
+        //couch
+        genericRoom->addAsset(Vector3D(30, 240, 0), "pics/test.tga", 0);
+        genericRoom->addCollision(3, 240 / 32 + 2, true);
+        genericRoom->addCollision(4, 240 / 32 + 2, true);
+        genericRoom->addCollision(5, 240 / 32 + 1, true);
+        genericRoom->addCollision(1, 240 / 32 + 3, true);
+        genericRoom->addCollision(2, 240 / 32 + 3, true);
+        genericRoom->addCollision(3, 240 / 32 + 3, true);
+    }
+
 }
 
 void GameMapGraph::destroy()

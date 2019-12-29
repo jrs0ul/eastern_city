@@ -1,9 +1,9 @@
 <xml>
 <Images>
     <Img src="pics/chars.tga" width="16" height="16" filter="1" /> 
-    <Img src="pics/rod.tga" width="16" height="16" filter="0" />
+    <Img src="pics/rat.tga" width="69" height="41" filter="0" />
     <Img src="pics/guistuff.tga" width="64" height="64" filter="0" />
-    <Img src="pics/buttons.tga" width="64" height="64" filter="0" />
+    <Img src="pics/title.tga" width="256" height="256" filter="0" />
     <Img src="pics/items.tga" width="32" height="32" filter="0" />
     <Img filter="0">
         <Path>pics/test.tga</Path>
@@ -22,8 +22,6 @@
     <Img src="pics/room.tga" width="600" height="406" filter="0" />
     <Img src="pics/stairwell.tga" width="760" height="360" filter="0" />
     <Img src="pics/stairwell2.tga" width="760" height="360" filter="0" />
-    <Img src="pics/outside.tga" width="1024" height="800" filter="0" />
+    <Img src="pics/outside.tga" width="1376" height="800" filter="0" />
     <Img src="pics/dude.tga" width="64" height="110" filter="0" />
-    <Img src="pics/title.tga" width="256" height="256" filter="0" />
-    <Img src="pics/rat.tga" width="69" height="41" filter="0" />
 </Images>

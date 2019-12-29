@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-    <Collision width="32" height="25" >
+    <Collision width="43" height="25" >
         <tr >
             <td >1</td>
             <td >1</td>
@@ -28,11 +28,22 @@
             <td >1</td>
             <td >1</td>
             <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -62,11 +73,22 @@
             <td >1</td>
             <td >1</td>
             <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -96,11 +118,22 @@
             <td >1</td>
             <td >1</td>
             <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -130,11 +163,22 @@
             <td >1</td>
             <td >1</td>
             <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -164,11 +208,22 @@
             <td >1</td>
             <td >1</td>
             <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -198,11 +253,22 @@
             <td >1</td>
             <td >1</td>
             <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -232,11 +298,22 @@
             <td >1</td>
             <td >1</td>
             <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -271,6 +348,17 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -305,6 +393,17 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -339,6 +438,17 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -373,6 +483,107 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+        </tr>
+        <tr >
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+        </tr>
+        <tr >
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -382,6 +593,50 @@
             <td >1</td>
             <td >0</td>
             <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+        </tr>
+        <tr >
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
             <td >1</td>
             <td >0</td>
             <td >0</td>
@@ -407,6 +662,108 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+        </tr>
+        <tr >
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+        </tr>
+        <tr >
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
             <td >1</td>
@@ -441,40 +798,17 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
-        </tr>
-        <tr >
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
             <td >1</td>
             <td >1</td>
             <td >1</td>
             <td >1</td>
-            <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
         </tr>
         <tr >
             <td >1</td>
@@ -509,8 +843,22 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
+            <td >1</td>
+            <td >1</td>
+            <td >1</td>
             <td >0</td>
             <td >0</td>
             <td >0</td>
@@ -543,8 +891,18 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
+            <td >1</td>
+            <td >1</td>
             <td >0</td>
             <td >0</td>
             <td >0</td>
@@ -577,8 +935,19 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
+            <td >1</td>
         </tr>
         <tr >
+            <td >1</td>
+            <td >1</td>
             <td >0</td>
             <td >0</td>
             <td >0</td>
@@ -611,8 +980,18 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >1</td>
         </tr>
         <tr >
+            <td >1</td>
             <td >0</td>
             <td >0</td>
             <td >0</td>
@@ -623,98 +1002,6 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-        </tr>
-        <tr >
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-        </tr>
-        <tr >
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-        </tr>
-        <tr >
             <td >0</td>
             <td >0</td>
             <td >0</td>
@@ -781,29 +1068,6 @@
             <td >0</td>
             <td >0</td>
             <td >0</td>
-        </tr>
-        <tr >
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
             <td >0</td>
             <td >0</td>
             <td >0</td>
@@ -817,6 +1081,17 @@
             <td >0</td>
         </tr>
         <tr >
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
+            <td >0</td>
             <td >0</td>
             <td >0</td>
             <td >0</td>
@@ -857,7 +1132,11 @@
     </Assets>
     <Entries >
         <Entry x="700.000000" y="185.000000" />
+        <Entry x="212.000000" y="340.000000" />
+        <Entry x="1200.000000" y="340.000000" />
     </Entries>
     <Regions >
         <Region x="674.000000" y="160.000000" width="64.000000" height="64.000000" entry="1" >data/stairwell.xml</Region>
+        <Region x="158.000000" y="320.000000" width="64.000000" height="64.000000" entry="1" >data/stairwell.xml</Region>
+        <Region x="1184.000000" y="320.000000" width="64.000000" height="64.000000" entry="1" >data/stairwell.xml</Region>
     </Regions>

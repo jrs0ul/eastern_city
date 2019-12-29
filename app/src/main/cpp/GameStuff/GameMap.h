@@ -5,6 +5,7 @@
 #include "GlobalItemList.h"
 #include "ItemDatabase.h"
 #include "ItemInstance.h"
+#include "ItemContainer.h"
 #include "GameMapGraph.h"
 #include "Asset.h"
 #include "Region.h"
@@ -31,12 +32,17 @@ public:
     void        addItem(ItemInstance* item);
     int         canTraverse(int x, int y);
     bool*       getCollisionData(){return collision;}
+    Asset*      getClickedAsset(float mapOffsetX, float mapOffsetY,
+                                PicsContainer& pics,
+                                int x, int y);
     void        setCollision(int x, int y, bool bColide);
     Vector3D*   getPlayerPos(unsigned index);
     int         getRegionCount(){return regions.count();}
     Region*     getRegion(int index){return &regions[index];}
     int         getItemCount(){return items.count();}
+    int         getItemContainerCount(){return containers.count();}
     ItemInstance* getItem(int index){return items[index];}
+    ItemContainer* getItemContainer(unsigned index);
     int         getTemperature(){return temperature;}
     unsigned    getWidth(){return width;}
     unsigned    getHeight(){return height;}
@@ -47,6 +53,7 @@ private:
     DArray<Asset>         assets;
     DArray<Region>        regions;
     DArray<Vector3D>      entries;
+    DArray<ItemContainer> containers;
     bool*                 collision;
 
     int                   temperature;

@@ -172,6 +172,9 @@ private:
     void editingLogic();
     void titleLogic();
 
+    void drawActiveContainer();
+
+    void centerCamera(float x, float y);
     void createEnemies();
 
     bool handleShooting(float x, float y);
@@ -216,7 +219,9 @@ private:
     GameMapGraph   mapGraph;
     Room* currentRoom;
 
-    int selectedItem;
+    ItemContainer* activeContainer;
+
+    ItemInstance* selectedItem;
     bool itemSelected;
     Vector3D selectedItemPos;
 

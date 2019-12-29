@@ -29,6 +29,13 @@ void GameMap::destroy()
     assets.destroy();
     regions.destroy();
     entries.destroy();
+    
+    for (unsigned i = 0; i < containers.count(); ++i)
+    {
+        containers[i].destroy();
+    }
+
+    containers.destroy();
 
     if (collision)
     {
@@ -56,6 +63,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
 
     width = 0;
     height = 0;
+    char buffer[100];
 
     if (collisionNode)
     {
@@ -63,7 +71,6 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
         {
             XmlAttribute* at = collisionNode->getAttribute(i);
 
-            char buffer[100];
 
             sprintf(buffer, "%ls", at->getName());
 
@@ -140,6 +147,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
             { 
                 Asset ass;
                 ass.spriteIndex = 0;
+                ass.containerIndex = -1;
 
                 for (unsigned j = 0; j < asset->attributeCount(); ++j)
                 {
@@ -165,6 +173,13 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
                         ass.spriteIndex = atoi(buffer);
 
                     }
+                    else if (strcmp(buffer, "containerIndex") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        ass.containerIndex = atoi(buffer);
+
+                    }
+
 
                 }
 
@@ -278,6 +293,69 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
 
         }
 
+    }
+
+
+    XmlNode* containersNode = mapfile.root.getNode(L"Containers");
+
+    if (containersNode)
+    {
+        for (unsigned i = 0; i < containersNode->childrenCount(); ++i)
+        {
+            XmlNode* containerNode = containersNode->getNode(i);
+
+            ItemContainer ic;
+
+            if (containerNode)
+            {
+                for (unsigned j = 0; j < containerNode->attributeCount(); ++j)
+                {
+                    XmlAttribute* att = containerNode->getAttribute(j);
+                    
+                    if (att)
+                    {
+                        sprintf(buffer, "%ls", att->getName());
+
+                        if (strcmp("slotCount", buffer) == 0)
+                        {
+                            sprintf(buffer, "%ls", att->getValue());
+                            ic.init(atoi(buffer));
+                        }
+
+                    }
+                }
+
+                for (unsigned j = 0; j < containerNode->childrenCount(); ++j)
+                {
+                    XmlNode* itemNode = containerNode->getNode(j);
+                    
+
+                    if (itemNode)
+                    {
+                        for (unsigned k = 0; k < itemNode->attributeCount(); ++k)
+                        {
+                            XmlAttribute* itemAttribute = itemNode->getAttribute(k);
+
+                            if (itemAttribute)
+                            {
+                                sprintf(buffer, "%ls", itemAttribute->getName());
+
+                                if (strcmp("index", buffer) == 0)
+                                {
+                                    sprintf(buffer, "%ls", itemAttribute->getValue());
+                                    ItemInstance itm;
+                                    itm.init(Vector3D(0, 0, 0), atoi(buffer));
+                                    ic.addItem(itm);
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+                containers.add(ic);
+            }
+        }
     }
 
 
@@ -404,6 +482,13 @@ void GameMap::save(const char* file)
         ass.addAtribute(L"x", buf);
         swprintf(buf, 100, L"%f", assets[i].pos.y);
         ass.addAtribute(L"y", buf);
+
+        if (assets[i].spriteIndex > 0)
+        {
+            swprintf(buf, 100, L"%u", assets[i].spriteIndex);
+            ass.addAtribute(L"index", buf);
+        }
+
         assetNode.addChild(ass);
     }
 
@@ -534,6 +619,49 @@ int GameMap::canTraverse(int x, int y)
     return !collision[y * width + x];
 }
 
+Asset* GameMap::getClickedAsset(float mapOffsetX, float mapOffsetY,
+                                PicsContainer& pics,
+                                int x, int y)
+{
+    const float currentX = x - mapOffsetX;
+    const float currentY = y - mapOffsetY;
+
+    if (!assets.count())
+    {
+        return nullptr;
+    }
+
+    for (int i = (int)assets.count() - 1; i >= 0; --i)
+    {
+        Asset* asset = &assets[i];
+
+        PicData* data = pics.getInfo(pics.findByName(asset->name));
+
+
+        if (data)
+        {
+            int spriteHeight = data->height;
+            int spriteWidth = data->width;
+
+            if (data->sprites.count())
+            {
+                Sprite* sprite = &(data->sprites[asset->spriteIndex]);
+                spriteHeight = sprite->height; 
+                spriteWidth = sprite->width;
+            }
+        
+            if (currentX > asset->pos.x 
+                && currentX < asset->pos.x + spriteWidth
+                && currentY > asset->pos.y
+                && currentY < asset->pos.y + spriteHeight)
+            {
+                return asset;
+            }
+        }
+    }
+
+    return nullptr;
+}
 
 void GameMap::setCollision(int x, int y, bool bColide)
 {
@@ -563,6 +691,17 @@ Vector3D* GameMap::getPlayerPos(unsigned index)
     }
 
     printf("Error-> Entry count: %lu, index:%u\n", entries.count(), index);
+
+    return nullptr;
+}
+
+
+ItemContainer* GameMap::getItemContainer(unsigned index)
+{
+    if (index < containers.count())
+    {
+        return &containers[index];
+    }
 
     return nullptr;
 }

@@ -6,6 +6,7 @@ struct Asset
     char name[256];
     Vector3D pos;
     unsigned spriteIndex;
+    int containerIndex;
 };
 
 
