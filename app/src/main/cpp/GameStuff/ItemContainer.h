@@ -8,14 +8,18 @@
 class ItemContainer
 {
 public:
-    void          init(unsigned sCount);
+    void          init(unsigned sCount, unsigned newWidth);
     void          destroy();
 
-    void          addItem(ItemInstance& item);
+    bool          addItem(ItemInstance& item, int slotIndex = -1);
     void          draw(PicsContainer& pics, ItemDatabase& itemDB, ItemInstance* selectedItem);
-    bool          checkInput(TouchData& touches, ItemInstance** selectedItem, bool& itemSelected, Vector3D& itemPos);
+    bool          checkInput(TouchData& touches, 
+                             ItemInstance** selectedItem, 
+                             bool& itemSelected, 
+                             Vector3D& itemPos);
 
     ItemInstance* getItem(unsigned index);
+    int           hasItem(unsigned itemId);
     unsigned      getItemCount(){return items.count();}
     unsigned      getSlotCount(){return slotCount;}
     bool          isActive(){return active;}
@@ -28,6 +32,7 @@ private:
     unsigned slotCount;
     Vector3D pos;
     bool active;
+    unsigned width;
 };
 
 

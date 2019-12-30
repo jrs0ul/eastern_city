@@ -319,7 +319,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
                         if (strcmp("slotCount", buffer) == 0)
                         {
                             sprintf(buffer, "%ls", att->getValue());
-                            ic.init(atoi(buffer));
+                            ic.init(atoi(buffer), 3);
                         }
 
                     }

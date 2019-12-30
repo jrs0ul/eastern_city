@@ -266,7 +266,6 @@ void Game::renderGame()
    
     actors.draw(mapPosX, mapPosY, pics, DebugMode);
 
-    //dude.draw(mapPosX, mapPosY, pics, DebugMode);
 
     if (DebugMode)
     {
@@ -281,7 +280,7 @@ void Game::renderGame()
         }
     }
     
-    dude.drawInventory(pics, itemDB);
+    dude.drawInventory(pics, itemDB, selectedItem);
 
     drawActiveContainer();
 
@@ -339,26 +338,8 @@ void Game::gameLogic()
             return;
         }
     }
-  
-    if (touches.down.count())
-    {
-        for (int i = 0; i < 10; ++i)
-        {
-            if (touches.down[0].x > 100 + i * 34 && touches.down[0].x < 100 + i * 34 + 32 &&
-                    touches.down[0].y > 445 && touches.down[0].y < 477 && !itemSelected
-               )
-            {
-                if (i < (int)dude.getItemCount() && !dude.getItem(i)->isRemoved())
-                {
-                    printf("Item selected\n");
-                    selectedItem = dude.getItem(i);
-                    itemSelected = true;
-                    selectedItemPos = Vector3D(touches.down[0].x, touches.down[0].y, 0);
-                }
-            }
-        }
 
-    }
+    dude.checkInventoryInput(touches, &selectedItem, itemSelected, selectedItemPos);
 
     if (touches.move.count())
     {
@@ -376,11 +357,8 @@ void Game::gameLogic()
 
         if (ass)
         {
-            printf("clicked on asset %s sprite:%d container:%d\n", ass->name, ass->spriteIndex, ass->containerIndex);
-
-            if (ass->containerIndex != -1)
+            if (ass->containerIndex != -1 && (!activeContainer || !activeContainer->isActive()))
             {
-                printf("Activating item container\n");
                 activeContainer = map.getItemContainer(ass->containerIndex);
                 activeContainer->setPosition(Vector3D(touches.up[0].x, touches.up[1].y, 0));
                 activeContainer->setActive(true);
@@ -388,26 +366,50 @@ void Game::gameLogic()
             }
         }
 
+        //---somewhat ugly block-
         for (int i = 0; i < 10; ++i)
         {
             if (touches.up[0].x > 100 + i * 34 && touches.up[0].x < 100 + i * 34 + 32 &&
                     touches.up[0].y > 445 && touches.up[0].y < 477
                )
             {
-                printf("using item %d\n", i);
-                dude.useItem(i, itemDB);
-                itemSelected = false;
-                return;
+                if (clickOnItem == i)
+                {
+                    printf("using item %d\n", i);
+                    dude.useItem(i, itemDB);
+                    itemSelected = false;
+                    clickOnItem = -1;
+                    return;
+                }
+                else
+                {
+                    clickOnItem = i;
+                }
             }
         }
+        //--
 
         if (itemSelected)
         {
             printf("adding selected item to map\n");
-            currentRoom->addItem(Vector3D(selectedItemPos.x - mapPosX, selectedItemPos.y - mapPosY, 0),
+            const float newItemPosX = selectedItemPos.x - mapPosX;
+            const float newItemPosY = selectedItemPos.y - mapPosY;
+
+            printf("%f %f\n", newItemPosX, newItemPosY);
+
+            if (!CollisionCircleRectangle(newItemPosX, newItemPosY, 8, 0, 0, map.getWidth() * 32, map.getHeight() * 32))
+            {
+                printf("SHIIIT\n");
+                selectedItem = nullptr;
+                itemSelected = false;
+                return;
+            }
+
+            currentRoom->addItem(Vector3D(newItemPosX, newItemPosY, 0),
                                  selectedItem->getIndex());
             map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
             selectedItem->setAsRemoved();
+            selectedItem = nullptr;
             itemSelected = false;
             return;
         }
@@ -574,6 +576,7 @@ void Game::titleLogic()
         itemSelected = false;
         selectedItemPos = Vector3D(0,0,0);
         activeContainer = nullptr;
+        clickOnItem = -1;
     }
 
 }

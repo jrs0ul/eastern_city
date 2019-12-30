@@ -14,7 +14,8 @@ void Dude::init(Vector3D& position)
     pos = position;
     playWalkAnimation = false;
     walkAnimationDone = true;
-    maxItems = 10;
+    itemBag.init(10, 10);
+    itemBag.setPosition(Vector3D(100, 445, 0));
     satiationProgress = 0.f;
     freezingProgress = 0.f;
     satiation = 100;
@@ -48,7 +49,7 @@ void Dude::init(Vector3D& position)
 
 void Dude::destroy()
 {
-    items.destroy();
+    itemBag.destroy();
     Actor::destroy();
 }
 
@@ -217,25 +218,9 @@ void Dude::update(float deltaTime,
 
 }
 
-void Dude::drawInventory(PicsContainer& pics, ItemDatabase& itemDb)
+void Dude::drawInventory(PicsContainer& pics, ItemDatabase& itemDb, ItemInstance* selectedItem)
 {
-    for (int i = 0; i < maxItems; ++i)
-    {
-        pics.draw(2, 100 + i * 34, 445, 0, false, 0.25f, 0.5);
-        pics.draw(2, 100 + i * 34 + 16, 445, 1, false, 0.25f, 0.5);
-
-        if (i < (int)items.count())
-        {
-            if (items[i].isRemoved())
-            {
-                continue;
-            }
-
-            ItemData* data = itemDb.get(items[i].getIndex());
-            pics.draw(4, 100 + i * 34, 445, data->imageIndex);
-        }
-    }
-
+    itemBag.draw(pics, itemDb, selectedItem);
 
     pics.draw(2, 100 + 19 * 34, 445, 0, false, 0.25f, 0.5);
     pics.draw(2, 100 + 19 * 34 + 16, 445, 1, false, 0.25f, 0.5);
@@ -262,82 +247,80 @@ void Dude::drawInventory(PicsContainer& pics, ItemDatabase& itemDb)
 
 int Dude::hasItem(unsigned itemId)
 {
-    for (unsigned j = 0; j < items.count(); ++j)
-    {
-        if (items[j].getIndex() == (int)itemId && !items[j].isRemoved())
-        {
-            return j;
-        }
-    }
-
-    return -1;
-
+    return itemBag.hasItem(itemId);
 }
 
 void Dude::removeItem(unsigned index)
 {
-    if (index < items.count())
+    ItemInstance* itm = itemBag.getItem(index);
+
+    if (itm)
     {
-        items[index].setAsRemoved();
+        itm->setAsRemoved();
     }
 }
 
 void Dude::useItem(unsigned index, ItemDatabase& itemDb)
 {
-    if (index < items.count() && !items[index].isRemoved())
+    ItemInstance* item = itemBag.getItem(index);
+
+    if (!item || item->isRemoved())
     {
-        ItemData* data = itemDb.get(items[index].getIndex());
+        printf("shit item\n");
+        return;
+    }
 
-        if (data->isConsumable)
+    ItemData* data = itemDb.get(item->getIndex());
+
+    if (data->isConsumable)
+    {
+        printf("satiationUp:%d hpUp:%d\n", data->hungerDecrease, data->hpUp);
+
+        satiation += data->hungerDecrease;
+
+        if (satiation > 100)
         {
-            printf("satiationUp:%d hpUp:%d\n", data->hungerDecrease, data->hpUp);
+            satiation = 100; 
+        }
 
-            satiation += data->hungerDecrease;
+        health += data->hpUp;
 
-            if (satiation > 100)
-            {
-                satiation = 100; 
-            }
-            
-            health += data->hpUp;
+        if (health > 100)
+        {
+            health = 100;
+        }
 
-            if (health > 100)
+        if (data->clothingQualityIncrease > 0.f)
+        {
+            if (!equipedClothes.isRemoved())
             {
-                health = 100;
-            }
-           
-            if (data->clothingQualityIncrease > 0.f)
-            {
-                if (!equipedClothes.isRemoved())
+                float quality = equipedClothes.getQuality();
+                quality += data->clothingQualityIncrease;
+
+                if (quality > 100.f)
                 {
-                    float quality = equipedClothes.getQuality();
-                    quality += data->clothingQualityIncrease;
-
-                    if (quality > 100.f)
-                    {
-                        quality = 100.f;
-                    }
-
-                    equipedClothes.setQuality(quality);
+                    quality = 100.f;
                 }
-                else
-                {
-                    return;
-                }
+
+                equipedClothes.setQuality(quality);
             }
+            else
+            {
+                return;
+            }
+        }
 
-            items[index].setAsRemoved();
-        }
-        else if (data->isWearable)
-        {
-            equipedClothes = items[index];
-            items[index].setAsRemoved();
-        }
-        else if (data->isWeapon)
-        {
-            equipedWeapon = items[index];
-            items[index].setAsRemoved();
-        }
+        item->setAsRemoved();
+    }
+    else if (data->isWearable)
+    {
+        equipedClothes = *item;
+        item->setAsRemoved();
+    }
+    else if (data->isWeapon)
+    {
+        equipedWeapon = *item;
+        item->setAsRemoved();
     }
 }
 
@@ -357,9 +340,11 @@ void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
 
         int itemCountToFind = ingredient->count;
 
-        for (unsigned j = 0; j < items.count(); ++j)
+        for (unsigned j = 0; j < itemBag.getItemCount(); ++j)
         {
-            if (items[j].getIndex() == ingredient->itemIndex && !items[j].isRemoved())
+            ItemInstance* itm = itemBag.getItem(j);
+
+            if (itm && itm->getIndex() == ingredient->itemIndex && !itm->isRemoved())
             {
                 itemsToRemove.add(j);
                 --itemCountToFind;
@@ -389,7 +374,7 @@ void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
 
     for (unsigned i = 0; i < itemsToRemove.count(); ++i)
     {
-        items[itemsToRemove[i]].setAsRemoved();
+        itemBag.getItem(itemsToRemove[i])->setAsRemoved();
     }
 
     ItemInstance craftedItem;
@@ -403,6 +388,17 @@ void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
 
     itemsToRemove.destroy();
 }
+
+bool Dude::checkInventoryInput(TouchData& touches, 
+        ItemInstance** selectedItem, 
+        bool& itemSelected, 
+        Vector3D& itemPos)
+{
+    itemBag.setActive(true);
+    return itemBag.checkInput(touches, selectedItem, itemSelected, itemPos);
+}
+
+
 
 bool Dude::colidesWithRegion(GameMap& map, unsigned* regionIndex, unsigned* entryIndex)
 {
@@ -434,26 +430,12 @@ void Dude::setPosition(Vector3D& position)
 
 ItemInstance* Dude::getItem(unsigned index)
 {
-    if (index < items.count())
-    {
-        return &items[index];
-    }
-
-    return nullptr;
+    return itemBag.getItem(index);
 }
 
 void Dude::addItemToInventory(ItemInstance* item, int inventorySlotIndex)
 {
-    if (inventorySlotIndex != -1)
-    {
-        items[inventorySlotIndex] = *item;
-    }
-    else if ((int)items.count() < maxItems)
-    {
-        ItemInstance itemToAdd = *item;
-        items.add(itemToAdd);
-    }
-
+    itemBag.addItem(*item, inventorySlotIndex);
 }
 
 
@@ -461,9 +443,11 @@ int Dude::findFreedInventorySlot()
 {
     int replacableItemIndex = -1;
 
-    for (unsigned i = 0; i < items.count(); ++i)
+    for (unsigned i = 0; i < itemBag.getItemCount(); ++i)
     {
-        if (items[i].isRemoved())
+        ItemInstance* itm = itemBag.getItem(i);
+
+        if (itm->isRemoved())
         {
             replacableItemIndex = i;
             break;
@@ -476,7 +460,7 @@ int Dude::findFreedInventorySlot()
 
 bool Dude::isNoMorePlaceInBag(int freedSlotIndex)
 {
-    return ((int)items.count() >= maxItems) ? (freedSlotIndex == -1 ?  true : false) : false;
+    return (itemBag.getItemCount() >= itemBag.getSlotCount()) ? (freedSlotIndex == -1 ?  true : false) : false;
 }
 
 void Dude::wearClothes(float deltaTime, ItemDatabase& itemdb)

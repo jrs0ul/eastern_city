@@ -225,6 +225,8 @@ private:
     bool itemSelected;
     Vector3D selectedItemPos;
 
+    int clickOnItem;
+
 
 };
 
