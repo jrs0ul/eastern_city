@@ -11,8 +11,10 @@ public:
     void      init(Vector3D position, int index);
     Vector3D* getPosition(){return &pos;}
     int       getIndex(){return itemIndex;}
+    int       getAmmoLoaded(){return ammoLoaded;}
     bool      isRemoved(){return removed;}
     float     getQuality(){return quality;}
+    void      setAmmoLoaded(int count){ammoLoaded = count;}
     void      setQuality(float q){quality = q;}
     void      setAsRemoved(){removed = true;}
 
@@ -20,6 +22,7 @@ private:
 
     int         itemIndex;
     Vector3D    pos;
+    int         ammoLoaded;
     float       quality;
     bool        removed;
 

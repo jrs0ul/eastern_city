@@ -12,5 +12,9 @@
     <Item name="Slingshot" imageIndex="9" isWeapon="1" ammoItemIndex="8"/>
     <Item name="Alcohol" isConsumable="1" imageIndex="10" hungerDecrease="2" hpUp="5"/>
     <Item name="Dead plant" imageIndex="11"/>
+    <Item name="Flashlight" imageIndex="12" isWeapon="1" ammoItemIndex="13"/>
+    <Item name="Batteries" imageIndex="13" spoilageSpeed="0.7"/>
+    <Item name="Roten cheese" imageIndex="14" isConsumable="1" hungerDecrease="30"/>
+    <Item name="Bread" imageIndex="15" isConsumable="1" hungerDecrease="18"/>
 </Items>
 

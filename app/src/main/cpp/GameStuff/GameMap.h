@@ -49,17 +49,17 @@ public:
 
 private:
 
-    DArray<ItemInstance*> items;
-    DArray<Asset>         assets;
-    DArray<Region>        regions;
-    DArray<Vector3D>      entries;
-    DArray<ItemContainer> containers;
-    bool*                 collision;
+    DArray<ItemInstance*>  items;
+    DArray<Asset>          assets;
+    DArray<Region>         regions;
+    DArray<Vector3D>       entries;
+    DArray<ItemContainer*> containers;
+    bool*                  collision;
 
-    int                   temperature;
+    int                    temperature;
 
-    unsigned              width;
-    unsigned              height;
+    unsigned               width;
+    unsigned               height;
 
 };
 

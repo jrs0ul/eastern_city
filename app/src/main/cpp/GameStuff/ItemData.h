@@ -7,6 +7,8 @@ struct ItemData
     bool        isWearable;
     bool        isConsumable;
     bool        isWeapon;
+    bool        isLoadable;
+    int         loadCapacity;
     int         coldDecrease;
     float       spoilageSpeed;
     float       clothingQualityIncrease;
@@ -20,6 +22,8 @@ struct ItemData
     , isWearable(false)
     , isConsumable(false)
     , isWeapon(false)
+    , isLoadable(false)
+    , loadCapacity(0)
     , coldDecrease(0)
     , spoilageSpeed(0.f)
     , clothingQualityIncrease(0.f)

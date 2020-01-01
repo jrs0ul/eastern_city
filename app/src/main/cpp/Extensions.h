@@ -56,13 +56,13 @@ extern PFNGLUNIFORMMATRIX4FVPROC            glUniformMatrix4fv;
 
 extern PFNGLGETINFOLOGARBPROC               glGetInfoLogARB;
 //------------------FBO--------------------------------
-extern PFNGLGENFRAMEBUFFERSEXTPROC          glGenFramebuffersEXT;
+extern PFNGLGENFRAMEBUFFERSPROC             glGenFramebuffers;
 extern PFNGLGENRENDERBUFFERSEXTPROC         glGenRenderbuffersEXT;
-extern PFNGLDELETEFRAMEBUFFERSEXTPROC       glDeleteFramebuffersEXT;
-extern PFNGLBINDFRAMEBUFFEREXTPROC          glBindFramebufferEXT;
+extern PFNGLDELETEFRAMEBUFFERSPROC          glDeleteFramebuffers;
+extern PFNGLBINDFRAMEBUFFERPROC             glBindFramebuffer;
 extern PFNGLBINDRENDERBUFFEREXTPROC         glBindRenderbufferEXT;
 extern PFNGLRENDERBUFFERSTORAGEEXTPROC      glRenderbufferStorageEXT;
-extern PFNGLFRAMEBUFFERTEXTURE2DEXTPROC     glFramebufferTexture2DEXT;
+extern PFNGLFRAMEBUFFERTEXTURE2DPROC        glFramebufferTexture2D;
 extern PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC   glCheckFramebufferStatusEXT;
 extern PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC  glFramebufferRenderbufferEXT;
 extern PFNGLDELETERENDERBUFFERSEXTPROC      glDeleteRenderbuffersEXT;

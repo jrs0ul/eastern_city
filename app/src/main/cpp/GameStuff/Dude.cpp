@@ -60,7 +60,17 @@ void Dude::update(float deltaTime,
                   Path& path)
 {
 
+    if (isWeaponEquiped() == 12)
+    {
+        strcpy(spriteName, "pics/dude_flashlight.tga");
+    }
+    else
+    {
+        strcpy(spriteName, "pics/dude.tga");
+    }
+
     wearClothes(deltaTime, itemdb);
+    drainBatteries(deltaTime, itemdb);
     doHungerDamage(deltaTime);
     doTemperatureDamage(deltaTime, map.getTemperature(), itemdb);
 
@@ -241,6 +251,9 @@ void Dude::drawInventory(PicsContainer& pics, ItemDatabase& itemDb, ItemInstance
     {
         ItemData* data = itemDb.get(equipedWeapon.getIndex());
         pics.draw(4, 100 + 20 * 34, 445, data->imageIndex);
+        char buf[100];
+        sprintf(buf, "%.1f", equipedWeapon.getQuality());
+        WriteShadedText(746 + 34, 445 + 20, pics, 0, buf, 0.6f, 0.6f);
     }
 }
 
@@ -319,9 +332,35 @@ void Dude::useItem(unsigned index, ItemDatabase& itemDb)
     }
     else if (data->isWeapon)
     {
+        printf("Using weapon\n");
+        if (!equipedWeapon.isRemoved())
+        {
+            printf("has item in weapon slot\n");
+
+            int freedSlot = findFreedInventorySlot();
+            if (isNoMorePlaceInBag(freedSlot))
+            {
+                return;
+            }
+
+            addItemToInventory(&equipedWeapon, freedSlot);
+
+            equipedWeapon.setAsRemoved();
+        }
+
         equipedWeapon = *item;
         item->setAsRemoved();
     }
+    else if (data->imageIndex == 13) // batteries
+    {
+        if (!equipedWeapon.isRemoved() && isWeaponEquiped() == 12)
+        {
+            equipedWeapon.setAmmoLoaded(1);
+            equipedWeapon.setQuality(100.f);
+            item->setAsRemoved();
+        }
+    }
+    
 }
 
 void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
@@ -479,6 +518,37 @@ void Dude::wearClothes(float deltaTime, ItemDatabase& itemdb)
         {
             equipedClothes.setAsRemoved();
         }
+    }
+}
+
+void Dude::drainBatteries(float deltaTime, ItemDatabase& itemdb)
+{
+    if (!equipedWeapon.isRemoved())
+    {
+        int itemID = equipedWeapon.getIndex();
+
+        if (itemID != 12)
+        {
+            return; //only works with flashlight
+        }
+
+        ItemData* equipedItemInfo = itemdb.get(equipedWeapon.getIndex());
+
+        if (equipedItemInfo)
+        {
+            ItemData* ammoInfo = itemdb.get(equipedItemInfo->ammoItemIndex);
+
+            if (equipedWeapon.getAmmoLoaded())
+            {
+                equipedWeapon.setQuality(equipedWeapon.getQuality() - deltaTime * ammoInfo->spoilageSpeed);
+                if (equipedWeapon.getQuality() <= 0.f)
+                {
+                    equipedWeapon.setQuality(0.f);
+                    equipedWeapon.setAmmoLoaded(0);
+                }
+            }
+        }
+
     }
 }
 

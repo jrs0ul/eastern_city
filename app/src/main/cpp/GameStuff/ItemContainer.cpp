@@ -18,7 +18,13 @@ bool ItemContainer::addItem(ItemInstance& item, int slotIndex)
 {
     if (slotIndex == -1)
     {
-        items.add(item);
+        if (items.count() == slotCount)
+        {
+            return false;
+        }
+
+        ItemInstance itm = item;
+        items.add(itm);
         return true;
     }
 
@@ -50,6 +56,13 @@ bool ItemContainer::addItem(ItemInstance& item, int slotIndex)
     }
 
     return true;
+}
+
+void ItemContainer::addItem(unsigned itemIndex)
+{
+    ItemInstance item;
+    item.init(Vector3D(0,0,0), itemIndex);
+    items.add(item);
 }
 
 void ItemContainer::draw(PicsContainer& pics, ItemDatabase& itemDB, ItemInstance* selectedItem)
@@ -103,7 +116,8 @@ bool ItemContainer::checkInput(TouchData& touches,
         return false;
     }
     
-    const int height = slotCount / width;
+    const int height = ceil(slotCount / (width * 1.f));
+
 
     if (touches.down.count() && touches.down[0].x > pos.x && touches.down[0].x < pos.x + 34 * width
                     && touches.down[0].y > pos.y && touches.down[0].y < height * 34 + pos.y)

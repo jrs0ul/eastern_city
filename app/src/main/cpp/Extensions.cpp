@@ -58,12 +58,12 @@ PFNGLUNIFORMMATRIX4FVPROC            glUniformMatrix4fv = 0;
 #endif
 PFNGLGETINFOLOGARBPROC               glGetInfoLogARB = 0;
 
-PFNGLGENFRAMEBUFFERSEXTPROC          glGenFramebuffersEXT = 0;
+PFNGLGENFRAMEBUFFERSPROC             glGenFramebuffers = 0;
 PFNGLGENRENDERBUFFERSEXTPROC         glGenRenderbuffersEXT = 0;
-PFNGLDELETEFRAMEBUFFERSEXTPROC       glDeleteFramebuffersEXT = 0;
-PFNGLBINDFRAMEBUFFEREXTPROC          glBindFramebufferEXT = 0;
+PFNGLDELETEFRAMEBUFFERSPROC          glDeleteFramebuffers = 0;
+PFNGLBINDFRAMEBUFFERPROC             glBindFramebuffer = 0;
 PFNGLBINDRENDERBUFFEREXTPROC         glBindRenderbufferEXT = 0;
-PFNGLFRAMEBUFFERTEXTURE2DEXTPROC     glFramebufferTexture2DEXT = 0;
+PFNGLFRAMEBUFFERTEXTURE2DPROC        glFramebufferTexture2D = 0;
 PFNGLRENDERBUFFERSTORAGEEXTPROC      glRenderbufferStorageEXT = 0;
 PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC   glCheckFramebufferStatusEXT = 0;
 PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC  glFramebufferRenderbufferEXT = 0;
@@ -143,12 +143,12 @@ void LoadExtensions() {
 #endif
     glGetInfoLogARB = (PFNGLGETINFOLOGARBPROC)SDL_GL_GetProcAddress("glGetInfoLogARB");
     //--------------------------------------------
-    glGenFramebuffersEXT        = (PFNGLGENFRAMEBUFFERSEXTPROC)SDL_GL_GetProcAddress("glGenFramebuffersEXT");
+    glGenFramebuffers        = (PFNGLGENFRAMEBUFFERSPROC)SDL_GL_GetProcAddress("glGenFramebuffers");
     glGenRenderbuffersEXT =(PFNGLGENRENDERBUFFERSEXTPROC)SDL_GL_GetProcAddress("glGenRenderbuffersEXT");
-    glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC)SDL_GL_GetProcAddress("glDeleteFramebuffersEXT");
-    glBindFramebufferEXT        = (PFNGLBINDFRAMEBUFFEREXTPROC)SDL_GL_GetProcAddress("glBindFramebufferEXT");
+    glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)SDL_GL_GetProcAddress("glDeleteFramebuffers");
+    glBindFramebuffer        = (PFNGLBINDFRAMEBUFFERPROC)SDL_GL_GetProcAddress("glBindFramebuffer");
     glBindRenderbufferEXT =  (PFNGLBINDRENDERBUFFEREXTPROC)SDL_GL_GetProcAddress("glBindRenderbufferEXT");
-    glFramebufferTexture2DEXT   = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)SDL_GL_GetProcAddress("glFramebufferTexture2DEXT");
+    glFramebufferTexture2D   = (PFNGLFRAMEBUFFERTEXTURE2DPROC)SDL_GL_GetProcAddress("glFramebufferTexture2D");
     glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC)SDL_GL_GetProcAddress("glRenderbufferStorageEXT");
     glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)SDL_GL_GetProcAddress("glCheckFramebufferStatusEXT");
     glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)SDL_GL_GetProcAddress("glFramebufferRenderbufferEXT");
@@ -190,12 +190,12 @@ void UnloadExtensions() {
     glGetInfoLogARB      = 0;
 
 #endif
-    glGenFramebuffersEXT = 0;
+    glGenFramebuffers = 0;
     glGenRenderbuffersEXT = 0;
-    glDeleteFramebuffersEXT = 0;
-    glBindFramebufferEXT = 0;
+    glDeleteFramebuffers = 0;
+    glBindFramebuffer = 0;
     glBindRenderbufferEXT = 0;
-    glFramebufferTexture2DEXT = 0;
+    glFramebufferTexture2D = 0;
     glRenderbufferStorageEXT = 0;
     glCheckFramebufferStatusEXT = 0;
     glFramebufferRenderbufferEXT = 0;

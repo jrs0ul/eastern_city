@@ -2,7 +2,7 @@
 #define GAME_MAP_GRAPH_H
 
 #include "../DArray.h"
-#include "ItemInstance.h"
+#include "ItemContainer.h"
 #include "Asset.h"
 #include "Region.h"
 
@@ -21,6 +21,7 @@ public:
     void              addChildRoom(const char* name, unsigned entry, unsigned region);
     void              addChildRoom(Room* node, unsigned entry, unsigned region);
     void              addItem(Vector3D pos, int index);
+    void              addItemContainer(unsigned assetIndex, ItemContainer& container);
     void              addEnemyPosition(Vector3D pos);
     void              addAsset(Vector3D pos, const char* name, unsigned spriteIndex);
     void              addCollision(unsigned x, unsigned y, bool isColliding);
@@ -28,6 +29,7 @@ public:
     void              addEntry(Vector3D pos);
     void              removeItem(unsigned index);
     unsigned          getItemCount();
+    unsigned          getItemContainerCount();
     unsigned          getEnemyCount();
     unsigned          getChildRoomCount();
     unsigned          getAssetCount();
@@ -35,6 +37,7 @@ public:
     unsigned          getAdditionalRegionsCount();
     unsigned          getAdditionalEntriesCount();
     ItemInstance*     getItem(unsigned index);
+    ItemContainer*    getItemContainer(unsigned index);
     Vector3D*         getEnemyPosition(unsigned index);
     RoomAndEntry*     getChildRoom(unsigned index);
     RoomAndEntry*     findChildRoomByRegionIndex(unsigned regionIndex);
@@ -50,6 +53,7 @@ private:
     DArray<RoomAndEntry>  childRooms;
     
     //data
+    DArray<ItemContainer>  itemContainers;
     DArray<ItemInstance>   items;
     DArray<Vector3D>       enemies;
     DArray<Asset>          assets;
@@ -93,6 +97,11 @@ public:
                       unsigned doorRegion,
                       unsigned returnPoint,
                       bool isLeft = true);
+
+    void addFridge(Room* room);
+    void addTvCupboard(Room* room);
+    void addCupboard(Room* room);
+    void addCouch(Room* room);
 
     void destroy();
 

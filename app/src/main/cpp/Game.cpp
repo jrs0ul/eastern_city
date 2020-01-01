@@ -87,9 +87,9 @@ void Game::init(){
 #endif
     printf("Creating shaders...\n");
    
+    LoadShader(&darknessShader, "darkness");
     LoadShader(&defaultShader, "default");
     LoadShader(&colorShader, "justcolor");
-    LoadShader(&modelShader, "model");
 
     colorShader.use();
 
@@ -113,6 +113,21 @@ void Game::init(){
 
     MatrixOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, -400, 400, OrthoMatrix);
 
+    //-----create fbo
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    
+    glGenTextures(1, &fboTexture);
+    glBindTexture(GL_TEXTURE_2D, fboTexture);
+  
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //------------------
 
 
 #ifndef __ANDROID__
@@ -135,6 +150,9 @@ void Game::init(){
 
     LOGI("Inited\n");
 #endif
+
+    fboTextureIndex = pics.getTextureCount();
+    pics.attachTexture(fboTexture, fboTextureIndex, 256, 256, 256, 256, 1);
 
 
     useAccel = false;
@@ -173,18 +191,23 @@ void Game::render(){
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    int MatrixID = defaultShader.getUniformID("ModelViewProjection");
+
+    //printf("%d %d %d\n", MatrixID, MatrixID2, MatrixID3);
+
+
     FlatMatrix identity;
     MatrixIdentity(identity.m);
 
-    int MatrixID2 = colorShader.getUniformID("ModelViewProjection");
-    modelMatrixId = modelShader.getUniformID("ModelViewProjection");
-
-
-
     FlatMatrix finalM = identity * OrthoMatrix;
+    defaultShader.use();
+    int MatrixID = defaultShader.getUniformID("ModelViewProjection");
     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, finalM.m);
+    colorShader.use();
+    int MatrixID2 = colorShader.getUniformID("ModelViewProjection");
     glUniformMatrix4fv(MatrixID2, 1, GL_FALSE, finalM.m);
+    darknessShader.use();
+    int MatrixID3 = darknessShader.getUniformID("ModelViewProjection");
+    glUniformMatrix4fv(MatrixID3, 1, GL_FALSE, finalM.m);
 
 
     
@@ -217,6 +240,9 @@ void Game::logic(){
 void Game::destroy(){
 
 
+    glDeleteFramebuffers(1, &fbo);
+
+
 #ifndef __ANDROID__
     music.release();
     ss.freeData();
@@ -237,6 +263,8 @@ void Game::destroy(){
     itemsInWorld.destroy();
     mapGraph.destroy();
 
+    darknessShader.destroy();
+    colorShader.destroy();
     defaultShader.destroy();
 }
 
@@ -263,10 +291,10 @@ void Game::onBack()
 void Game::renderGame()
 {
     map.draw(mapPosX, mapPosY, pics, itemDB, DebugMode);
-   
     actors.draw(mapPosX, mapPosY, pics, DebugMode);
 
-
+    drawDarkness();
+   
     if (DebugMode)
     {
         for (unsigned i = 0; i < path.parent.count(); i++)
@@ -315,6 +343,9 @@ void Game::renderGame()
     sprintf(buf, "Health:%d", dude.getHealth());
     WriteText(500, 20, pics, 0, buf, 0.8f, 0.8f);
 
+    sprintf(buf, "Day %d %dh", days, (int)(worldTime / 10));
+    WriteText(500, 40, pics, 0, buf, 0.8f, 0.8f);
+
 }
 
 void Game::renderEditing()
@@ -329,6 +360,16 @@ void Game::renderTitle()
 
 void Game::gameLogic()
 {
+    worldTime += DeltaTime;
+
+    if (worldTime >= 240.f)
+    {
+        worldTime = 0.f;
+        ++days;
+    }
+
+    
+
     centerCamera(dude.pos.x, dude.pos.y);
 
     if (activeContainer)
@@ -576,6 +617,8 @@ void Game::titleLogic()
         itemSelected = false;
         selectedItemPos = Vector3D(0,0,0);
         activeContainer = nullptr;
+        worldTime = 100;
+        days = 0;
         clickOnItem = -1;
     }
 
@@ -596,6 +639,120 @@ void Game::drawActiveContainer()
 
     activeContainer->draw(pics, itemDB, selectedItem);
 
+}
+
+void Game::drawDarkness()
+{
+    float darknessAlpha = (worldTime >= 60 && worldTime < 200) ? 1.f - sinf(((worldTime - 60) / 140.f) * M_PI) : 1.f;
+
+
+    if (darknessAlpha <= 0.f)
+    {
+        return;
+    }
+
+    pics.drawBatch(&colorShader, &defaultShader, 666);
+
+
+
+    //draw to FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glViewport(0,0,256,256);
+    glClearColor(0.f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    pics.draw(11,
+              dude.pos.x + mapPosX,
+              dude.pos.y + mapPosY,
+              0,
+              true,
+              1.f, 1.f,
+              0.f,
+              COLOR(1,1,1,0.6),
+              COLOR(1,1,1,0.6f));
+
+
+    if (dude.isWeaponEquiped() == 12 && dude.hasWeaponAmmo())
+    {
+
+        if (dude.animationSubset == 0)
+        {
+            pics.draw(15,
+                    dude.pos.x + mapPosX + ((dude.isFlipedX) ? 89 : -89),
+                    dude.pos.y + mapPosY - 20,
+                    0,
+                    false, (dude.isFlipedX) ? -1.6 : 1.6, 1.3);
+        }
+        else if (dude.animationSubset == 1)
+        {
+
+            pics.draw(11,
+                    dude.pos.x + mapPosX,
+                    dude.pos.y + mapPosY - 60,
+                    0,
+                    true,
+                    1.8f, 1.5f,
+                    0.f);
+
+        }
+        else
+        {
+
+            pics.draw(13,
+                    dude.pos.x + mapPosX + ((dude.isFlipedX) ? 335 : -335),
+                    dude.pos.y + mapPosY - 68,
+                    0,
+                    false, (dude.isFlipedX) ? -1.3f : 1.3f, 1.3f );
+        }
+    }
+
+
+    pics.drawBatch(&colorShader, &defaultShader, 666);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, ScreenWidth, ScreenHeight);
+    glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
+
+    int dark  = darknessShader.getUniformID("uDarkness");
+    int light = darknessShader.getUniformID("uLight");
+
+    darknessShader.use();
+    glUniform1i(dark, 0);
+    glUniform1i(light, 1);
+
+
+    float verts[] = {0, 0, 
+        SCREEN_WIDTH, 0,
+        SCREEN_WIDTH, SCREEN_HEIGHT,
+        0, 0,
+        SCREEN_WIDTH, SCREEN_HEIGHT,
+        0, SCREEN_HEIGHT};
+
+    float uvs[] = {
+        0,1,//0,0,
+        1,1,//1,0,
+        1,0,//1,1,
+        0,1,//0,0,
+        1,0,//1,1,
+        0,0//0,1
+    };
+
+    float colors[] = {
+        0,0,0, darknessAlpha,
+        0,0,0, darknessAlpha,
+        0,0,0, darknessAlpha,
+        0,0,0, darknessAlpha,
+        0,0,0, darknessAlpha,
+        0,0,0, darknessAlpha
+    };
+
+
+    glActiveTexture(GL_TEXTURE0 + 0); 
+    glBindTexture(GL_TEXTURE_2D, pics.getname(12));
+
+    glActiveTexture(GL_TEXTURE0 + 1); 
+    glBindTexture(GL_TEXTURE_2D, pics.getname(fboTextureIndex)); 
+
+    pics.drawVA(verts, uvs, colors, 12, 12, &darknessShader);
+    glActiveTexture(GL_TEXTURE0);
 }
 
 
@@ -680,7 +837,12 @@ bool Game::handleShooting(float x, float y)
 
             if (weaponEquiped != -1)
             {
-                ItemData* weaponInfo = itemDB.get(weaponEquiped); 
+                ItemData* weaponInfo = itemDB.get(weaponEquiped);
+
+                if (weaponInfo->imageIndex != 9)
+                {
+                    return false;
+                }
 
                 int ammoSlot = dude.hasItem(weaponInfo->ammoItemIndex);
 

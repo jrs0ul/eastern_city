@@ -29,12 +29,6 @@ void GameMap::destroy()
     assets.destroy();
     regions.destroy();
     entries.destroy();
-    
-    for (unsigned i = 0; i < containers.count(); ++i)
-    {
-        containers[i].destroy();
-    }
-
     containers.destroy();
 
     if (collision)
@@ -296,7 +290,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
     }
 
 
-    XmlNode* containersNode = mapfile.root.getNode(L"Containers");
+  /*  XmlNode* containersNode = mapfile.root.getNode(L"Containers");
 
     if (containersNode)
     {
@@ -356,7 +350,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
                 containers.add(ic);
             }
         }
-    }
+    }*/
 
 
     if (worldItems)
@@ -422,6 +416,16 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
                 entries.add(entr);
             }
 
+        }
+
+        for (unsigned i = 0; i < room->getItemContainerCount(); ++i)
+        {
+            ItemContainer* container = room->getItemContainer(i);
+
+            if (container)
+            {
+                containers.add(container);
+            }
         }
     }
 
@@ -700,7 +704,7 @@ ItemContainer* GameMap::getItemContainer(unsigned index)
 {
     if (index < containers.count())
     {
-        return &containers[index];
+        return containers[index];
     }
 
     return nullptr;

@@ -12,6 +12,7 @@ public:
     void          destroy();
 
     bool          addItem(ItemInstance& item, int slotIndex = -1);
+    void          addItem(unsigned itemIndex); //for procedural generation;
     void          draw(PicsContainer& pics, ItemDatabase& itemDB, ItemInstance* selectedItem);
     bool          checkInput(TouchData& touches, 
                              ItemInstance** selectedItem, 

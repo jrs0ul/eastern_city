@@ -32,6 +32,7 @@ public:
     void          resetPathIndex(){pathIndex = 0;}
 
     int           isWeaponEquiped(){return (equipedWeapon.isRemoved()) ? -1 : equipedWeapon.getIndex();}
+    int           hasWeaponAmmo(){return (equipedWeapon.isRemoved()) ? 0 : equipedWeapon.getAmmoLoaded();}
 
     unsigned      getItemCount(){return itemBag.getItemCount();}
     ItemInstance* getItem(unsigned index);
@@ -45,12 +46,12 @@ private:
 
     bool isColiding(Vector3D newPos, GameMap& map);
 
-    //item stuff---
     void addItemToInventory(ItemInstance* item, int inventorySlotIndex);
     int  findFreedInventorySlot();
     bool isNoMorePlaceInBag(int freedSlotIndex);
     void wearClothes(float deltaTime, ItemDatabase& itemdb);
-    //---
+    void drainBatteries(float deltaTime, ItemDatabase& itemdb);
+    
     //
     void doTemperatureDamage(float deltaTime, int temperature, ItemDatabase& itemdb);
     void doHungerDamage(float deltaTime);

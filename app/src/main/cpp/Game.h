@@ -173,6 +173,7 @@ private:
     void titleLogic();
 
     void drawActiveContainer();
+    void drawDarkness();
 
     void centerCamera(float x, float y);
     void createEnemies();
@@ -196,12 +197,11 @@ private:
     float                OrthoMatrix[16];
     float                ViewMatrix[16];
     FlatMatrix           pushed;
-    int                  modelMatrixId;
 
 
     ShaderProgram        defaultShader;
     ShaderProgram        colorShader;
-    ShaderProgram        modelShader;
+    ShaderProgram        darknessShader;
 
 
     Dude dude;
@@ -227,6 +227,12 @@ private:
 
     int clickOnItem;
 
+    float worldTime;
+    int days;
+
+    unsigned fbo;
+    unsigned fboTexture;
+    int fboTextureIndex;
 
 };
 

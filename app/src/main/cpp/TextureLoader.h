@@ -101,11 +101,11 @@ class PicsContainer{
     DArray<GLuint> TexNames;
     DArray<PicData> PicInfo;
     DArray<SpriteBatchItem> batch;
-
+public:
     void drawVA(void * vertices, void * uvs, void *colors,
                 unsigned uvsCount, unsigned vertexCount,
                 ShaderProgram* shader);
-
+private:
     void resizeContainer(unsigned long index,
                          int twidth, int theight, int filter,
                          const char * name,
@@ -147,6 +147,7 @@ public:
                    int method = 0);
 
     GLuint getname(unsigned long index);
+    unsigned getTextureCount(){return TexNames.count();}
     PicData* getInfo(unsigned long index);
     unsigned long count(){return PicInfo.count();}
     int findByName(const char* picname, bool debug = false);
