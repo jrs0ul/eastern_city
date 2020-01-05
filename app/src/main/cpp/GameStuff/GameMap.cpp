@@ -1,5 +1,6 @@
 #include "GameMap.h"
 #include "../Xml.h"
+#include "../Usefull.h"
 #include <cwchar>
 
 
@@ -543,7 +544,13 @@ void GameMap::save(const char* file)
     mapfile.write(file);
 }
 
-void GameMap::draw(float posX, float posY, PicsContainer& pics, ItemDatabase& itemDb, bool isDebug)
+void GameMap::draw(float posX, 
+                   float posY,
+                   unsigned screenWidth,
+                   unsigned screenHeight,
+                   PicsContainer& pics, 
+                   ItemDatabase& itemDb, 
+                   bool isDebug)
 {
 
     for (unsigned i = 0; i < assets.count(); ++i)
@@ -596,6 +603,51 @@ void GameMap::draw(float posX, float posY, PicsContainer& pics, ItemDatabase& it
 
 }
 
+ void GameMap::drawDarknessBorder(float offsetX, float offsetY,
+                                   unsigned screenWidth, unsigned screenHeight,
+                                   PicsContainer& pics)
+{
+    if (height * 32 < screenHeight)
+    {
+        int frame = 0;
+        int frames[] = {0, 1, 1, 0, 0, 1};
+        
+        for (unsigned i = 0; i < width; ++i)
+        {
+            pics.draw(16, offsetX + i * 32 + 16, offsetY + (height - 1) * 32 + 16, frames[frame], true, 1, 1);
+            pics.draw(16, offsetX + i * 32 + 16, offsetY + 16, frames[frame], true, 1, -1);
+        
+            ++frame;
+
+            if (frame > 5)
+            {
+                frame = 0;
+            }
+        }
+    }
+
+    if (width * 32 < screenWidth)
+    {
+        int frame = 0;
+        int frames[] = {2, 3, 3, 2, 2, 3};
+        
+        for (unsigned i = 0; i < height; ++i)
+        {
+            pics.draw(16, offsetX + 16, offsetY + i * 32 + 16, frames[frame], true);
+            pics.draw(16, offsetX + (width - 1) * 32 + 16, offsetY + i * 32 + 16, frames[frame], true, -1);
+            ++frame;
+
+            if (frame > 5)
+            {
+                frame = 0;
+            }
+
+        }
+    }
+
+}
+
+
 void GameMap::addItem(ItemInstance* item)
 {
     items.add(item);
@@ -625,7 +677,9 @@ int GameMap::canTraverse(int x, int y)
 
 Asset* GameMap::getClickedAsset(float mapOffsetX, float mapOffsetY,
                                 PicsContainer& pics,
-                                int x, int y)
+                                int x, int y,
+                                bool returnIfColidesWithHero,
+                                float heroX, float heroY)
 {
     const float currentX = x - mapOffsetX;
     const float currentY = y - mapOffsetY;
@@ -659,7 +713,25 @@ Asset* GameMap::getClickedAsset(float mapOffsetX, float mapOffsetY,
                 && currentY > asset->pos.y
                 && currentY < asset->pos.y + spriteHeight)
             {
-                return asset;
+                if (returnIfColidesWithHero)
+                {
+                    if (CollisionCircleRectangle(heroX, 
+                                                 heroY, 
+                                                 25, 
+                                                 asset->pos.x, 
+                                                 asset->pos.y,
+                                                 spriteWidth, 
+                                                 spriteHeight))
+                    {
+                        return asset;
+                    }
+                            
+                }
+                else
+                {
+                    return asset;
+                }
+
             }
         }
     }

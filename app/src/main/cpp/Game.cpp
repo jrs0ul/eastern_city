@@ -93,7 +93,6 @@ void Game::init(){
 
     colorShader.use();
 
-    glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
     glEnable(GL_TEXTURE_2D);
     glDepthFunc(GL_LEQUAL);
 
@@ -135,7 +134,7 @@ void Game::init(){
     ss.init(0);
     music.open("music/music.ogg");
     music.setVolume(sys.musicVolume);
-    music.playback();
+    //music.playback();
 
 #else
     pics.load("pics/imagesToLoad.xml", AssetManager);
@@ -290,10 +289,19 @@ void Game::onBack()
 
 void Game::renderGame()
 {
-    map.draw(mapPosX, mapPosY, pics, itemDB, DebugMode);
+    map.draw(mapPosX, mapPosY, SCREEN_WIDTH, SCREEN_HEIGHT, pics, itemDB, DebugMode);
     actors.draw(mapPosX, mapPosY, pics, DebugMode);
+    map.drawDarknessBorder(mapPosX, mapPosY, SCREEN_WIDTH, SCREEN_HEIGHT, pics);
 
     drawDarkness();
+
+    if (stateInTheGame != GAMEPLAY)
+    {
+        pics.draw(-1, 0, 0, 0, false, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 
+                  COLOR(0, 0, 0, (stateInTheGame == FADEIN) ? 1.f - fadeProgress : fadeProgress),
+                  COLOR(0, 0, 0, (stateInTheGame == FADEIN) ? 1.f - fadeProgress : fadeProgress)
+                  );
+    }
    
     if (DebugMode)
     {
@@ -342,35 +350,120 @@ void Game::renderGame()
     WriteText(500, 2, pics, 0, buf, 0.8f, 0.8f);
     sprintf(buf, "Health:%d", dude.getHealth());
     WriteText(500, 20, pics, 0, buf, 0.8f, 0.8f);
+    sprintf(buf, "Warmth:%d", dude.getWarmth());
+    WriteText(500, 38, pics, 0, buf, 0.8f, 0.8f);
+    sprintf(buf, "Energy:%d", dude.getWakefullness());
+    WriteText(500, 56, pics, 0, buf, 0.8f, 0.8f);
 
+    sprintf(buf, "Temperature:%d", map.getTemperature());
+    WriteText(700, 2, pics, 0, buf, 0.8f, 0.8f);
     sprintf(buf, "Day %d %dh", days, (int)(worldTime / 10));
-    WriteText(500, 40, pics, 0, buf, 0.8f, 0.8f);
+    WriteText(700, 20, pics, 0, buf, 0.8f, 0.8f);
 
 }
 
 void Game::renderEditing()
 {
-    map.draw(mapPosX, mapPosY, pics, itemDB, DebugMode);
+    map.draw(mapPosX, mapPosY, SCREEN_WIDTH, SCREEN_HEIGHT, pics, itemDB, DebugMode);
 }
 
 void Game::renderTitle()
 {
+    glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
     pics.draw(3, SCREEN_WIDTH/2.f, SCREEN_HEIGHT/2.f, 0, true);
+#ifndef __ANDROID__
+    WriteText(SCREEN_WIDTH/2.f - 120, SCREEN_HEIGHT/2.f + 120, pics, 0, "click anywhere to continue...");
+#else
+    WriteText(SCREEN_WIDTH/2.f - 110, SCREEN_HEIGHT/2.f + 120, pics, 0, "tap anywhere to continue...");
+#endif
+}
+
+void Game::renderDefeat()
+{
+    glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
+    
+    char buf[255];
+
+    float totalTime = days * 240 + worldTime - 10;
+
+    int survivedDays = totalTime / 240;
+
+    sprintf(buf, "You have survived for %d days %d hours", survivedDays, (int)((totalTime - (survivedDays * 240)) / 10));
+    WriteText(SCREEN_WIDTH/2.f - 120, 100, pics, 0, buf);
+
+#ifndef __ANDROID__
+    WriteText(SCREEN_WIDTH/2.f - 120, SCREEN_HEIGHT/2.f + 120, pics, 0, "click anywhere to continue...");
+#else
+    WriteText(SCREEN_WIDTH/2.f - 110, SCREEN_HEIGHT/2.f + 120, pics, 0, "tap anywhere to continue...");
+#endif
+
 }
 
 void Game::gameLogic()
 {
-    worldTime += DeltaTime;
+    centerCamera(dude.pos.x, dude.pos.y);
+    darkness = (worldTime >= 60 && worldTime < 200) ? 1.f - sinf(((worldTime - 60) / 140.f) * M_PI) : 1.f;
 
-    if (worldTime >= 240.f)
+    //---
+    if (stateInTheGame != GAMEPLAY)
     {
-        worldTime = 0.f;
-        ++days;
+        fadeProgress += DeltaTime * 1.8f;
+        
+        if (fadeProgress >= 1.f)
+        {
+            fadeProgress = 0.f;
+
+            if (stateInTheGame == FADEIN)
+            {
+                stateInTheGame = GAMEPLAY;
+            }
+            else
+            {
+                if (!dude.isSleeping())
+                {
+
+#ifdef __ANDROID__
+                    map.load(currentRoom->getMapName(), AssetManager, &itemsInWorld, currentRoom);
+#else
+                    map.load(currentRoom->getMapName(), &itemsInWorld, currentRoom);
+#endif
+                    dude.setPosition(*map.getPlayerPos(currentPlayerEntryPoint));
+                    createEnemies();
+                    unsigned regionIndex = 0;
+                    unsigned entryIndex = 0;
+
+                    if (dude.colidesWithRegion(map, &regionIndex, &entryIndex))
+                    {
+                        ignoreRegion = true;
+                        printf("REGION IGNORED\n");
+                    }
+
+                    stateInTheGame = FADEIN;
+                }
+                else
+                {
+                    stateInTheGame = FADEIN;
+                    printf("WELCOME TO THE WORLD OF TOMOROW!\n");
+                    updateWorld(60);
+                    dude.stopSleep();
+                    return;
+                }
+            }
+        }
+
+        return;
+    }
+    //--
+    if (dude.isSleeping() && dude.isSleepAnimationDone())
+    {
+        stateInTheGame = FADEOUT;
+        return;
     }
 
+   
     
+    updateWorld(DeltaTime);
 
-    centerCamera(dude.pos.x, dude.pos.y);
 
     if (activeContainer)
     {
@@ -392,9 +485,12 @@ void Game::gameLogic()
 
     if (touches.up.count())
     {
+        //----asset interactions
         Asset * ass = map.getClickedAsset(mapPosX, mapPosY, 
                                           pics, 
-                                          touches.up[0].x, touches.up[1].y);
+                                          touches.up[0].x, touches.up[1].y,
+                                          true,
+                                          dude.pos.x, dude.pos.y + 39);
 
         if (ass)
         {
@@ -404,6 +500,13 @@ void Game::gameLogic()
                 activeContainer->setPosition(Vector3D(touches.up[0].x, touches.up[1].y, 0));
                 activeContainer->setActive(true);
                 return;
+            }
+            else if (ass->isBed)
+            {
+                dude.pos.x = ass->pos.x + 112;
+                dude.pos.y = ass->pos.y + 67;
+                dude.isFlipedX = false;
+                dude.goToSleep();
             }
         }
 
@@ -447,7 +550,7 @@ void Game::gameLogic()
             }
 
             currentRoom->addItem(Vector3D(newItemPosX, newItemPosY, 0),
-                                 selectedItem->getIndex());
+                                 selectedItem);
             map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
             selectedItem->setAsRemoved();
             selectedItem = nullptr;
@@ -480,22 +583,8 @@ void Game::gameLogic()
     }
 
 
-    dude.update(DeltaTime, Keys, map, itemDB, path);
     
-    for (unsigned i = 0; i < actors.getActorCount(); ++i)
-    {
-        Actor* actr = actors.getActor(i);
-
-        if (actr)
-        {
-            if (actr->getType() == 1)
-            {
-                Rat* rat = static_cast<Rat*>(actr);
-                rat->update(DeltaTime, map, dude, actors);
-            }
-        }
-    }
-
+    
     unsigned entryIndex = 0;
     unsigned regionIndex = 0;
 
@@ -508,22 +597,13 @@ void Game::gameLogic()
 
         if (rae != nullptr)
         {
+            printf("THERE'S A ROOM CONNECTED TO THIS REGION\n");
             activeContainer = nullptr;
             currentRoom = rae->room;
-            printf("THERE'S A ROOM CONNECTED TO THIS REGION\n");
-#ifdef __ANDROID__
-            map.load(currentRoom->getMapName(), AssetManager, &itemsInWorld, currentRoom);
-#else
-            map.load(currentRoom->getMapName(), &itemsInWorld, currentRoom);
-#endif
+            currentPlayerEntryPoint = rae->entryIndex;
             path.destroy();
-            dude.setPosition(*map.getPlayerPos(rae->entryIndex));
-            createEnemies();
 
-            if (dude.colidesWithRegion(map, &regionIndex, &entryIndex))
-            {
-                ignoreRegion = true;
-            }
+            stateInTheGame = FADEOUT;
         }
     }
     else if (!colidesWithRegion && ignoreRegion)
@@ -533,7 +613,36 @@ void Game::gameLogic()
 
     if (dude.getHealth() <= 0)
     {
-        gameMode = TITLE;
+        gameMode = DEFEAT;
+    }
+
+}
+    
+void Game::updateWorld(float deltaT)
+{
+    worldTime += deltaT;
+
+    if (worldTime >= 240.f)
+    {
+        int daysPassed = worldTime / 240;
+        days += daysPassed;
+        worldTime = (worldTime - daysPassed * 240);
+    }
+    
+    dude.update(deltaT, Keys, map, darkness, itemDB, path);
+    
+    for (unsigned i = 0; i < actors.getActorCount(); ++i)
+    {
+        Actor* actr = actors.getActor(i);
+
+        if (actr)
+        {
+            if (actr->getType() == 1)
+            {
+                Rat* rat = static_cast<Rat*>(actr);
+                rat->update(deltaT, map, dude, actors);
+            }
+        }
     }
 
 }
@@ -589,7 +698,7 @@ void Game::editingLogic()
 
 void Game::titleLogic()
 {
-    if (touches.up.count())
+    if (touches.up.count() && !touches.oldDown.count())
     {
         //mapGraph.init();
         mapGraph.destroy();
@@ -611,6 +720,7 @@ void Game::titleLogic()
 
         createEnemies();
 
+        glClearColor(0.f, 0.0f, 0.0f, 0.0f);
         
         ignoreRegion = false;
         selectedItem = nullptr;
@@ -620,10 +730,19 @@ void Game::titleLogic()
         worldTime = 100;
         days = 0;
         clickOnItem = -1;
+        stateInTheGame = FADEIN;
+        fadeProgress = 0.f;
     }
-
 }
 
+void Game::defeatLogic()
+{
+    
+    if (touches.up.count() && !touches.oldDown.count())
+    {
+        gameMode = TITLE;
+    }
+}
 
 void Game::drawActiveContainer()
 {
@@ -643,10 +762,9 @@ void Game::drawActiveContainer()
 
 void Game::drawDarkness()
 {
-    float darknessAlpha = (worldTime >= 60 && worldTime < 200) ? 1.f - sinf(((worldTime - 60) / 140.f) * M_PI) : 1.f;
 
 
-    if (darknessAlpha <= 0.f)
+    if (darkness <= 0.f)
     {
         return;
     }
@@ -658,7 +776,6 @@ void Game::drawDarkness()
     //draw to FBO
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glViewport(0,0,256,256);
-    glClearColor(0.f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     pics.draw(11,
               dude.pos.x + mapPosX,
@@ -671,7 +788,7 @@ void Game::drawDarkness()
               COLOR(1,1,1,0.6f));
 
 
-    if (dude.isWeaponEquiped() == 12 && dude.hasWeaponAmmo())
+    if (dude.isWeaponEquiped() == 12 && dude.getAmmoInWeaponCount())
     {
 
         if (dude.animationSubset == 0)
@@ -709,7 +826,6 @@ void Game::drawDarkness()
     pics.drawBatch(&colorShader, &defaultShader, 666);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, ScreenWidth, ScreenHeight);
-    glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
 
     int dark  = darknessShader.getUniformID("uDarkness");
     int light = darknessShader.getUniformID("uLight");
@@ -736,12 +852,12 @@ void Game::drawDarkness()
     };
 
     float colors[] = {
-        0,0,0, darknessAlpha,
-        0,0,0, darknessAlpha,
-        0,0,0, darknessAlpha,
-        0,0,0, darknessAlpha,
-        0,0,0, darknessAlpha,
-        0,0,0, darknessAlpha
+        0,0,0, darkness,
+        0,0,0, darkness,
+        0,0,0, darkness,
+        0,0,0, darkness,
+        0,0,0, darkness,
+        0,0,0, darkness
     };
 
 
@@ -893,6 +1009,7 @@ void Game::GameLoop(){
     {
         case GAME    : gameLogic(); break;
         case TITLE   : titleLogic(); break;
+        case DEFEAT  : defeatLogic(); break;
         case EDITING : editingLogic(); break;
     }
 }
@@ -905,6 +1022,7 @@ void Game::Render2D()
     {
         case GAME    : renderGame(); break;
         case TITLE   : renderTitle(); break;
+        case DEFEAT  : renderDefeat(); break;
         case EDITING : renderEditing(); break;
     }
 }
@@ -915,6 +1033,4 @@ void Game::DrawDebugText(){
     char buf[256];
     sprintf(buf, "FPS:%d", FPS());
     WriteText(2, 2, pics, 0, buf, 0.8f, 0.8f);
-    
-    
 }

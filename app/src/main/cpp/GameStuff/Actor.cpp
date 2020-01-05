@@ -21,8 +21,16 @@ void Actor::draw(float offsetX, float offsetY,
 {
     int frame = animations[animationSubset].frames[animationFrame];
     pics.draw(pics.findByName(spriteName), 
-              pos.x + offsetX, pos.y + offsetY,
-              frame, true, (isFlipedX)? -1.f: 1.f, 1.f);
+              pos.x + offsetX + animations[animationSubset].offsetX, 
+              pos.y + offsetY + animations[animationSubset].offsetY,
+              frame, 
+              true, 
+              (isFlipedX)? -1.f: 1.f, 
+              1.f,
+              0.f,
+              (isDamaged) ? COLOR(1,0,0,1) : COLOR(1,1,1,1),
+              (isDamaged) ? COLOR(1,0,0,1) : COLOR(1,1,1,1)
+              );
 
     if (debugInfo)
     {
@@ -85,3 +93,13 @@ bool Actor::isColiding(Vector3D newPos, GameMap& map)
 
 }
  
+void Actor::setHealth(float newHealth)
+{
+    if (newHealth < health)
+    {
+        isDamaged = true;
+        damageProgress = 0.1f;
+    }
+
+    health = newHealth;
+}

@@ -25,16 +25,23 @@ public:
 
     void        save(const char* file);
 
-    void        draw(float posX, float posY, 
+    void        draw(float posX, float posY,
+                     unsigned screenWidth, unsigned screenHeight,
                      PicsContainer& pics, 
                      ItemDatabase& itemDb, 
                      bool debugInfo = false);
+    void        drawDarknessBorder(float offsetX, float offsetY,
+                                   unsigned screenWidth, unsigned screenHeight,
+                                   PicsContainer& pics);
     void        addItem(ItemInstance* item);
     int         canTraverse(int x, int y);
     bool*       getCollisionData(){return collision;}
     Asset*      getClickedAsset(float mapOffsetX, float mapOffsetY,
                                 PicsContainer& pics,
-                                int x, int y);
+                                int x, int y,
+                                bool returnIfColidesWithHero,
+                                float heroX = 0.f, float heroY = 0.f);
+
     void        setCollision(int x, int y, bool bColide);
     Vector3D*   getPlayerPos(unsigned index);
     int         getRegionCount(){return regions.count();}

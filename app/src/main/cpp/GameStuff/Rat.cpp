@@ -10,6 +10,7 @@ void Rat::init(Vector3D& position)
     collisionBodyRadius = 10;
     collisionBodyOffset = Vector3D(0, 0, 0);
     isDead = false;
+    isDamaged = false;
 
     FrameSet up;
     up.frames.add(0);
@@ -60,6 +61,18 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
     {
         return;
     }
+
+    if (isDamaged)
+    {
+        damageProgress -= deltaTime;
+        
+        if (damageProgress <= 0.f)
+        {
+            isDamaged = false;
+        }
+
+    }
+
 
     Vector3D dudPos = *dude.getPos();
     dudPos.y += 39.f;

@@ -21,6 +21,7 @@ public:
     void              addChildRoom(const char* name, unsigned entry, unsigned region);
     void              addChildRoom(Room* node, unsigned entry, unsigned region);
     void              addItem(Vector3D pos, int index);
+    void              addItem(Vector3D pos, ItemInstance* item);
     void              addItemContainer(unsigned assetIndex, ItemContainer& container);
     void              addEnemyPosition(Vector3D pos);
     void              addAsset(Vector3D pos, const char* name, unsigned spriteIndex);
@@ -101,7 +102,7 @@ public:
     void addFridge(Room* room);
     void addTvCupboard(Room* room);
     void addCupboard(Room* room);
-    void addCouch(Room* room);
+    void addCouch(Room* room, int x, int y);
 
     void destroy();
 

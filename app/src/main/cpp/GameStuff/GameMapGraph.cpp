@@ -27,6 +27,13 @@ void Room::addItem(Vector3D pos, int index)
     items.add(item);
 }
 
+void Room::addItem(Vector3D pos, ItemInstance* item)
+{
+    ItemInstance newItem = *item;
+    newItem.setPosition(pos);
+    items.add(newItem);
+}
+
 void Room::addItemContainer(unsigned assetIndex, ItemContainer& container)
 {
     if (assetIndex > assets.count())
@@ -284,6 +291,7 @@ void GameMapGraph::init()
     root->addChildRoom("data/stairwell.xml", 2, 0);
     root->addItem(Vector3D(300, 260, 0), rand() % 2);
 
+    addCupboard(root);
     root->addAsset(Vector3D(480, 180, 0), "pics/test.tga", 1);
 
     ItemContainer wardrobe;
@@ -291,12 +299,16 @@ void GameMapGraph::init()
 
     int itemArray[] = {5, 3, 8, 0, 6, 7, 10, 11, 4};
 
+
     wardrobe.addItem(itemArray[rand() % 9]);
     wardrobe.addItem(itemArray[rand() % 9]);
     wardrobe.addItem(itemArray[rand() % 9]);
     wardrobe.addItem(12);
     wardrobe.addItem(13);
-    root->addItemContainer(0, wardrobe);
+    wardrobe.addItem(2);
+    root->addItemContainer(1, wardrobe);
+
+    addCouch(root, 110, 200);
     
 
     Room* stairwell = root->getChildRoom(0)->room;
@@ -434,9 +446,12 @@ void GameMapGraph::generateRoom(Room* floor,
     genericRoom->addItem(Vector3D(350 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
     genericRoom->addItem(Vector3D(200 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
 
-    for (int i = 0; i < rand() % 5; ++i)
+    if (isLeft)
     {
-        genericRoom->addEnemyPosition(Vector3D(200 + i * 32, 300 + rand() % 100, 0 ));
+        for (int i = 0; i < rand() % 4; ++i)
+        {
+            genericRoom->addEnemyPosition(Vector3D(200 + i * 32, 300 + rand() % 100, 0 ));
+        }
     }
 
 
@@ -468,7 +483,7 @@ void GameMapGraph::generateRoom(Room* floor,
 
     if (!isLeft)
     {
-        addCouch(genericRoom);
+        addCouch(genericRoom, 30, 240);
     }
 
 }
@@ -528,15 +543,17 @@ void GameMapGraph::addCupboard(Room* room)
     room->addItemContainer(room->getAssetCount() - 1, container2);
 }
 
-void GameMapGraph::addCouch(Room* room)
+void GameMapGraph::addCouch(Room* room, int x, int y)
 {
-    room->addAsset(Vector3D(30, 240, 0), "pics/test.tga", 0);
-    room->addCollision(3, 240 / 32 + 2, true);
-    room->addCollision(4, 240 / 32 + 2, true);
-    room->addCollision(5, 240 / 32 + 1, true);
-    room->addCollision(1, 240 / 32 + 3, true);
-    room->addCollision(2, 240 / 32 + 3, true);
-    room->addCollision(3, 240 / 32 + 3, true);
+    room->addAsset(Vector3D(x, y, 0), "pics/test.tga", 0);
+    Asset* bed = room->getAsset(room->getAssetCount() - 1);
+    bed->isBed = true;
+    room->addCollision((x - 16) / 32 + 3, y / 32 + 2, true);
+    room->addCollision((x - 16) / 32 + 4, y / 32 + 2, true);
+    room->addCollision((x - 16) / 32 + 5, y / 32 + 1, true);
+    room->addCollision((x - 16) / 32 + 1, y / 32 + 3, true);
+    room->addCollision((x - 16) / 32 + 2, y / 32 + 3, true);
+    room->addCollision((x - 16) / 32 + 3, y / 32 + 3, true);
 }
 
 void GameMapGraph::destroy()

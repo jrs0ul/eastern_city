@@ -23,8 +23,8 @@
         </Sprites>
     </Img>
     <Img src="pics/room.tga" width="600" height="406" filter="0" />
-    <Img src="pics/stairwell.tga" width="760" height="360" filter="0" />
-    <Img src="pics/stairwell2.tga" width="760" height="360" filter="0" />
+    <Img src="pics/stairwell.tga" width="760" height="352" filter="0" />
+    <Img src="pics/stairwell2.tga" width="760" height="352" filter="0" />
     <Img src="pics/outside.tga" width="1376" height="800" filter="0" />
     <Img src="pics/dude.tga" width="64" height="110" filter="0" />
     <Img src="pics/glow.tga" width="137" height="189" filter="1" />
@@ -32,4 +32,6 @@
     <Img src="pics/flashlight.tga" width="256" height="110" filter="1" />
     <Img src="pics/dude_flashlight.tga" width="64" height="110" filter="0" />
     <Img src="pics/flashlight_bottom.tga" width="110" height="160" filter="1" />
+    <Img src="pics/darknessTransition.tga" width="32" height="32" filter="0" />
+    <Img src="pics/dude_sleep.tga" width="113" height="110" filter="0" />
 </Images>

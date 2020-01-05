@@ -58,9 +58,16 @@ enum GameModes
 {
     TITLE,
     GAME,
+    DEFEAT,
     EDITING
 };
 
+enum GameStates
+{
+    GAMEPLAY,
+    FADEOUT,
+    FADEIN
+};
 
 //============================================
 class Game
@@ -167,10 +174,13 @@ private:
     void renderGame();
     void renderEditing();
     void renderTitle();
+    void renderDefeat();
 
     void gameLogic();
+    void updateWorld(float deltaTime);
     void editingLogic();
     void titleLogic();
+    void defeatLogic();
 
     void drawActiveContainer();
     void drawDarkness();
@@ -228,11 +238,16 @@ private:
     int clickOnItem;
 
     float worldTime;
+    float darkness;
     int days;
 
     unsigned fbo;
     unsigned fboTexture;
     int fboTextureIndex;
+
+    GameStates stateInTheGame;
+    float fadeProgress;
+    unsigned currentPlayerEntryPoint;
 
 };
 

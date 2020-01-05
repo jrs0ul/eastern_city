@@ -274,7 +274,7 @@
             <td >1</td>
         </tr>
     </Collision>
-    <Temperature >-1</Temperature>
+    <Temperature >2</Temperature>
     <Assets >
         <Asset x="0.000000" y="0.000000" >pics/room.tga</Asset>
         <Asset x="250.000000" y="130.000000" index="8">pics/test.tga</Asset>

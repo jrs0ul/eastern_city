@@ -7,6 +7,14 @@ struct Asset
     Vector3D pos;
     unsigned spriteIndex;
     int containerIndex;
+    bool isBed;
+
+    Asset()
+    : spriteIndex(0)
+    , containerIndex(-1)
+    , isBed(false)
+    {
+    }
 };
 
 

@@ -17,6 +17,7 @@ public:
     void      setAmmoLoaded(int count){ammoLoaded = count;}
     void      setQuality(float q){quality = q;}
     void      setAsRemoved(){removed = true;}
+    void      setPosition(Vector3D position){pos = position;}
 
 private:
 

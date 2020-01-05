@@ -14,7 +14,12 @@ class Dude : public Actor
 public:
     void          init(Vector3D& position);
     void          destroy();
-    void          update(float deltaTime, unsigned char* Keys, GameMap& map, ItemDatabase& itemDb, Path& path);
+    void          update(float deltaTime, 
+                         unsigned char* Keys, 
+                         GameMap& map,
+                         float darkness,
+                         ItemDatabase& itemDb, 
+                         Path& path);
 
     void          drawInventory(PicsContainer& pics, ItemDatabase& itemDb, ItemInstance* selectedItem);
     int           hasItem(unsigned itemId);
@@ -28,18 +33,25 @@ public:
 
     bool          colidesWithRegion(GameMap& map, unsigned* regionIndex, unsigned* entryIndex);
     void          setPosition(Vector3D& position);
-    void          setHealth(float newHealth){health = newHealth;}
     void          resetPathIndex(){pathIndex = 0;}
+    void          goToSleep();
+    void          stopSleep(){sleeping = false;}
 
-    int           isWeaponEquiped(){return (equipedWeapon.isRemoved()) ? -1 : equipedWeapon.getIndex();}
-    int           hasWeaponAmmo(){return (equipedWeapon.isRemoved()) ? 0 : equipedWeapon.getAmmoLoaded();}
+    int           isClothesEquiped();
+    int           isWeaponEquiped();
+    int           getAmmoInWeaponCount();
 
     unsigned      getItemCount(){return itemBag.getItemCount();}
     ItemInstance* getItem(unsigned index);
 
     Vector3D*     getPos(){return &pos;}
     int           getHealth(){return health;}
+    int           getWarmth(){return warmth;}
     int           getSatiation(){return satiation;}
+    int           getWakefullness(){return wakefullness;}
+
+    bool          isSleeping(){return sleeping;}
+    bool          isSleepAnimationDone(){return sleepAnimationDone;}
 
     virtual int   getType() override {return 0;}
 private:
@@ -53,21 +65,32 @@ private:
     void drainBatteries(float deltaTime, ItemDatabase& itemdb);
     
     //
+    void doDarknessEffect(float deltaTime, float darkness);
     void doTemperatureDamage(float deltaTime, int temperature, ItemDatabase& itemdb);
     void doHungerDamage(float deltaTime);
+    void walkingLogic(float deltaTime,
+                      bool useKeys, 
+                      unsigned char* Keys,
+                      GameMap& map,
+                      Path& path);
 
 private:
     ItemContainer        itemBag;
     int                  pathIndex;
     bool                 playWalkAnimation;
     bool                 walkAnimationDone;
+    bool                 sleeping;
+    bool                 sleepAnimationDone;
     float                satiationProgress;
     float                freezingProgress;
+    float                darknessProgress;
+    float                timeAwake;
 
-    ItemInstance         equipedClothes;
-    ItemInstance         equipedWeapon;
+    ItemContainer        equipedItems;
 
     int                  satiation;
+    float                wakefullness;
+    float                warmth;
 };
 
 
