@@ -20,6 +20,7 @@ code = [
         "app/src/main/cpp/GameStuff/Actor.cpp",
         "app/src/main/cpp/GameStuff/Dude.cpp",
         "app/src/main/cpp/GameStuff/Rat.cpp",
+        "app/src/main/cpp/GameStuff/Ghost.cpp",
         "app/src/main/cpp/FindPath.cpp",
         "app/src/main/cpp/Usefull.cpp",
         "app/src/main/cpp/SDLVideo.cpp",

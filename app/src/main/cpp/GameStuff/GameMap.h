@@ -7,9 +7,11 @@
 #include "ItemInstance.h"
 #include "ItemContainer.h"
 #include "GameMapGraph.h"
+#include "Actor.h"
 #include "Asset.h"
 #include "Region.h"
 
+class Actor;
 
 class GameMap
 {
@@ -30,11 +32,15 @@ public:
                      PicsContainer& pics, 
                      ItemDatabase& itemDb, 
                      bool debugInfo = false);
+
+    void        update(Actor* mainguy, PicsContainer& pics);
+
     void        drawDarknessBorder(float offsetX, float offsetY,
                                    unsigned screenWidth, unsigned screenHeight,
                                    PicsContainer& pics);
     void        addItem(ItemInstance* item);
     int         canTraverse(int x, int y);
+    Vector3D    getNearestReachableSquare(int x, int y);
     bool*       getCollisionData(){return collision;}
     Asset*      getClickedAsset(float mapOffsetX, float mapOffsetY,
                                 PicsContainer& pics,

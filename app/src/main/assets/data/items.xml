@@ -1,16 +1,23 @@
 <?xml version="1.0"?>
 <Items>
-    <Item name="Canned food" isWearable="0" isConsumable="1" coldDecrease="0" spoilageSpeed="0" imageIndex="0" hungerDecrease="12" hpUp="1"/>
-    <Item name="Rat meat" isWearable="0" isConsumable="1" coldDecrease="0" spoilageSpeed="1" imageIndex="1" hungerDecrease="10" hpUp="0"/>
-    <Item name="Coat" isWearable="1" isConsumable="0" coldDecrease="3" spoilageSpeed="1.5" imageIndex="2" hungerDecrease="0" hpUp="0"/>
-    <Item name="Medicine" isWearable="0" isConsumable="1" coldDecrease="0" spoilageSpeed="0" imageIndex="3" hungerDecrease="0" hpUp="40"/>
-    <Item name="Rags" isWearable="0" isConsumable="0" coldDecrease="0" spoilageSpeed="0" imageIndex="4" hungerDecrease="0" hpUp="0"/>
-    <Item name="Sewing kit" isWearable="0" isConsumable="0" coldDecrease="0" spoilageSpeed="0" imageIndex="5" hungerDecrease="0" hpUp="0"/>
-    <Item name="Wood" isWearable="0" isConsumable="0" coldDecrease="0" spoilageSpeed="0" imageIndex="6" hungerDecrease="0" hpUp="0"/>
-    <Item name="Rubber band" isWearable="0" isConsumable="0" coldDecrease="0" spoilageSpeed="0" imageIndex="7" hungerDecrease="0" hpUp="0"/>
-    <Item name="Junk" isWearable="0" isConsumable="0" coldDecrease="0" spoilageSpeed="0" imageIndex="8" hungerDecrease="0" hpUp="0"/>
-    <Item name="Slingshot" isWearable="0" isConsumable="0" coldDecrease="0" spoilageSpeed="0" imageIndex="9" hungerDecrease="0" hpUp="0"/>
-    <Item name="Alcohol" isWearable="0" isConsumable="1" coldDecrease="0" spoilageSpeed="0" imageIndex="10" hungerDecrease="2" hpUp="5"/>
-    <Item name="Dead plant" isWearable="0" isConsumable="0" coldDecrease="0" spoilageSpeed="0" imageIndex="11" hungerDecrease="0" hpUp="0"/>
+    <Item name="Canned food" isConsumable="1" imageIndex="0" hungerDecrease="20" hpUp="1"/>
+    <Item name="Rat meat" isConsumable="1" spoilageSpeed="1" imageIndex="1" hungerDecrease="15"/>
+    <Item name="Puffy Coat" isWearable="1" coldDecrease="25" spoilageSpeed="0.7" imageIndex="2"/>
+    <Item name="Medicine" isConsumable="1" imageIndex="3" hpUp="40"/>
+    <Item name="Rags" imageIndex="4"/>
+    <Item name="Sewing kit" isConsumable="1" imageIndex="5" clothingQualityIncrease="20"/>
+    <Item name="Wood" imageIndex="6"/>
+    <Item name="Rubber band" imageIndex="7"/>
+    <Item name="Junk" imageIndex="8"/>
+    <Item name="Slingshot" imageIndex="9" isWeapon="1" ammoItemIndex="8"/>
+    <Item name="Alcohol" isConsumable="1" imageIndex="10" hungerDecrease="2" hpUp="5"/>
+    <Item name="Dead plant" imageIndex="11"/>
+    <Item name="Flashlight" imageIndex="12" isWeapon="1" ammoItemIndex="13"/>
+    <Item name="Batteries" imageIndex="13" spoilageSpeed="0.7"/>
+    <Item name="Roten cheese" imageIndex="14" isConsumable="1" hungerDecrease="30"/>
+    <Item name="Bread" imageIndex="15" isConsumable="1" hungerDecrease="18"/>
+    <Item name="Thin Coat" isWearable="1" coldDecrease="15" spoilageSpeed="0.4" imageIndex="16"/>
+    <Item name="Cotton wool" imageIndex="17"/>
+    <Item name="Anticeptic" imageIndex="18" isConsumable="1" hpUp="10"/>
 </Items>
 

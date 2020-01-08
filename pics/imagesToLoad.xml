@@ -34,4 +34,6 @@
     <Img src="pics/flashlight_bottom.tga" width="110" height="160" filter="1" />
     <Img src="pics/darknessTransition.tga" width="32" height="32" filter="0" />
     <Img src="pics/dude_sleep.tga" width="113" height="110" filter="0" />
+    <Img src="pics/baubas.tga" width="76" height="120" filter="0" />
+    <Img src="pics/hud_icons.tga" width="32" height="32" filter="0" />
 </Images>

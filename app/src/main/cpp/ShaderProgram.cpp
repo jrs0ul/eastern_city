@@ -30,7 +30,7 @@ void ShaderProgram::getLog(char* string, int len)
 
 void ShaderProgram::attach(Shader & sh)
 {
-    printf("attaching shader:%d to program %d\n", sh.id, program);
+    //printf("attaching shader:%d to program %d\n", sh.id, program);
     glAttachShader(program, sh.id);
 }
 

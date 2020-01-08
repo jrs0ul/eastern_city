@@ -1,4 +1,5 @@
 #include "ItemContainer.h"
+#include <cmath>
 
 void ItemContainer::init(unsigned sCount, unsigned newWidth)
 {

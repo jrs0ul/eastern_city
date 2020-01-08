@@ -80,6 +80,10 @@ Actor* ActorContainer::getActor(unsigned index)
 
 bool ActorContainer::isColidingWithOthers(Actor* actor, Vector3D& offset)
 {
+    Vector3D newPosition = Vector3D(actor->pos.x + offset.x + actor->collisionBodyOffset.x,
+                                    actor->pos.y + offset.y + actor->collisionBodyOffset.y,
+                                    0);
+
     for (unsigned i = 0; i < actors.count(); ++i)
     {
         Actor* pActor = actors[i];
@@ -89,9 +93,11 @@ bool ActorContainer::isColidingWithOthers(Actor* actor, Vector3D& offset)
             continue;
         }
 
-        if (CollisionCircleCircle(actor->pos.x + offset.x, actor->pos.y + offset.y, actor->collisionBodyRadius,
-                                  actors[i]->pos.x, 
-                                  actors[i]->pos.y, 
+        if (CollisionCircleCircle(newPosition.x,
+                                  newPosition.y,
+                                  actor->collisionBodyRadius,
+                                  actors[i]->pos.x + actors[i]->collisionBodyOffset.x, 
+                                  actors[i]->pos.y + actors[i]->collisionBodyOffset.y, 
                                   actors[i]->collisionBodyRadius))
         {
             return true;

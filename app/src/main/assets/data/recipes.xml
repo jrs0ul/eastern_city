@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Recipes>
     <Recipe resultItemIndex="2">
-        <Ingredient itemIndex="4" count="5"/>
+        <Ingredient itemIndex="4" count="4"/>
         <Ingredient itemIndex="5" count="1"/>
     </Recipe>
     <Recipe resultItemIndex="9">

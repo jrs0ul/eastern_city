@@ -42,6 +42,11 @@ add_library(game SHARED
              src/main/cpp/GameStuff/GameMap.cpp
              src/main/cpp/GameStuff/GameMapGraph.cpp
              src/main/cpp/GameStuff/ItemInstance.cpp
+             src/main/cpp/GameStuff/ItemContainer.cpp
+             src/main/cpp/GameStuff/Actor.cpp
+             src/main/cpp/GameStuff/Rat.cpp
+             src/main/cpp/GameStuff/Ghost.cpp
+             src/main/cpp/GameStuff/ActorContainer.cpp
              src/main/cpp/GameStuff/GlobalItemList.cpp
              src/main/cpp/GameStuff/ItemDatabase.cpp
              src/main/cpp/GameStuff/CraftingRecipes.cpp

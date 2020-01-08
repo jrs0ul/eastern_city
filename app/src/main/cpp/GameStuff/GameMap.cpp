@@ -555,10 +555,13 @@ void GameMap::draw(float posX,
 
     for (unsigned i = 0; i < assets.count(); ++i)
     {
+        COLOR assetColor = (assets[i].colidedWithHero) ? COLOR(2.f, 2.f, 2.f, 1) : COLOR(1, 1, 1, 1);
         pics.draw(pics.findByName(assets[i].name), 
                                   assets[i].pos.x + posX, 
                                   assets[i].pos.y + posY,
-                                  assets[i].spriteIndex);
+                                  assets[i].spriteIndex,
+                                  false,
+                                  1, 1, 0, assetColor, assetColor);
     }
 
     for (unsigned i = 0; i < items.count(); ++i)
@@ -603,7 +606,48 @@ void GameMap::draw(float posX,
 
 }
 
- void GameMap::drawDarknessBorder(float offsetX, float offsetY,
+void GameMap::update(Actor* mainguy, PicsContainer& pics)
+{
+
+
+    for (unsigned i = 0; i < assets.count(); ++i)
+    {
+        Asset* asset = &assets[i];
+
+        if (!asset->interactable)
+        {
+            continue;
+        }
+
+        PicData* data = pics.getInfo(pics.findByName(asset->name));
+
+        int spriteHeight = data->height;
+        int spriteWidth = data->width;
+
+        if (asset->spriteIndex < data->sprites.count())
+        {
+            spriteHeight = data->sprites[asset->spriteIndex].height;
+            spriteWidth = data->sprites[asset->spriteIndex].width;
+        }
+
+        asset->colidedWithHero = false;
+
+        if (CollisionCircleRectangle(mainguy->pos.x + mainguy->collisionBodyOffset.x,
+                                 mainguy->pos.y + mainguy->collisionBodyOffset.y,
+                                 mainguy->collisionBodyRadius * 2.f,
+                                 asset->pos.x,
+                                 asset->pos.y,
+                                 spriteWidth,
+                                 spriteHeight))
+        {
+           
+            asset->colidedWithHero = true;
+        }
+    }
+}
+
+
+void GameMap::drawDarknessBorder(float offsetX, float offsetY,
                                    unsigned screenWidth, unsigned screenHeight,
                                    PicsContainer& pics)
 {
@@ -661,7 +705,7 @@ int GameMap::canTraverse(int x, int y)
         return -1;
     }
 
-    if (x <= 0 || y <= 0)
+    if (x <= -1 || y <= -1)
     {
         return -1;
     }
@@ -673,6 +717,54 @@ int GameMap::canTraverse(int x, int y)
 
 
     return !collision[y * width + x];
+}
+
+
+Vector3D GameMap::getNearestReachableSquare(int dx, int dy)
+{
+    Vector3D dv = Vector3D(dx, dy, 0);
+    DArray<Vector3D> emptySquares;
+    
+    for (unsigned y = 0; y < height; ++y)
+    {
+        for (unsigned x = 0; x < width; ++x)
+        {
+            Vector3D v(x, y, 0);
+            if (canTraverse(x, y))
+            {
+                emptySquares.add(v);
+            }
+        }
+    }
+
+    float smallestDistFromDest = 99999;
+
+    int nearestSquareFromDest = -1;
+
+    for (unsigned i = 0; i < emptySquares.count(); ++i)
+    {
+        Vector3D res = dv - emptySquares[i];
+
+        float distDest = res.length();
+
+        if (distDest < smallestDistFromDest)
+        {
+            smallestDistFromDest = distDest;
+            nearestSquareFromDest = i;
+        }
+    }
+
+    Vector3D result(-1, -1, 0);
+
+    if (nearestSquareFromDest != -1)
+    {
+        result = emptySquares[nearestSquareFromDest];
+    }
+
+    emptySquares.destroy();
+
+    return result;
+
 }
 
 Asset* GameMap::getClickedAsset(float mapOffsetX, float mapOffsetY,
@@ -715,13 +807,7 @@ Asset* GameMap::getClickedAsset(float mapOffsetX, float mapOffsetY,
             {
                 if (returnIfColidesWithHero)
                 {
-                    if (CollisionCircleRectangle(heroX, 
-                                                 heroY, 
-                                                 25, 
-                                                 asset->pos.x, 
-                                                 asset->pos.y,
-                                                 spriteWidth, 
-                                                 spriteHeight))
+                    if (asset->colidedWithHero)
                     {
                         return asset;
                     }

@@ -24,7 +24,7 @@ public:
     void              addItem(Vector3D pos, ItemInstance* item);
     void              addItemContainer(unsigned assetIndex, ItemContainer& container);
     void              addEnemyPosition(Vector3D pos);
-    void              addAsset(Vector3D pos, const char* name, unsigned spriteIndex);
+    void              addAsset(Vector3D pos, const char* name, unsigned spriteIndex, bool interactable);
     void              addCollision(unsigned x, unsigned y, bool isColliding);
     void              addRegion(Vector3D pos, Vector3D size);
     void              addEntry(Vector3D pos);

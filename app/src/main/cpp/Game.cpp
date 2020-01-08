@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cwchar>
 #include "Game.h"
+#include "GameStuff/Ghost.h"
 
 
 const int boardX = 16;
@@ -93,6 +94,8 @@ void Game::init(){
 
     colorShader.use();
 
+
+
     glEnable(GL_TEXTURE_2D);
     glDepthFunc(GL_LEQUAL);
 
@@ -108,7 +111,8 @@ void Game::init(){
 
     //glAlphaFunc(GL_GREATER, 0.5);
     //glEnable(GL_ALPHA_TEST);
-    
+
+
 
     MatrixOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, -400, 400, OrthoMatrix);
 
@@ -118,15 +122,25 @@ void Game::init(){
     
     glGenTextures(1, &fboTexture);
     glBindTexture(GL_TEXTURE_2D, fboTexture);
-  
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     //------------------
+
+#ifdef __ANDROID__
+    int glData[4];
+    glGetIntegerv(GL_VIEWPORT, glData);
+
+    if (glData)
+    {
+        LOGI("%d %d\n", glData[2], glData[3]);
+        ScreenWidth = glData[2];
+        ScreenHeight = glData[3];
+    }
+#endif
+
 
 
 #ifndef __ANDROID__
@@ -346,14 +360,15 @@ void Game::renderGame()
         DrawDebugText();
     }
     
-    sprintf(buf, "Satiation:%d", dude.getSatiation());
-    WriteText(500, 2, pics, 0, buf, 0.8f, 0.8f);
-    sprintf(buf, "Health:%d", dude.getHealth());
-    WriteText(500, 20, pics, 0, buf, 0.8f, 0.8f);
-    sprintf(buf, "Warmth:%d", dude.getWarmth());
-    WriteText(500, 38, pics, 0, buf, 0.8f, 0.8f);
-    sprintf(buf, "Energy:%d", dude.getWakefullness());
-    WriteText(500, 56, pics, 0, buf, 0.8f, 0.8f);
+    int stats[] = {dude.getHealth(), dude.getSatiation(), dude.getWarmth(), dude.getWakefullness()};
+
+    for (int i = 0; i < 4; ++i)
+    {
+        pics.draw(19, 270 + i * 68, 2, i);
+        sprintf(buf, "%d", stats[i]);
+        COLOR statColor = (stats[i] < 20) ? COLOR(1,0,0,1) : COLOR(1,1,1,1);
+        WriteText(270 + i * 68 + 32, 16, pics, 0, buf, 0.8f, 0.8f, statColor, statColor);
+    }
 
     sprintf(buf, "Temperature:%d", map.getTemperature());
     WriteText(700, 2, pics, 0, buf, 0.8f, 0.8f);
@@ -402,7 +417,7 @@ void Game::renderDefeat()
 void Game::gameLogic()
 {
     centerCamera(dude.pos.x, dude.pos.y);
-    darkness = (worldTime >= 60 && worldTime < 200) ? 1.f - sinf(((worldTime - 60) / 140.f) * M_PI) : 1.f;
+    calcDarknessValue();
 
     //---
     if (stateInTheGame != GAMEPLAY)
@@ -445,7 +460,18 @@ void Game::gameLogic()
                     stateInTheGame = FADEIN;
                     printf("WELCOME TO THE WORLD OF TOMOROW!\n");
                     updateWorld(60);
+                    calcDarknessValue();
                     dude.stopSleep();
+
+                    if (darkness > 0.5f)
+                    {
+                        Ghost* ghost;
+                        ghost = new Ghost();
+                        Vector3D pos = Vector3D((map.getWidth() * 32 / 2), 240, 0);
+                        ghost->init(pos);
+                        actors.addActor(ghost);
+                    }
+
                     return;
                 }
             }
@@ -503,8 +529,8 @@ void Game::gameLogic()
             }
             else if (ass->isBed)
             {
-                dude.pos.x = ass->pos.x + 112;
-                dude.pos.y = ass->pos.y + 67;
+                dude.pos.x = ass->pos.x + 113.f;
+                dude.pos.y = ass->pos.y + 67.f;
                 dude.isFlipedX = false;
                 dude.goToSleep();
             }
@@ -575,6 +601,18 @@ void Game::gameLogic()
         _Point dest;
         dest.x = (touches.up[0].x - mapPosX) / 32;
         dest.y = (touches.up[0].y - mapPosY) / 32;
+
+        if (!map.canTraverse(dest.x, dest.y))
+        {  
+            Vector3D res = map.getNearestReachableSquare(dest.x, dest.y);
+
+            if (res.x > -1 && res.y > -1)
+            {
+                dest.x = (int)res.x;
+                dest.y = (int)res.y;
+            }
+        }
+        
         path.destroy();
         path.findPath(src, dest, map.getCollisionData(), map.getWidth(), map.getHeight());
         dude.resetPathIndex();
@@ -642,8 +680,15 @@ void Game::updateWorld(float deltaT)
                 Rat* rat = static_cast<Rat*>(actr);
                 rat->update(deltaT, map, dude, actors);
             }
+            else if (actr->getType() == 2)
+            {
+                Ghost* ghost = static_cast<Ghost*>(actr);
+                ghost->update(deltaT, map, dude, actors);
+            }
         }
     }
+
+    map.update(&dude, pics);
 
 }
 
@@ -762,8 +807,6 @@ void Game::drawActiveContainer()
 
 void Game::drawDarkness()
 {
-
-
     if (darkness <= 0.f)
     {
         return;
@@ -774,7 +817,10 @@ void Game::drawDarkness()
 
 
     //draw to FBO
+
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    //GLenum res = glCheckFramebufferStatus(fbo);
     glViewport(0,0,256,256);
     glClear(GL_COLOR_BUFFER_BIT);
     pics.draw(11,
@@ -869,8 +915,13 @@ void Game::drawDarkness()
 
     pics.drawVA(verts, uvs, colors, 12, 12, &darknessShader);
     glActiveTexture(GL_TEXTURE0);
+    //pics.draw(fboTextureIndex, 0, 0, 0);
 }
 
+void Game::calcDarknessValue()
+{
+    darkness = (worldTime >= 60 && worldTime < 200) ? 1.f - sinf(((worldTime - 60) / 140.f) * M_PI) : 1.f;
+}
 
 void Game::centerCamera(float x, float y)
 {
@@ -926,9 +977,20 @@ void Game::createEnemies()
     {
         Rat* rat;
         Vector3D* ratPos = currentRoom->getEnemyPosition(i);
-        rat = new Rat();
-        rat->init(*ratPos);
-        actors.addActor(rat);
+
+        //if (i < currentRoom->getEnemyCount() - 1)
+        {
+            rat = new Rat();
+            rat->init(*ratPos);
+            actors.addActor(rat);
+        }
+        /*else
+        {
+            Ghost* ghost;
+            ghost = new Ghost();
+            ghost->init(*ratPos);
+            actors.addActor(ghost);
+        }*/
     }
 
     actors.addActor(&dude);

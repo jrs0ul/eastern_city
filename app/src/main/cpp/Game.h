@@ -184,6 +184,7 @@ private:
 
     void drawActiveContainer();
     void drawDarkness();
+    void calcDarknessValue(); 
 
     void centerCamera(float x, float y);
     void createEnemies();
