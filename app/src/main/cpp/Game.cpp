@@ -1,9 +1,8 @@
 #include <vector>
-#include <algorithm>
 #include <cwchar>
+#include <cmath>
 #include "Game.h"
 #include "GameStuff/Ghost.h"
-
 
 const int boardX = 16;
 const int boardY = 445;
@@ -171,10 +170,6 @@ void Game::init(){
     useAccel = false;
 
     srand((unsigned int)time(0));
-
-
-
-
 
     printf("game mode:%d\n", gameMode);
     if (gameMode == EDITING)
@@ -1010,14 +1005,27 @@ void Game::drawDarkness()
     };
 
 
-    glActiveTexture(GL_TEXTURE0 + 0); 
+#ifdef WIN32
+    wglActiveTexture(GL_TEXTURE0 + 0);
+#else   
+    glActiveTexture(GL_TEXTURE0 + 0);
+#endif
     glBindTexture(GL_TEXTURE_2D, pics.getname(12));
 
-    glActiveTexture(GL_TEXTURE0 + 1); 
+#ifdef WIN32
+    wglActiveTexture(GL_TEXTURE0 + 1);
+#else 
+    glActiveTexture(GL_TEXTURE0 + 1);
+#endif
+
     glBindTexture(GL_TEXTURE_2D, pics.getname(fboTextureIndex)); 
 
     pics.drawVA(verts, uvs, colors, 12, 12, &darknessShader);
+#ifdef WIN32
+    wglActiveTexture(GL_TEXTURE0);
+#else
     glActiveTexture(GL_TEXTURE0);
+#endif
     //pics.draw(fboTextureIndex, 0, 0, 0);
 }
 

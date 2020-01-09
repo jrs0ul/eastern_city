@@ -25,7 +25,6 @@ code = [
         "app/src/main/cpp/Usefull.cpp",
         "app/src/main/cpp/SDLVideo.cpp",
         "app/src/main/cpp/Extensions.cpp",
-        "app/src/main/cpp/rm2.cpp",
         "app/src/main/cpp/gui/OnScreenBoard.cpp",
         "app/src/main/cpp/audio/OggStream.cpp",
         "app/src/main/cpp/audio/SoundSystem.cpp",
@@ -49,8 +48,10 @@ code = [
 #Windblows
 if sys.platform == 'win32':
     Tool('mingw')(env)
-    env.Append(LIBS = ['mingw32','SDLmain', 'SDL', 'OpenGL32',
-                       'openal32', 'vorbisfile', 'vorbis', 'ogg'])
+    env.Append(LIBS = ['mingw32','SDL2main', 'SDL2', 'OpenGL32',
+		        'imagehlp', 'dxguid', 'dxerr8',
+			'oleaut32', 'shell32', 'version', 'uuid',
+                       'openal32', 'vorbisfile', 'ole32', 'imm32', 'user32', 'gdi32', 'winmm', 'dinput8', 'vorbis', 'ogg'])
 else: #Mac OS X
     if sys.platform == 'darwin':
         env['FRAMEWORKS'] = ['Cocoa', 'SDL', 'OPENGL', 'OpenAL','vorbis', 'Ogg']

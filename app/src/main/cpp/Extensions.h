@@ -9,8 +9,8 @@
         #include <SDL.h>
         #include <SDL_opengl.h>
     #else
-        #include <SDL/SDL.h>
-        #include <SDL/SDL_opengl.h>
+        #include <SDL2/SDL.h>
+        #include <SDL2/SDL_opengl.h>
     #endif
 #else
     #include <SDL2/SDL.h>
@@ -56,13 +56,21 @@ extern PFNGLUNIFORMMATRIX4FVPROC            glUniformMatrix4fv;
 
 extern PFNGLGETINFOLOGARBPROC               glGetInfoLogARB;
 //------------------FBO--------------------------------
-extern PFNGLGENFRAMEBUFFERSPROC             glGenFramebuffers;
-extern PFNGLGENRENDERBUFFERSEXTPROC         glGenRenderbuffersEXT;
+#ifdef WIN32
+extern PFNGLDELETEFRAMEBUFFERSEXTPROC       glDeleteFramebuffers;
+extern PFNGLBINDFRAMEBUFFEREXTPROC          glBindFramebuffer;
+extern PFNGLGENFRAMEBUFFERSEXTPROC          glGenFramebuffers;
+extern PFNGLFRAMEBUFFERTEXTURE2DEXTPROC        glFramebufferTexture2D;
+#else
 extern PFNGLDELETEFRAMEBUFFERSPROC          glDeleteFramebuffers;
 extern PFNGLBINDFRAMEBUFFERPROC             glBindFramebuffer;
+extern PFNGLGENFRAMEBUFFERSPROC             glGenFramebuffers;
+extern PFNGLFRAMEBUFFERTEXTURE2DPROC        glFramebufferTexture2D;
+#endif
+
+extern PFNGLGENRENDERBUFFERSEXTPROC         glGenRenderbuffersEXT;
 extern PFNGLBINDRENDERBUFFEREXTPROC         glBindRenderbufferEXT;
 extern PFNGLRENDERBUFFERSTORAGEEXTPROC      glRenderbufferStorageEXT;
-extern PFNGLFRAMEBUFFERTEXTURE2DPROC        glFramebufferTexture2D;
 extern PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC   glCheckFramebufferStatusEXT;
 extern PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC  glFramebufferRenderbufferEXT;
 extern PFNGLDELETERENDERBUFFERSEXTPROC      glDeleteRenderbuffersEXT;
@@ -70,7 +78,7 @@ extern PFNGLDELETERENDERBUFFERSEXTPROC      glDeleteRenderbuffersEXT;
 #ifndef __APPLE__
 //-----------------Multitexturing------------------------------------
 #ifdef WIN32 
-extern PFNGLACTIVETEXTUREPROC            glActiveTexture;
+extern PFNGLACTIVETEXTUREPROC            wglActiveTexture;
 #endif
 #endif
 extern const GLubyte * GLExtensionString;

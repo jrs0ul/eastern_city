@@ -58,12 +58,19 @@ PFNGLUNIFORMMATRIX4FVPROC            glUniformMatrix4fv = 0;
 #endif
 PFNGLGETINFOLOGARBPROC               glGetInfoLogARB = 0;
 
+#ifdef WIN32
+PFNGLGENFRAMEBUFFERSEXTPROC          glGenFramebuffers = 0;
+PFNGLDELETEFRAMEBUFFERSEXTPROC       glDeleteFramebuffers = 0;
+PFNGLBINDFRAMEBUFFEREXTPROC          glBindFramebuffer = 0;
+PFNGLFRAMEBUFFERTEXTURE2DEXTPROC     glFramebufferTexture2D = 0;
+#else
 PFNGLGENFRAMEBUFFERSPROC             glGenFramebuffers = 0;
-PFNGLGENRENDERBUFFERSEXTPROC         glGenRenderbuffersEXT = 0;
 PFNGLDELETEFRAMEBUFFERSPROC          glDeleteFramebuffers = 0;
 PFNGLBINDFRAMEBUFFERPROC             glBindFramebuffer = 0;
-PFNGLBINDRENDERBUFFEREXTPROC         glBindRenderbufferEXT = 0;
 PFNGLFRAMEBUFFERTEXTURE2DPROC        glFramebufferTexture2D = 0;
+#endif
+PFNGLGENRENDERBUFFERSEXTPROC         glGenRenderbuffersEXT = 0;
+PFNGLBINDRENDERBUFFEREXTPROC         glBindRenderbufferEXT = 0;
 PFNGLRENDERBUFFERSTORAGEEXTPROC      glRenderbufferStorageEXT = 0;
 PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC   glCheckFramebufferStatusEXT = 0;
 PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC  glFramebufferRenderbufferEXT = 0;
@@ -73,7 +80,7 @@ PFNGLBLENDFUNCSEPARATEPROC           glBlendFuncSeparate = 0;
 
 #ifndef __APPLE__
 #ifdef WIN32 
-PFNGLACTIVETEXTUREPROC               glActiveTexture = 0;
+PFNGLACTIVETEXTUREPROC               wglActiveTexture = 0;
 #endif
 #endif
 
@@ -143,21 +150,28 @@ void LoadExtensions() {
 #endif
     glGetInfoLogARB = (PFNGLGETINFOLOGARBPROC)SDL_GL_GetProcAddress("glGetInfoLogARB");
     //--------------------------------------------
-    glGenFramebuffers        = (PFNGLGENFRAMEBUFFERSPROC)SDL_GL_GetProcAddress("glGenFramebuffers");
-    glGenRenderbuffersEXT =(PFNGLGENRENDERBUFFERSEXTPROC)SDL_GL_GetProcAddress("glGenRenderbuffersEXT");
-    glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)SDL_GL_GetProcAddress("glDeleteFramebuffers");
-    glBindFramebuffer        = (PFNGLBINDFRAMEBUFFERPROC)SDL_GL_GetProcAddress("glBindFramebuffer");
-    glBindRenderbufferEXT =  (PFNGLBINDRENDERBUFFEREXTPROC)SDL_GL_GetProcAddress("glBindRenderbufferEXT");
-    glFramebufferTexture2D   = (PFNGLFRAMEBUFFERTEXTURE2DPROC)SDL_GL_GetProcAddress("glFramebufferTexture2D");
-    glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC)SDL_GL_GetProcAddress("glRenderbufferStorageEXT");
-    glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)SDL_GL_GetProcAddress("glCheckFramebufferStatusEXT");
+    #ifdef WIN32
+    glGenFramebuffers            = (PFNGLGENFRAMEBUFFERSEXTPROC)SDL_GL_GetProcAddress("glGenFramebuffers");
+    glDeleteFramebuffers         = (PFNGLDELETEFRAMEBUFFERSEXTPROC)SDL_GL_GetProcAddress("glDeleteFramebuffers");
+    glBindFramebuffer            = (PFNGLBINDFRAMEBUFFEREXTPROC)SDL_GL_GetProcAddress("glBindFramebuffer");
+    glFramebufferTexture2D       = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)SDL_GL_GetProcAddress("glFramebufferTexture2D");
+    #else   
+    glGenFramebuffers            = (PFNGLGENFRAMEBUFFERSPROC)SDL_GL_GetProcAddress("glGenFramebuffers");
+    glDeleteFramebuffers         = (PFNGLDELETEFRAMEBUFFERSPROC)SDL_GL_GetProcAddress("glDeleteFramebuffers");
+    glBindFramebuffer            = (PFNGLBINDFRAMEBUFFERPROC)SDL_GL_GetProcAddress("glBindFramebuffer");
+    glFramebufferTexture2D       = (PFNGLFRAMEBUFFERTEXTURE2DPROC)SDL_GL_GetProcAddress("glFramebufferTexture2D");
+    #endif
+    glGenRenderbuffersEXT        = (PFNGLGENRENDERBUFFERSEXTPROC)SDL_GL_GetProcAddress("glGenRenderbuffersEXT");
+    glBindRenderbufferEXT        = (PFNGLBINDRENDERBUFFEREXTPROC)SDL_GL_GetProcAddress("glBindRenderbufferEXT");
+    glRenderbufferStorageEXT     = (PFNGLRENDERBUFFERSTORAGEEXTPROC)SDL_GL_GetProcAddress("glRenderbufferStorageEXT");
+    glCheckFramebufferStatusEXT  = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)SDL_GL_GetProcAddress("glCheckFramebufferStatusEXT");
     glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)SDL_GL_GetProcAddress("glFramebufferRenderbufferEXT");
-    glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC)SDL_GL_GetProcAddress("glDeleteRenderbuffersEXT");
+    glDeleteRenderbuffersEXT     = (PFNGLDELETERENDERBUFFERSEXTPROC)SDL_GL_GetProcAddress("glDeleteRenderbuffersEXT");
 
 #ifndef __APPLE__
     //--------------------------------------------
     #ifdef WIN32
-    glActiveTexture = (PFNGLACTIVETEXTUREPROC)SDL_GL_GetProcAddress("glActiveTexture");
+    wglActiveTexture = (PFNGLACTIVETEXTUREPROC)SDL_GL_GetProcAddress("glActiveTexture");
     #endif
   #endif
 }
@@ -203,7 +217,7 @@ void UnloadExtensions() {
 
 #ifndef __APPLE__
 #ifdef WIN32 
-    glActiveTexture = 0;
+    wglActiveTexture = 0;
 #endif
 #endif
 }

@@ -12,7 +12,7 @@
     #ifdef _MSC_VER
         #include <SDL_opengl.h>
     #else
-        #include <SDL/SDL_opengl.h>
+        #include <SDL2/SDL_opengl.h>
     #endif
 #else
     #ifdef __APPLE__    
