@@ -341,19 +341,8 @@ void Game::renderGame()
 
 
     char buf[256];
-    WriteText(10, 10, pics, 0, "Craft:", 0.8f, 0.8f);
-
-    for (unsigned i = 0; i < recipes.getRecipeCount(); ++i)
-    {
-
-        Recipe* recipe = recipes.getRecipe(i);
-
-        pics.draw(2, 10, 32 + i * 34, 0, false, 0.25f, 0.5);
-        pics.draw(2, 10 + 16, 32 + i * 34, 1, false, 0.25f, 0.5);
-
-        pics.draw(4, 10, 32 + i * 34, recipe->indexOfItemToMake);
-        
-    }
+  
+    drawRecipes();
 
     if (DebugMode)
     {
@@ -511,26 +500,54 @@ void Game::gameLogic()
 
     if (touches.up.count())
     {
-        //----asset interactions
-        Asset * ass = map.getClickedAsset(mapPosX, mapPosY, 
-                                          pics, 
-                                          touches.up[0].x, touches.up[1].y,
-                                          true,
-                                          dude.pos.x, dude.pos.y + 39);
+        //----inanimate objects interactions
+        Furniture * fur = map.getClickedFurniture(mapPosX, mapPosY, 
+                                              pics, 
+                                              touches.up[0].x, touches.up[1].y,
+                                              true,
+                                              dude.pos.x, dude.pos.y + 39);
 
-        if (ass)
+        if (fur)
         {
-            if (ass->containerIndex != -1 && (!activeContainer || !activeContainer->isActive()))
+            if (dude.isWeaponEquiped() == 19)
             {
-                activeContainer = map.getItemContainer(ass->containerIndex);
+                fur->removed = true;
+                Recipe* r = recipes.getRecipeByFurnitureIndex(fur->spriteIndex);
+                printf("furniture:%d was destroyed %x\n", fur->spriteIndex, r);
+
+                if (r)
+                {
+                    for (unsigned i = 0; i < r->ingredients.count(); ++i)
+                    {
+                        printf("items: %d\n", r->ingredients[i].itemIndex);
+
+                        for (int j = 0; j < r->ingredients[i].count; ++j)
+                        {
+                            currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
+                                        fur->pos.y + fur->collisionBodySize.y, 
+                                        0),
+                                    r->ingredients[i].itemIndex);
+                            map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+                        }
+
+                    }
+
+                }
+
+                return;
+            }
+
+            if (fur->itemContainerIndex != -1 && (!activeContainer || !activeContainer->isActive()))
+            {
+                activeContainer = map.getItemContainer(fur->itemContainerIndex);
                 activeContainer->setPosition(Vector3D(touches.up[0].x, touches.up[1].y, 0));
                 activeContainer->setActive(true);
                 return;
             }
-            else if (ass->isBed)
+            else if (fur->isBed)
             {
-                dude.pos.x = ass->pos.x + 113.f;
-                dude.pos.y = ass->pos.y + 67.f;
+                dude.pos.x = fur->pos.x + 113.f;
+                dude.pos.y = fur->pos.y + 67.f;
                 dude.isFlipedX = false;
                 dude.goToSleep();
             }
@@ -583,6 +600,24 @@ void Game::gameLogic()
             itemSelected = false;
             return;
         }
+
+
+        if (recipeClicked != -1)
+        {
+            if (craftRecipeButton.isPointerOnTop(touches.up[0].x, touches.up[0].y))
+            {
+                Recipe* recipe = recipes.getRecipe(recipeClicked);
+                recipeClicked = -1;
+                dude.craftItem(recipe, itemDB);
+                return;
+            }
+            else
+            {
+                recipeClicked = -1;
+                return;
+            }
+        }
+
         
         if (handleCrafting(touches.up[0].x, touches.up[0].y))
         {
@@ -777,6 +812,7 @@ void Game::titleLogic()
         clickOnItem = -1;
         stateInTheGame = FADEIN;
         fadeProgress = 0.f;
+        recipeClicked = -1;
     }
 }
 
@@ -802,6 +838,73 @@ void Game::drawActiveContainer()
     }
 
     activeContainer->draw(pics, itemDB, selectedItem);
+
+}
+
+void Game::drawRecipes()
+{
+    char buf[128];
+    WriteText(10, 10, pics, 0, "Craft:", 0.8f, 0.8f);
+
+
+    int recipeIndex = 0;
+
+    for (unsigned i = 0; i < recipes.getRecipeCount(); ++i)
+    {
+
+        Recipe* recipe = recipes.getRecipe(i);
+
+        if (!recipe->craftable)
+        {
+            continue;
+        }
+
+        pics.draw(2, 10, 32 + recipeIndex * 34, 0, false, 0.25f, 0.5);
+        pics.draw(2, 10 + 16, 32 + recipeIndex * 34, 1, false, 0.25f, 0.5);
+
+        pics.draw(4, 10, 32 + recipeIndex * 34, recipe->indexOfItemToMake);
+
+
+        if (recipeClicked != -1 && recipeIndex == recipeClicked)
+        {
+            const float panelWidth = recipe->ingredients.count() * 34 + 64;
+            const float halfPanelWidth = panelWidth / 2.f;
+
+            pics.draw(2, 
+                      42,
+                      32 + recipeIndex * 34 - 17,
+                      0, false, halfPanelWidth / 64.f , 1.f, 0, COLOR(1,1,1, 0.5));
+            pics.draw(2, 
+                      42 + halfPanelWidth,
+                      32 + recipeIndex * 34 - 17,
+                      1,
+                      false, 
+                      halfPanelWidth / 64.f, 
+                      1.f, 0, COLOR(1,1,1, 0.5));
+
+            for (unsigned j = 0; j < recipe->ingredients.count(); ++j)
+            {
+                pics.draw(4,
+                          10 + 34 + j * 32,
+                          32 + recipeIndex * 34 + 8 - 17,
+                          recipe->ingredients[j].itemIndex);
+                sprintf(buf, "%d", recipe->ingredients[j].count);
+
+                bool haveEnough = (dude.getItemCountByTypeIndex(recipe->ingredients[j].itemIndex) >= recipe->ingredients[j].count);
+
+                COLOR countColor = (haveEnough) ? COLOR(1, 1, 1, 1) : COLOR(1, 0, 0, 1);
+
+                WriteShadedText(10 + 34 + j * 32 + 8,
+                          32 + recipeIndex * 34 + 32 + 8 - 17,
+                          pics, 0, buf, 0.8f, 0.8f, countColor, countColor);
+            }
+
+            craftRecipeButton.drawTextnPicture(pics, 20, 0, 0, "Make");
+        }
+
+
+        ++recipeIndex;
+    }
 
 }
 
@@ -1053,10 +1156,9 @@ bool Game::handleCrafting(float x, float y)
         if (x > 10 && x < 42 &&
                 y > 32 + i * 34 && y < 64 + i * 34)
         {
-            printf("let's craft some shit\n");
-
-            Recipe* recipe = recipes.getRecipe(i);
-            dude.craftItem(recipe, itemDB);
+            recipeClicked = i;
+            craftRecipeButton.init(recipes.getRecipe(i)->ingredients.count() * 32 + 10 + 4 + 32,
+                                   i * 34 + 32 + 7 - 17 , 50, 50);
             return true;
         }
     }

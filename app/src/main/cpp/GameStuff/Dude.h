@@ -40,6 +40,7 @@ public:
     int           isClothesEquiped();
     int           isWeaponEquiped();
     int           getAmmoInWeaponCount();
+    int           getItemCountByTypeIndex(int index);
 
     unsigned      getItemCount(){return itemBag.getItemCount();}
     ItemInstance* getItem(unsigned index);

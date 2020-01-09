@@ -34,14 +34,14 @@ void Room::addItem(Vector3D pos, ItemInstance* item)
     items.add(newItem);
 }
 
-void Room::addItemContainer(unsigned assetIndex, ItemContainer& container)
+void Room::addItemContainer(unsigned furnitureIndex, ItemContainer& container)
 {
-    if (assetIndex > assets.count())
+    if (furnitureIndex > furniture.count())
     {
         return;
     }
 
-    assets[assetIndex].containerIndex = itemContainers.count();
+    furniture[furnitureIndex].itemContainerIndex = itemContainers.count();
     itemContainers.add(container);
 }
 
@@ -50,15 +50,19 @@ void Room::addEnemyPosition(Vector3D pos)
     enemies.add(pos);
 }
 
-void Room::addAsset(Vector3D pos, const char* name, unsigned spriteIndex, bool interactable)
+void Room::addAsset(Vector3D pos, const char* name, unsigned spriteIndex)
 {
     Asset ass;
     ass.pos = pos;
     strcpy(ass.name, name);
     ass.spriteIndex = spriteIndex;
-    ass.containerIndex = -1;
-    ass.interactable = interactable;
     assets.add(ass);
+}
+
+void Room::addFurniture(Furniture* f)
+{
+    Furniture fur = *f;
+    furniture.add(fur);
 }
 
 void Room::addCollision(unsigned x, unsigned y, bool isColliding)
@@ -114,6 +118,11 @@ unsigned Room::getChildRoomCount()
 unsigned Room::getAssetCount()
 {
     return assets.count();
+}
+
+unsigned Room::getFurnitureCount()
+{
+    return furniture.count();
 }
 
 unsigned Room::getAdditionalCollisionCount()
@@ -191,6 +200,16 @@ Asset* Room::getAsset(unsigned index)
     if (index < assets.count())
     {
         return &assets[index];
+    }
+
+    return nullptr;
+}
+
+Furniture* Room::getFurniture(unsigned index)
+{
+    if (index < furniture.count())
+    {
+        return &furniture[index];
     }
 
     return nullptr;
@@ -293,7 +312,14 @@ void GameMapGraph::init()
     root->addItem(Vector3D(300, 260, 0), rand() % 2);
 
     addCupboard(root);
-    root->addAsset(Vector3D(480, 180, 0), "pics/test.tga", 1, true);
+    //---
+    Furniture ward;
+    ward.pictureIndex = 5;
+    ward.spriteIndex = 1;
+    ward.pos = Vector3D(480, 180, 0);
+    ward.collisionBodySize = Vector3D(78, 200, 0);
+
+    root->addFurniture(&ward);
 
     ItemContainer wardrobe;
     wardrobe.init(10, 3);
@@ -307,7 +333,9 @@ void GameMapGraph::init()
     wardrobe.addItem(12);
     wardrobe.addItem(13);
     wardrobe.addItem(2);
+    wardrobe.addItem(19);
     root->addItemContainer(1, wardrobe);
+    //---
 
     addCouch(root, 110, 200);
     
@@ -379,7 +407,7 @@ Room* GameMapGraph::addFloors(Room* mainfloor, unsigned entranceIndex)
         }
 
         currentFloor->addChildRoom("data/stairwell2.xml", 0, 1);
-        currentFloor->addAsset(Vector3D(0, 0, 0), "pics/test.tga", 3, false); //stairs
+        currentFloor->addAsset(Vector3D(0, 0, 0), "pics/test.tga", 3); //stairs
 
 
         addDoorway(currentFloor, 288, 98, 2, 0, 2, 0, nullptr, 2);
@@ -412,7 +440,7 @@ void GameMapGraph::addDoorway(Room* floor,
     const unsigned x = rx / 32;
     const unsigned y = ry / 32;
 
-    floor->addAsset(Vector3D(rx, ry, 0), "pics/test.tga", assetIndex, false);
+    floor->addAsset(Vector3D(rx, ry, 0), "pics/test.tga", assetIndex);
 
     for (int i = 0; i < 3; ++i)
     {
@@ -484,17 +512,19 @@ void GameMapGraph::generateRoom(Room* floor,
 
     if (!isLeft)
     {
-        addCouch(genericRoom, 30, 240);
+        addCouch(genericRoom, 20, 264);
     }
 
 }
 
 void GameMapGraph::addFridge(Room* room)
 {
-    room->addAsset(Vector3D(472, 235, 0), "pics/test.tga", 9, true);
-    room->addCollision(15, 200 / 32 + 4, true);
-    room->addCollision(16, 200 / 32 + 4, true);
-    room->addCollision(15, 200 / 32 + 3, true);
+    Furniture fridge;
+    fridge.pos = Vector3D(472, 235, 0);
+    fridge.collisionBodySize = Vector3D(108, 146, 0);
+    fridge.spriteIndex = 9;
+    fridge.pictureIndex = 5;
+    room->addFurniture(&fridge);
     ItemContainer container;
     container.init(6, 3);
     int foods[] = {1, 0, 10, 14, 15};
@@ -504,14 +534,17 @@ void GameMapGraph::addFridge(Room* room)
         container.addItem(foods[rand() % 5]);
     }
 
-    room->addItemContainer(room->getAssetCount() - 1, container);
+    room->addItemContainer(room->getFurnitureCount() - 1, container);
 }
 
 void GameMapGraph::addTvCupboard(Room* room)
 {
-    room->addAsset(Vector3D(135, 200, 0), "pics/test.tga", 10, true);
-    room->addCollision(5, 200 / 32 + 2, true);
-    room->addCollision(6, 200 / 32 + 2, true);
+    Furniture tvCupboard;
+    tvCupboard.pos = Vector3D(135, 200, 0);
+    tvCupboard.collisionBodySize = Vector3D(101, 118, 0);
+    tvCupboard.pictureIndex = 5;
+    tvCupboard.spriteIndex = 10;
+    room->addFurniture(&tvCupboard);
     ItemContainer container;
     container.init(3, 1);
 
@@ -522,15 +555,17 @@ void GameMapGraph::addTvCupboard(Room* room)
         container.addItem(junkstuff[rand() % 4]);
     }
 
-    room->addItemContainer(room->getAssetCount() - 1, container);
+    room->addItemContainer(room->getFurnitureCount() - 1, container);
 }
 
 void GameMapGraph::addCupboard(Room* room)
 {
-    room->addAsset(Vector3D(445, 235, 0), "pics/test.tga", 11, true);
-    room->addCollision(14, 200 / 32 + 3, true);
-    room->addCollision(14, 200 / 32 + 2, true);
-    room->addCollision(15, 200 / 32 + 3, true);
+    Furniture cupboard;
+    cupboard.pos = Vector3D(445, 235, 0);
+    cupboard.pictureIndex = 5;
+    cupboard.spriteIndex = 11;
+    cupboard.collisionBodySize = Vector3D(92, 118, 0);
+    room->addFurniture(&cupboard);
     ItemContainer container2;
     container2.init(4, 2);
     
@@ -541,20 +576,18 @@ void GameMapGraph::addCupboard(Room* room)
         container2.addItem(junkstuff[rand() % 4]);
     }
 
-    room->addItemContainer(room->getAssetCount() - 1, container2);
+    room->addItemContainer(room->getFurnitureCount() - 1, container2);
 }
 
 void GameMapGraph::addCouch(Room* room, int x, int y)
 {
-    room->addAsset(Vector3D(x, y, 0), "pics/test.tga", 0, true);
-    Asset* bed = room->getAsset(room->getAssetCount() - 1);
-    bed->isBed = true;
-    room->addCollision((x - 16) / 32 + 3, y / 32 + 2, true);
-    room->addCollision((x - 16) / 32 + 4, y / 32 + 2, true);
-    room->addCollision((x - 16) / 32 + 5, y / 32 + 1, true);
-    room->addCollision((x - 16) / 32 + 1, y / 32 + 3, true);
-    room->addCollision((x - 16) / 32 + 2, y / 32 + 3, true);
-    room->addCollision((x - 16) / 32 + 3, y / 32 + 3, true);
+    Furniture couch;
+    couch.pos = Vector3D(x, y, 0);
+    couch.pictureIndex = 5;
+    couch.spriteIndex = 0;
+    couch.isBed = true;
+    couch.collisionBodySize = Vector3D(150, 126, 0);
+    room->addFurniture(&couch);
 }
 
 void GameMapGraph::destroy()

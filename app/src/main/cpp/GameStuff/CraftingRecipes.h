@@ -17,6 +17,15 @@ struct Recipe
 {
     DArray<Ingredient> ingredients;
     int indexOfItemToMake;
+    int indexOfFurnitureToMake;
+    bool craftable;
+
+    Recipe()
+    : indexOfItemToMake(-1)
+    , indexOfFurnitureToMake(-1)
+    , craftable(false)
+    {
+    }
 };
 
 
@@ -30,6 +39,7 @@ public:
 #endif
     unsigned getRecipeCount();
     Recipe*  getRecipe(unsigned index);
+    Recipe*  getRecipeByFurnitureIndex(unsigned index);
     void     destroy();
 
 private:

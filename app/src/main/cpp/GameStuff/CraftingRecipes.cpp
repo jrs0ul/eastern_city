@@ -37,6 +37,17 @@ void CraftingRecipes::load(const char* filename, AAssetManager* assman)
                     sprintf(buffer, "%ls", at->getValue());
                     recipe.indexOfItemToMake = atoi(buffer);
                 }
+                else if (strcmp(buffer, "craftable") == 0)
+                {
+                    sprintf(buffer, "%ls", at->getValue());
+                    recipe.craftable = atoi(buffer);
+                }
+                else if (strcmp(buffer, "resultFurnitureIndex") == 0)
+                {
+                    sprintf(buffer, "%ls", at->getValue());
+                    recipe.indexOfFurnitureToMake = atoi(buffer);
+                }
+
             }
 
             
@@ -92,6 +103,21 @@ Recipe*  CraftingRecipes::getRecipe(unsigned index)
     if (index < recipes.count())
     {
         return &recipes[index];
+    }
+
+    return nullptr;
+}
+
+Recipe*  CraftingRecipes::getRecipeByFurnitureIndex(unsigned index)
+{
+    for (unsigned i = 0; i < recipes.count(); ++i)
+    {
+        Recipe* r = &recipes[i];
+
+        if (r->indexOfFurnitureToMake == (int)index)
+        {
+            return r;
+        }
     }
 
     return nullptr;

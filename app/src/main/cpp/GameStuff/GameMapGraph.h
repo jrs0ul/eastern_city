@@ -5,6 +5,7 @@
 #include "ItemContainer.h"
 #include "Asset.h"
 #include "Region.h"
+#include "Furniture.h"
 
 struct RoomAndEntry;
 
@@ -22,9 +23,10 @@ public:
     void              addChildRoom(Room* node, unsigned entry, unsigned region);
     void              addItem(Vector3D pos, int index);
     void              addItem(Vector3D pos, ItemInstance* item);
-    void              addItemContainer(unsigned assetIndex, ItemContainer& container);
+    void              addItemContainer(unsigned furnitureIndex, ItemContainer& container);
     void              addEnemyPosition(Vector3D pos);
-    void              addAsset(Vector3D pos, const char* name, unsigned spriteIndex, bool interactable);
+    void              addAsset(Vector3D pos, const char* name, unsigned spriteIndex);
+    void              addFurniture(Furniture* f);
     void              addCollision(unsigned x, unsigned y, bool isColliding);
     void              addRegion(Vector3D pos, Vector3D size);
     void              addEntry(Vector3D pos);
@@ -34,6 +36,7 @@ public:
     unsigned          getEnemyCount();
     unsigned          getChildRoomCount();
     unsigned          getAssetCount();
+    unsigned          getFurnitureCount();
     unsigned          getAdditionalCollisionCount();
     unsigned          getAdditionalRegionsCount();
     unsigned          getAdditionalEntriesCount();
@@ -43,6 +46,7 @@ public:
     RoomAndEntry*     getChildRoom(unsigned index);
     RoomAndEntry*     findChildRoomByRegionIndex(unsigned regionIndex);
     Asset*            getAsset(unsigned index);
+    Furniture*        getFurniture(unsigned index);
     CollisionTile*    getAdditionalCollisionTile(unsigned index);
     Region*           getAdditionalRegion(unsigned index);
     Vector3D*         getAdditionalEntry(unsigned index);
@@ -58,6 +62,7 @@ private:
     DArray<ItemInstance>   items;
     DArray<Vector3D>       enemies;
     DArray<Asset>          assets;
+    DArray<Furniture>      furniture;
     DArray<CollisionTile>  additionalCollision;
     DArray<Region>         additionalRegions;
     DArray<Vector3D>       additionalEntries;

@@ -1,15 +1,56 @@
 <?xml version="1.0"?>
 <Recipes>
-    <Recipe resultItemIndex="2">
-        <Ingredient itemIndex="4" count="4"/>
-        <Ingredient itemIndex="5" count="1"/>
+    <Recipe resultItemIndex="19" craftable="1">
+        <Ingredient itemIndex="20" count="2"/>
+        <Ingredient itemIndex="6" count="1"/>
     </Recipe>
-    <Recipe resultItemIndex="9">
+    <Recipe resultItemIndex="9" craftable="1">
         <Ingredient itemIndex="6" count="3"/>
         <Ingredient itemIndex="7" count="2"/>
     </Recipe>
-    <Recipe resultItemIndex="3">
+    <Recipe resultItemIndex="16" craftable="1">
+        <Ingredient itemIndex="4" count="3"/>
+        <Ingredient itemIndex="5" count="1"/>
+    </Recipe>
+    <Recipe resultItemIndex="2" craftable="1">
+        <Ingredient itemIndex="4" count="4"/>
+        <Ingredient itemIndex="5" count="1"/>
+        <Ingredient itemIndex="17" count="2"/>
+    </Recipe>
+    <Recipe resultItemIndex="21" craftable="1">
+        <Ingredient itemIndex="4" count="2"/>
+        <Ingredient itemIndex="5" count="1"/>
+        <Ingredient itemIndex="17" count="1"/>
+    </Recipe>
+    <Recipe resultItemIndex="18" craftable="1">
+        <Ingredient itemIndex="17" count="1"/>
+        <Ingredient itemIndex="10" count="1"/>
+    </Recipe>
+    <Recipe resultItemIndex="3" craftable="1">
         <Ingredient itemIndex="10" count="1"/>
         <Ingredient itemIndex="11" count="2"/>
+    </Recipe>
+    <Recipe resultFurnitureIndex="0" craftable="0">
+        <Ingredient itemIndex="6" count="4"/>
+        <Ingredient itemIndex="4" count="3"/>
+        <Ingredient itemIndex="17" count="2"/>
+    </Recipe>
+    <Recipe resultFurnitureIndex="1" craftable="0">
+        <Ingredient itemIndex="6" count="5"/>
+        <Ingredient itemIndex="8" count="1"/>
+    </Recipe>
+    <Recipe resultFurnitureIndex="9" craftable="0">
+        <Ingredient itemIndex="20" count="4"/>
+        <Ingredient itemIndex="7" count="2"/>
+        <Ingredient itemIndex="8" count="1"/>
+    </Recipe>
+    <Recipe resultFurnitureIndex="10" craftable="0">
+        <Ingredient itemIndex="6" count="3"/>
+        <Ingredient itemIndex="8" count="2"/>
+        <Ingredient itemIndex="20" count="1"/>
+    </Recipe>
+    <Recipe resultFurnitureIndex="11" craftable="0">
+        <Ingredient itemIndex="6" count="3"/>
+        <Ingredient itemIndex="8" count="1"/>
     </Recipe>
 </Recipes>

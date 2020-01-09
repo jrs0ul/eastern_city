@@ -183,6 +183,7 @@ private:
     void defeatLogic();
 
     void drawActiveContainer();
+    void drawRecipes();
     void drawDarkness();
     void calcDarknessValue(); 
 
@@ -235,6 +236,9 @@ private:
     ItemInstance* selectedItem;
     bool itemSelected;
     Vector3D selectedItemPos;
+
+    int recipeClicked;
+    Button craftRecipeButton;
 
     int clickOnItem;
 

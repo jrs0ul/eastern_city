@@ -7,21 +7,7 @@
 GameMap::GameMap()
 {
     collision = nullptr;
-}
-
-void GameMap::create()
-{
-    width = 26;
-    height = 15;
-
-    collision = (bool*)malloc(sizeof(bool) * width * height);
-    for (int i = 0; i < (int)height; ++i)
-    {
-        for(int j = 0; j < (int)width; ++j)
-        {
-            collision[width * i + j] = (rand() % 10 < 2 && j > 4);
-        }
-    }
+    collisionOriginal = nullptr;
 }
 
 void GameMap::destroy()
@@ -31,10 +17,18 @@ void GameMap::destroy()
     regions.destroy();
     entries.destroy();
     containers.destroy();
+    furniture.destroy();
 
     if (collision)
     {
         free(collision);
+        collision = nullptr;
+    }
+
+    if (collisionOriginal)
+    {
+        free(collisionOriginal);
+        collisionOriginal = nullptr;
     }
 }
 
@@ -84,6 +78,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
         printf("width: %d height:%d\n", width, height);
 
         collision = (bool*)malloc(sizeof(bool) * width * height);
+        collisionOriginal = (bool*)malloc(sizeof(bool) * width * height);
         memset(collision, 0, sizeof(bool) * width * height);
 
         printf("children count %lu\n", collisionNode->childrenCount());
@@ -120,6 +115,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
 
     }
 
+
     XmlNode* temperatureNode = mapfile.root.getNode(L"Temperature");
 
     if (temperatureNode)
@@ -142,7 +138,6 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
             { 
                 Asset ass;
                 ass.spriteIndex = 0;
-                ass.containerIndex = -1;
 
                 for (unsigned j = 0; j < asset->attributeCount(); ++j)
                 {
@@ -166,15 +161,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
                     {
                         sprintf(buffer, "%ls", at->getValue());
                         ass.spriteIndex = atoi(buffer);
-
                     }
-                    else if (strcmp(buffer, "containerIndex") == 0)
-                    {
-                        sprintf(buffer, "%ls", at->getValue());
-                        ass.containerIndex = atoi(buffer);
-
-                    }
-
 
                 }
 
@@ -428,9 +415,22 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
                 containers.add(container);
             }
         }
+
+        for (unsigned i = 0; i < room->getFurnitureCount(); ++i)
+        {
+            Furniture* fur = room->getFurniture(i);
+
+            if (fur)
+            {
+                furniture.add(fur);
+            }
+        }
     }
 
     mapfile.destroy();
+
+    memcpy(collisionOriginal, collision, sizeof(bool) * width * height);
+
     printf("done.\n");
 }
 
@@ -555,13 +555,27 @@ void GameMap::draw(float posX,
 
     for (unsigned i = 0; i < assets.count(); ++i)
     {
-        COLOR assetColor = (assets[i].colidedWithHero) ? COLOR(2.f, 2.f, 2.f, 1) : COLOR(1, 1, 1, 1);
+
         pics.draw(pics.findByName(assets[i].name), 
                                   assets[i].pos.x + posX, 
                                   assets[i].pos.y + posY,
-                                  assets[i].spriteIndex,
-                                  false,
-                                  1, 1, 0, assetColor, assetColor);
+                                  assets[i].spriteIndex
+                                  );
+    }
+
+    for (unsigned i = 0; i < furniture.count(); ++i)
+    {
+        if (furniture[i]->removed)
+        {
+            continue;
+        }
+
+        COLOR furnitureColor = (furniture[i]->colidedWithHero) ? COLOR(2.f, 2.f, 2.f, 1) : COLOR(1, 1, 1, 1);
+        pics.draw(furniture[i]->pictureIndex,
+                  furniture[i]->pos.x + posX,
+                  furniture[i]->pos.y + posY,
+                  furniture[i]->spriteIndex,
+                  false, 1,1, 0, furnitureColor, furnitureColor);
     }
 
     for (unsigned i = 0; i < items.count(); ++i)
@@ -581,9 +595,13 @@ void GameMap::draw(float posX,
         {
             for(int j = 0; j < (int)width; ++j)
             {
-                if (collision[width * i + j])
+                const float x = j * 32 + posX;
+                const float y = i * 32 + posY;
+
+                if (collision[width * i + j] && 
+                    x > -32 &&  x < screenWidth + 32 && y > -32 && y < screenHeight + 32)
                 {
-                    pics.draw(-1, j * 32 + posX, i * 32 + posY, 0, false, 32, 32, 0.f, COLOR(1, 0,0, 0.5f), COLOR(1,0,0, 0.5f));
+                    pics.draw(-1, x, y, 0, false, 32, 32, 0.f, COLOR(1, 0,0, 0.5f), COLOR(1,0,0, 0.5f));
                 }
             }
         }
@@ -609,39 +627,47 @@ void GameMap::draw(float posX,
 void GameMap::update(Actor* mainguy, PicsContainer& pics)
 {
 
+    memcpy(collision, collisionOriginal, sizeof(bool) * width * height);
 
-    for (unsigned i = 0; i < assets.count(); ++i)
+    for (unsigned i = 0; i < furniture.count(); ++i)
     {
-        Asset* asset = &assets[i];
+        Furniture* fur = furniture[i];
 
-        if (!asset->interactable)
+        if (fur->removed)
         {
             continue;
         }
 
-        PicData* data = pics.getInfo(pics.findByName(asset->name));
 
-        int spriteHeight = data->height;
-        int spriteWidth = data->width;
+        int fromX = (fur->pos.x + fur->collisionBodyPos.x + 16) / 32;
+        int toX = (fur->pos.x + fur->collisionBodyPos.x + fur->collisionBodySize.x) / 32;
 
-        if (asset->spriteIndex < data->sprites.count())
+        int fromY = (fur->pos.y + fur->collisionBodyPos.y + 16) / 32;
+        int toY = (fur->pos.y + fur->collisionBodyPos.y + fur->collisionBodySize.y - 10) / 32;
+
+        for (int j = fromY; j < toY; ++j)
         {
-            spriteHeight = data->sprites[asset->spriteIndex].height;
-            spriteWidth = data->sprites[asset->spriteIndex].width;
+            for (int k = fromX; k < toX; ++k)
+            {
+                if (j * width + k < width * height)
+                {
+                    collision[j * width + k] = true;
+                }
+            }
         }
 
-        asset->colidedWithHero = false;
+
+        fur->colidedWithHero = false;
 
         if (CollisionCircleRectangle(mainguy->pos.x + mainguy->collisionBodyOffset.x,
                                  mainguy->pos.y + mainguy->collisionBodyOffset.y,
                                  mainguy->collisionBodyRadius * 2.f,
-                                 asset->pos.x,
-                                 asset->pos.y,
-                                 spriteWidth,
-                                 spriteHeight))
+                                 fur->pos.x + fur->collisionBodyPos.x,
+                                 fur->pos.y + fur->collisionBodyPos.y,
+                                 fur->collisionBodySize.x,
+                                 fur->collisionBodySize.y))
         {
-           
-            asset->colidedWithHero = true;
+            fur->colidedWithHero = true;
         }
     }
 }
@@ -767,59 +793,52 @@ Vector3D GameMap::getNearestReachableSquare(int dx, int dy)
 
 }
 
-Asset* GameMap::getClickedAsset(float mapOffsetX, float mapOffsetY,
-                                PicsContainer& pics,
-                                int x, int y,
-                                bool returnIfColidesWithHero,
-                                float heroX, float heroY)
+Furniture* GameMap::getClickedFurniture(float mapOffsetX, float mapOffsetY,
+                                        PicsContainer& pics,
+                                        int x, int y,
+                                        bool returnIfColidesWithHero,
+                                        float heroX, float heroY)
 {
     const float currentX = x - mapOffsetX;
     const float currentY = y - mapOffsetY;
 
-    if (!assets.count())
+    if (!furniture.count())
     {
         return nullptr;
     }
 
-    for (int i = (int)assets.count() - 1; i >= 0; --i)
+    for (int i = (int)furniture.count() - 1; i >= 0; --i)
     {
-        Asset* asset = &assets[i];
+        Furniture* fur = furniture[i];
 
-        PicData* data = pics.getInfo(pics.findByName(asset->name));
-
-
-        if (data)
+        if (fur->removed)
         {
-            int spriteHeight = data->height;
-            int spriteWidth = data->width;
-
-            if (data->sprites.count())
-            {
-                Sprite* sprite = &(data->sprites[asset->spriteIndex]);
-                spriteHeight = sprite->height; 
-                spriteWidth = sprite->width;
-            }
-        
-            if (currentX > asset->pos.x 
-                && currentX < asset->pos.x + spriteWidth
-                && currentY > asset->pos.y
-                && currentY < asset->pos.y + spriteHeight)
-            {
-                if (returnIfColidesWithHero)
-                {
-                    if (asset->colidedWithHero)
-                    {
-                        return asset;
-                    }
-                            
-                }
-                else
-                {
-                    return asset;
-                }
-
-            }
+            continue;
         }
+
+        const float collisionBodyX = fur->pos.x + fur->collisionBodyPos.x;
+        const float collisionBodyY = fur->pos.y + fur->collisionBodyPos.y;
+
+        if (currentX > collisionBodyX
+            && currentX < collisionBodyX + fur->collisionBodySize.x
+                && currentY > collisionBodyY
+                && currentY < collisionBodyY + fur->collisionBodySize.y)
+        {
+            if (returnIfColidesWithHero)
+            {
+                if (fur->colidedWithHero)
+                {
+                    return fur;
+                }
+
+            }
+            else
+            {
+                return fur;
+            }
+
+        }
+
     }
 
     return nullptr;

@@ -36,4 +36,5 @@
     <Img src="pics/dude_sleep.tga" width="113" height="110" filter="0" />
     <Img src="pics/baubas.tga" width="76" height="120" filter="0" />
     <Img src="pics/hud_icons.tga" width="32" height="32" filter="0" />
+    <Img src="pics/buttons.tga" width="64" height="64" filter="1" />
 </Images>

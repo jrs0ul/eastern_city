@@ -10,6 +10,7 @@
 #include "Actor.h"
 #include "Asset.h"
 #include "Region.h"
+#include "Furniture.h"
 
 class Actor;
 
@@ -17,7 +18,6 @@ class GameMap
 {
 public:
     GameMap();
-    void        create();
     void        destroy();
 #ifdef __ANDROID__
     void load(const char* file,  AAssetManager* assman, GlobalItemList* worldItems = nullptr, Room* room = nullptr);
@@ -42,7 +42,7 @@ public:
     int         canTraverse(int x, int y);
     Vector3D    getNearestReachableSquare(int x, int y);
     bool*       getCollisionData(){return collision;}
-    Asset*      getClickedAsset(float mapOffsetX, float mapOffsetY,
+    Furniture*  getClickedFurniture(float mapOffsetX, float mapOffsetY,
                                 PicsContainer& pics,
                                 int x, int y,
                                 bool returnIfColidesWithHero,
@@ -67,7 +67,9 @@ private:
     DArray<Region>         regions;
     DArray<Vector3D>       entries;
     DArray<ItemContainer*> containers;
+    DArray<Furniture*>     furniture;
     bool*                  collision;
+    bool*                  collisionOriginal;
 
     int                    temperature;
 

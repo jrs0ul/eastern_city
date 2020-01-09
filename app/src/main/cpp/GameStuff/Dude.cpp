@@ -148,21 +148,27 @@ void Dude::update(float deltaTime,
     //picking up items ----
     Vector3D shiftedPos = pos + Vector3D(0, 39, 0);
 
-    int replacableItemIndex = findFreedInventorySlot();
 
     for (int i = 0; i < map.getItemCount(); ++i)
     {
         ItemInstance* itm = map.getItem(i);
 
+        int replacableItemIndex = findFreedInventorySlot();
         bool noMorePlaceInBag = isNoMorePlaceInBag(replacableItemIndex);
+
+        if (noMorePlaceInBag)
+        {
+            return;
+        }
         
-        if (itm->isRemoved() || noMorePlaceInBag)
+        if (itm->isRemoved())
         {
             continue;
         }
 
         if (CollisionCircleCircle(shiftedPos.x, shiftedPos.y, 16, itm->getPosition()->x, itm->getPosition()->y, 8))
         {
+            printf("adding to slot %d\n", replacableItemIndex);
             addItemToInventory(itm, replacableItemIndex);
             itm->setAsRemoved();
         }
@@ -451,6 +457,24 @@ int  Dude::getAmmoInWeaponCount()
     }
 
     return (weapon->isRemoved()) ? 0 : weapon->getAmmoLoaded();
+}
+
+
+int Dude::getItemCountByTypeIndex(int index)
+{
+    int count = 0;
+
+    for (unsigned j = 0; j < itemBag.getItemCount(); ++j)
+    {
+        ItemInstance* itm = itemBag.getItem(j);
+
+        if (itm && itm->getIndex() == index && !itm->isRemoved())
+        {
+            ++count;
+        }
+    }
+
+    return count;
 }
 
 ItemInstance* Dude::getItem(unsigned index)
