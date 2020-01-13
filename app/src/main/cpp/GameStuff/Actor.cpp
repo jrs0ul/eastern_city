@@ -1,5 +1,5 @@
 #include "Actor.h"
-#include "../Usefull.h"
+#include "../Useful.h"
 
 Actor::~Actor()
 {
@@ -49,47 +49,73 @@ void Actor::draw(float offsetX, float offsetY,
 
 
 
-bool Actor::isColiding(Vector3D newPos, GameMap& map)
+bool Actor::isColiding(Vector3D newPos, Vector3D* movement, GameMap& map)
 {
     newPos = newPos + collisionBodyOffset;
-
-    int topX = newPos.x - collisionBodyRadius;
-    int topY = newPos.y - collisionBodyRadius;
-    int bottomX = newPos.x + collisionBodyRadius;
-    int bottomY = newPos.y + collisionBodyRadius;
-
     bool colides = false;
+    int collisionCount = 0;
 
-    int fromY = topY / 32;
-    int toY = bottomY / 32;
-    int fromX = topX / 32;
-    int toX = bottomX / 32;
-
-    for (int i = fromY; i <= toY; ++i)
+    for (unsigned long i = 0; i < map.getPolygonCount(); ++i)
     {
-        for (int j = fromX; j <= toX; ++j)
+        Polygon* poly = map.getPolygon(i);
+
+        if (poly->points.count() < 2)
         {
-            int res = map.canTraverse(j, i);
+            continue;
+        }
 
-            if (res == 0)
+
+        for (unsigned long j = 1; j < poly->points.count(); ++j)
+        {
+            if (CollisionCircleLineSegment(poly->points[j - 1].x,
+                                       poly->points[j - 1].y,
+                                       poly->points[j].x,
+                                       poly->points[j].y,
+                                       newPos.x, newPos.y, collisionBodyRadius))
             {
-                colides = CollisionCircleRectangle(newPos.x, newPos.y, collisionBodyRadius - 1.f, j * 32, i * 32, 32, 32);
-
-                if (colides)
+                if (movement)
                 {
-                    return true;
+                    Vector3D wd = Vector3D(poly->points[j].x - poly->points[j - 1].x,
+                                           poly->points[j].y - poly->points[j - 1].y,
+                                           0);
+                    Vector3D wp1 = Vector3D(-wd.y, wd.x, 0);
+                    Vector3D wp2 = Vector3D(wd.y, -wd.x, 0);
+                    Vector3D normal = wp2 - wp1;
+                    normal.normalize();
+
+                    Vector3D mov = *movement;
+
+                    float dot = mov * normal;
+                    normal.x *= dot;
+                    normal.y *= dot;
+                    mov = mov - normal;
+                    //if (collisionCount == 0)
+                    {
+                        (*movement) = mov;
+                    }
+                    //else
+                    {
+                    //    (*movement) = (*movement) - mov;
+                    }
+                    //printf("%f %f\n", mov.x, mov.y);
                 }
 
+                ++collisionCount;
+                colides = true;
             }
-            else if (res == -1)
-            {
-                return true;
-            }
+
         }
+
+    }
+
+    if (collisionCount)
+    {
+        //printf("collisions %d\n", collisionCount);
     }
 
 
-    return false;
+    return colides;
+
 
 }
  

@@ -1,6 +1,8 @@
 #ifndef FURNITURE_H
 #define FURNITURE_H
 
+#include "Polygon.h"
+
 struct Furniture
 {
     Furniture()
@@ -12,6 +14,9 @@ struct Furniture
     {
     }
 
+    void destroy();
+
+    Polygon  collisionPolygon;
     Vector3D pos;
     Vector3D collisionBodyPos;
     Vector3D collisionBodySize;

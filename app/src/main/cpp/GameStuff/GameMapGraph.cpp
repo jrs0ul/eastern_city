@@ -65,13 +65,22 @@ void Room::addFurniture(Furniture* f)
     furniture.add(fur);
 }
 
-void Room::addCollision(unsigned x, unsigned y, bool isColliding)
+void Room::addCollisionPolygon(Polygon& p)
 {
-    CollisionTile tile;
-    tile.x = x;
-    tile.y = y;
-    tile.collides = isColliding;
-    additionalCollision.add(tile);
+    Polygon pol;
+    collisionPolygons.add(pol);
+    Polygon* pp = &collisionPolygons[collisionPolygons.count() - 1];
+
+    for (unsigned i = 0; i < p.points.count(); ++i)
+    {
+        pp->points.add(p.points[i]);
+    }
+
+}
+
+void Room::addDoorHole(float x1, float x2, float height)
+{
+    doorHoles.add(Vector3D(x1, x2, height));
 }
 
 void Room::addRegion(Vector3D pos, Vector3D size)
@@ -125,11 +134,6 @@ unsigned Room::getFurnitureCount()
     return furniture.count();
 }
 
-unsigned Room::getAdditionalCollisionCount()
-{
-    return additionalCollision.count();
-}
-
 unsigned Room::getAdditionalRegionsCount()
 {
     return additionalRegions.count();
@@ -138,6 +142,16 @@ unsigned Room::getAdditionalRegionsCount()
 unsigned Room::getAdditionalEntriesCount()
 {
     return additionalEntries.count();
+}
+
+unsigned Room::getCollisionPolygonCount()
+{
+    return collisionPolygons.count();
+}
+
+unsigned Room::getDoorHoleCount()
+{
+    return doorHoles.count();
 }
 
 ItemInstance* Room::getItem(unsigned index)
@@ -215,17 +229,6 @@ Furniture* Room::getFurniture(unsigned index)
     return nullptr;
 }
 
-CollisionTile* Room::getAdditionalCollisionTile(unsigned index)
-{
-    if (index < additionalCollision.count())
-    {
-        return &additionalCollision[index];
-    }
-
-    return nullptr;
-
-}
-
 Region* Room::getAdditionalRegion(unsigned index)
 {
     if (index < additionalRegions.count())
@@ -247,6 +250,28 @@ Vector3D* Room::getAdditionalEntry(unsigned index)
     return nullptr;
 
 }
+
+Polygon* Room::getCollisionPolygon(unsigned index)
+{
+    if (index < collisionPolygons.count())
+    {
+        return &collisionPolygons[index];
+    }
+
+    return nullptr;
+
+}
+
+Vector3D* Room::getDoorHole(unsigned index)
+{
+    if (index < doorHoles.count())
+    {
+        return &doorHoles[index];
+    }
+    
+    return nullptr;
+}
+
 
 const char* Room::getMapName()
 {
@@ -296,7 +321,23 @@ void Room::destroy(Room* parent, int level)
     items.destroy();
     enemies.destroy();
     assets.destroy();
-    additionalCollision.destroy();
+    doorHoles.destroy();
+
+    for (unsigned i = 0; i < collisionPolygons.count(); ++i)
+    {
+        collisionPolygons[i].points.destroy();
+    }
+
+    collisionPolygons.destroy();
+    
+    for (unsigned i = 0; i < furniture.count(); ++i)
+    {
+        furniture[i].destroy();
+    }
+
+    furniture.destroy();
+
+
     additionalRegions.destroy();
     additionalEntries.destroy();
 }
@@ -318,6 +359,12 @@ void GameMapGraph::init()
     ward.spriteIndex = 1;
     ward.pos = Vector3D(480, 180, 0);
     ward.collisionBodySize = Vector3D(78, 200, 0);
+    ward.collisionPolygon.points.add(Vector3D(2, 169, 0));
+    ward.collisionPolygon.points.add(Vector3D(42, 168, 0));
+    ward.collisionPolygon.points.add(Vector3D(70, 185, 0));
+    ward.collisionPolygon.points.add(Vector3D(25, 187, 0));
+    ward.collisionPolygon.points.add(Vector3D(2, 169, 0));
+
 
     root->addFurniture(&ward);
 
@@ -334,6 +381,7 @@ void GameMapGraph::init()
     wardrobe.addItem(13);
     wardrobe.addItem(2);
     wardrobe.addItem(19);
+   
     root->addItemContainer(1, wardrobe);
     //---
 
@@ -349,18 +397,27 @@ void GameMapGraph::init()
 
     Room* lastFloor = addFloors(stairwell, 2);
 
+    lastFloor->addDoorHole(546, 638.9f, 21.f);
+   
     addDoorway(lastFloor, 288, 98, 2, 0, 2, 0, nullptr, 2);
     lastFloor->addItem(Vector3D(300, 300, 0), 8);
     lastFloor->addItem(Vector3D(360, 320, 0), 8);
     lastFloor->addItem(Vector3D(320, 340, 0), 8);
     lastFloor->addItem(Vector3D(360, 305, 0), 8);
-    lastFloor->addCollision(5, 5, true);
-    lastFloor->addCollision(6, 5, true);
-    lastFloor->addCollision(7, 5, true);
-
+    Polygon poly;
+    poly.points.add(Vector3D(144, 184, 0));
+    poly.points.add(Vector3D(261, 184, 0));
+    poly.points.add(Vector3D(262, 205, 0));
+    poly.points.add(Vector3D(141, 204, 0));
+    poly.points.add(Vector3D(144, 184, 0));
+    lastFloor->addCollisionPolygon(poly);
     addDoorway(stairwell, 288, 98, 3, 0, 3, 0, nullptr, 2);
     addDoorway(stairwell, 544, 96, 4, 0, 4, 0,  nullptr, 2);
 
+
+    outside->addDoorHole(669, 736, 15);
+    outside->addDoorHole(182, 229, 30);
+    outside->addDoorHole(1172, 1215, 30);
     outside->addChildRoom(stairwell, 0, 0);
     
     outside->addChildRoom("data/stairwell.xml", 0, 1);
@@ -371,8 +428,16 @@ void GameMapGraph::init()
     buildingLeft->addChildRoom(outside, 1, 0);
     buildingRight->addChildRoom(outside, 2, 0);
 
-    addFloors(buildingLeft, 1);
-    addFloors(buildingRight, 1);
+    Room* lastFloorLeft = addFloors(buildingLeft, 1);
+    lastFloorLeft->addCollisionPolygon(poly);
+    lastFloorLeft->addDoorHole(546, 638.9f, 21.f);
+    addDoorway(lastFloorLeft, 288, 98, 2, 0, 2, 0, nullptr, 2);
+    
+    Room* lastFloorRight = addFloors(buildingRight, 1);
+    lastFloorRight->addCollisionPolygon(poly);
+    lastFloorRight->addDoorHole(546, 638.9f, 21.f);
+    addDoorway(lastFloorRight, 288, 98, 2, 0, 2, 0, nullptr, 2);
+    addDoorway(lastFloorRight, 40, 128, 3, 0, 3, 50, nullptr, 5, false);
 
 
     for (int i = 0; i < 15; ++i)
@@ -380,6 +445,7 @@ void GameMapGraph::init()
         outside->addEnemyPosition(Vector3D(400 + i * 32, 400 + rand() % 100, 0 ));
     }
 
+    poly.points.destroy();
     printf("done generating\n");
 }
 
@@ -410,6 +476,7 @@ Room* GameMapGraph::addFloors(Room* mainfloor, unsigned entranceIndex)
         currentFloor->addAsset(Vector3D(0, 0, 0), "pics/test.tga", 3); //stairs
 
 
+        currentFloor->addDoorHole(546, 638.9f, 21.f);
         addDoorway(currentFloor, 288, 98, 2, 0, 2, 0, nullptr, 2);
         addDoorway(currentFloor, 672, 115, 3, 0, 3, 50, nullptr, 4);
         addDoorway(currentFloor, 40, 128, 4, 0, 4, 50, nullptr, 5, false);
@@ -442,12 +509,8 @@ void GameMapGraph::addDoorway(Room* floor,
 
     floor->addAsset(Vector3D(rx, ry, 0), "pics/test.tga", assetIndex);
 
-    for (int i = 0; i < 3; ++i)
-    {
-        floor->addCollision(x,     y + 2 + i, false);
-        floor->addCollision(x + 1, y + 2 + i, false);
-    }
-
+    floor->addDoorHole(x * 32 + 15, (x + 2) * 32 + 10);
+   
     floor->addRegion(Vector3D(x * 32, (y + 2) * 32 + regionOffsetY, 0), Vector3D(64,32,0));
     floor->addEntry(Vector3D(x * 32 + 32, (y + 2) * 32 + 4 + regionOffsetY, 0));
 
@@ -524,6 +587,12 @@ void GameMapGraph::addFridge(Room* room)
     fridge.collisionBodySize = Vector3D(108, 146, 0);
     fridge.spriteIndex = 9;
     fridge.pictureIndex = 5;
+    fridge.collisionPolygon.points.add(Vector3D(5, 90, 0));
+    fridge.collisionPolygon.points.add(Vector3D(45, 90, 0));
+    fridge.collisionPolygon.points.add(Vector3D(70, 120, 0));
+    fridge.collisionPolygon.points.add(Vector3D(30, 120, 0));
+    fridge.collisionPolygon.points.add(Vector3D(5, 90, 0));
+
     room->addFurniture(&fridge);
     ItemContainer container;
     container.init(6, 3);
@@ -544,6 +613,12 @@ void GameMapGraph::addTvCupboard(Room* room)
     tvCupboard.collisionBodySize = Vector3D(101, 118, 0);
     tvCupboard.pictureIndex = 5;
     tvCupboard.spriteIndex = 10;
+    tvCupboard.collisionPolygon.points.add(Vector3D(60, 73, 0));
+    tvCupboard.collisionPolygon.points.add(Vector3D(94, 75, 0));
+    tvCupboard.collisionPolygon.points.add(Vector3D(42, 104, 0));
+    tvCupboard.collisionPolygon.points.add(Vector3D(4, 96, 0));
+    tvCupboard.collisionPolygon.points.add(Vector3D(60, 73, 0));
+
     room->addFurniture(&tvCupboard);
     ItemContainer container;
     container.init(3, 1);
@@ -565,6 +640,12 @@ void GameMapGraph::addCupboard(Room* room)
     cupboard.pictureIndex = 5;
     cupboard.spriteIndex = 11;
     cupboard.collisionBodySize = Vector3D(92, 118, 0);
+    cupboard.collisionPolygon.points.add(Vector3D(1, 62, 0));
+    cupboard.collisionPolygon.points.add(Vector3D(44, 62, 0));
+    cupboard.collisionPolygon.points.add(Vector3D(76, 103, 0));
+    cupboard.collisionPolygon.points.add(Vector3D(34, 107, 0));
+    cupboard.collisionPolygon.points.add(Vector3D(1, 62, 0));
+
     room->addFurniture(&cupboard);
     ItemContainer container2;
     container2.init(4, 2);
@@ -587,6 +668,12 @@ void GameMapGraph::addCouch(Room* room, int x, int y)
     couch.spriteIndex = 0;
     couch.isBed = true;
     couch.collisionBodySize = Vector3D(150, 126, 0);
+
+    couch.collisionPolygon.points.add(Vector3D(80, 60, 0));
+    couch.collisionPolygon.points.add(Vector3D(145, 60, 0));
+    couch.collisionPolygon.points.add(Vector3D(70, 105, 0));
+    couch.collisionPolygon.points.add(Vector3D(5, 95, 0));
+    couch.collisionPolygon.points.add(Vector3D(80, 60, 0));
     room->addFurniture(&couch);
 }
 

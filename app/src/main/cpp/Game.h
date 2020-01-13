@@ -17,7 +17,7 @@
 #include "gui/Button.h"
 #include "SysConfig.h"
 #include "Utils.h"
-#include "Usefull.h"
+#include "Useful.h"
 #include "Entity.h"
 #include "ShaderProgram.h"
 #include "Matrix.h"
@@ -170,24 +170,30 @@ public:
 
 private:
 
+    //scenes rendering
     void renderGame();
     void renderEditing();
     void renderTitle();
     void renderDefeat();
 
+    //scenes logic
     void gameLogic();
     void updateWorld(float deltaTime);
     void editingLogic();
     void titleLogic();
     void defeatLogic();
+    //------------------
 
     void drawActiveContainer();
     void drawRecipes();
     void drawDarkness();
     void calcDarknessValue(); 
 
+    bool interactWithFurniture(float clickX, float clickY);
+
     void centerCamera(float x, float y);
     void createEnemies();
+    void drawPolygon(Polygon* poly, ShaderProgram& shader, COLOR c = COLOR(0,0,1,1));
 
     bool handleShooting(float x, float y);
     bool handleCrafting(float x, float y);
@@ -220,7 +226,7 @@ private:
     GameMap map;
     float mapPosX;
     float mapPosY;
-    Path    path;
+    FindPath    path;
     bool    ignoreRegion;
 
     ItemDatabase itemDB;

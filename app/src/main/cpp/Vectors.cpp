@@ -57,12 +57,14 @@ void Vector3D::transform(float * matrix){
     memcpy(v, nw, 4 * sizeof(float));
 }
 //----------------------------
-float Vector3D::length(){
+float Vector3D::length()
+{
     return sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
 //----------------------------
 void Vector3D::normalize(){
     float l = length();
+    if (l == 0){return;}
     v[0] = v[0] / l;
     v[1] = v[1] / l;
     v[2] = v[2] / l;

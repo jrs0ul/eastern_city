@@ -5,16 +5,10 @@
 #include "ItemContainer.h"
 #include "Asset.h"
 #include "Region.h"
+#include "Polygon.h"
 #include "Furniture.h"
 
 struct RoomAndEntry;
-
-struct CollisionTile
-{
-    unsigned x;
-    unsigned y;
-    bool     collides;
-};
 
 class Room
 {
@@ -27,7 +21,8 @@ public:
     void              addEnemyPosition(Vector3D pos);
     void              addAsset(Vector3D pos, const char* name, unsigned spriteIndex);
     void              addFurniture(Furniture* f);
-    void              addCollision(unsigned x, unsigned y, bool isColliding);
+    void              addCollisionPolygon(Polygon& p);
+    void              addDoorHole(float x1, float x2, float height = 50.f);
     void              addRegion(Vector3D pos, Vector3D size);
     void              addEntry(Vector3D pos);
     void              removeItem(unsigned index);
@@ -37,9 +32,10 @@ public:
     unsigned          getChildRoomCount();
     unsigned          getAssetCount();
     unsigned          getFurnitureCount();
-    unsigned          getAdditionalCollisionCount();
     unsigned          getAdditionalRegionsCount();
     unsigned          getAdditionalEntriesCount();
+    unsigned          getCollisionPolygonCount();
+    unsigned          getDoorHoleCount();
     ItemInstance*     getItem(unsigned index);
     ItemContainer*    getItemContainer(unsigned index);
     Vector3D*         getEnemyPosition(unsigned index);
@@ -47,9 +43,10 @@ public:
     RoomAndEntry*     findChildRoomByRegionIndex(unsigned regionIndex);
     Asset*            getAsset(unsigned index);
     Furniture*        getFurniture(unsigned index);
-    CollisionTile*    getAdditionalCollisionTile(unsigned index);
     Region*           getAdditionalRegion(unsigned index);
     Vector3D*         getAdditionalEntry(unsigned index);
+    Polygon*          getCollisionPolygon(unsigned index);
+    Vector3D*         getDoorHole(unsigned index);
     const char*       getMapName();
     void              setMapName(const char* name);
     void              destroy(Room* parent, int level = 0);
@@ -63,7 +60,8 @@ private:
     DArray<Vector3D>       enemies;
     DArray<Asset>          assets;
     DArray<Furniture>      furniture;
-    DArray<CollisionTile>  additionalCollision;
+    DArray<Polygon>        collisionPolygons;
+    DArray<Vector3D>       doorHoles;
     DArray<Region>         additionalRegions;
     DArray<Vector3D>       additionalEntries;
     char mapName[256];

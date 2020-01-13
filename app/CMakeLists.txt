@@ -12,7 +12,7 @@ add_library(app-glue STATIC
 
 add_library(game SHARED
 
-             src/main/cpp/game.cpp
+             src/main/cpp/game_android.cpp
              src/main/cpp/Game.cpp
              src/main/cpp/TextureLoader.cpp
 

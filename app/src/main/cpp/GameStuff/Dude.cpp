@@ -1,6 +1,6 @@
 #include "Dude.h"
 #include "../TextureLoader.h"
-#include "../Usefull.h"
+#include "../Useful.h"
 #include "../gui/Text.h"
 #include <cmath>
 
@@ -75,7 +75,7 @@ void Dude::update(float deltaTime,
                   GameMap& map,
                   float darkness,
                   ItemDatabase& itemdb,
-                  Path& path)
+                  FindPath& path)
 {
 
     if (isDamaged)
@@ -690,11 +690,11 @@ void Dude::doHungerDamage(float deltaTime)
     }
 }
 
-void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, GameMap& map, Path& path)
+void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, GameMap& map, FindPath& path)
 {
     float dudeSpeed = 1.8f;
 
-    const bool followPath = pathIndex < (int)path.parent.count();
+    const bool followPath = pathIndex < path.getPathLength();
 
     if ((useKeys || followPath) && walkAnimationDone)
     {
@@ -706,26 +706,28 @@ void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, Game
         animationFrame = 1;
     }
 
-
     Vector3D shift(0, 0, 0);
 
     if (!useKeys)
     {
         if (followPath)
         {
-            Vector3D destination = Vector3D(path.parent[pathIndex].x * 32 + 16,
-                    path.parent[pathIndex].y * 32 + 16,
-                    0);
-            Vector3D shiftedPos = pos + Vector3D(0, 39, 0);
-            Vector3D direction = destination - shiftedPos;
-            direction.normalize();
-            shift = Vector3D(direction.x * dudeSpeed, direction.y * dudeSpeed, 0);
+            Vector3D* destination = path.getPathStep(pathIndex);
 
-            Vector3D tmp = shiftedPos + shift;
-
-            if (CollisionCircleCircle(tmp.x, tmp.y, 2, destination.x, destination.y, 1))
+            if (destination)
             {
-                ++pathIndex;
+                Vector3D shiftedPos = pos + Vector3D(0, 39, 0);
+                Vector3D direction = (*destination) - shiftedPos;
+                direction.normalize();
+                shift = Vector3D(direction.x * dudeSpeed, direction.y * dudeSpeed, 0);
+
+                Vector3D tmp = shiftedPos + shift;
+
+
+                if (CollisionCircleCircle(tmp.x, tmp.y, 1.f, destination->x, destination->y, 1.f))
+                {
+                    ++pathIndex;
+                }
             }
         }
     }
@@ -762,10 +764,6 @@ void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, Game
             animationSubset = 0;
         }
 
-        if (Actor::isColiding(pos + shift, map))
-        {
-            shift.y = 0.f;
-        }
     }
 
     if (fabsf(shift.y) < fabsf(shift.x))
@@ -781,18 +779,29 @@ void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, Game
             isFlipedX = true;
         }
 
-        if (Actor::isColiding(pos + shift, map))
-        {
-            shift.x = 0.f;
-        }
     }
 
 
     Vector3D newPos = pos + shift;
 
-    if (!Actor::isColiding(newPos, map))
+    if (!Actor::isColiding(newPos, &shift, map))
     {
         pos = newPos;
+    }
+    else
+    {
+        newPos = pos + shift;
+
+        //printf("%f %f\n", shift.x, shift.y);
+
+        if (!Actor::isColiding(newPos, nullptr, map))
+        {
+            pos = newPos;
+        }
+        else
+        {
+            //printf("%f %f\n", shift.x, shift.y);
+        }
     }
 
     //---

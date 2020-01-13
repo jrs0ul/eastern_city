@@ -1,27 +1,78 @@
 #ifndef PATH_H
 #define PATH_H
 
-#include "DArray.h"
+#include "Vectors.h"
+#include "GameStuff/Polygon.h"
 
-struct _Point{
-    int x;
-    int y;
+struct Node;
+
+struct Link
+{
+    float distanceToGoal;
+    bool  visited;
+    Node* linkedNode;
 };
 
-class Path{
+struct Node
+{
+    Vector3D pos;
+    DArray<Link> links;
+
+    Node(Vector3D v)
+    : pos(v)
+    {
+    }
+
+};
+
+
+class FindPath{
 
 public:
-    DArray<_Point> parent;
-    DArray<_Point> visited;
     
-    bool found;
  
-    Path(){ found = false; }
-    //grazina masyvo val maziausios reiksmes indeksa, count - limitas
-    int minival(int* val, int count);
-    bool findPath(_Point src, _Point dest, bool* map, int width, int height);
-    bool isVisited(_Point p);
+    FindPath(){}
+
+    bool find(Vector3D& source,
+                  Vector3D& destination,
+                  Polygon* polygons,
+                  unsigned polygonCount);
+    
     void destroy();
+
+    unsigned getPathLength();
+    Vector3D* getPathStep(unsigned index);
+
+private:
+
+    void makeGraph(Vector3D& source,
+                   Vector3D& destination,
+                   Polygon* polygons,
+                   unsigned polygonCount);
+
+    bool isPointReachable(Vector3D& source,
+                          Vector3D& destination,
+                          float radius,
+                          Polygon* polygons,
+                          unsigned polygonCount);
+
+    bool isPointVisible(Vector3D& source,
+                        Vector3D& destination,
+                        Polygon* polygons,
+                        unsigned polygonCount);
+
+    bool isPointConcave(Polygon* polygonlist,
+                         unsigned polygonIndex,
+                         unsigned pointIndex);
+
+    void deleteGraph();
+
+
+
+private:
+    DArray<Vector3D> path;
+    DArray<Node*> graph;
+
 };
 
 #endif //PATH_H

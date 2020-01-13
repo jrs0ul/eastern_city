@@ -11,6 +11,12 @@ bool CollisionCircleCircle(float x1, float y1, float radius1,
 bool CollisionCircleRectangle(float cirleCenterX, float circleCenterY, float circleRadius,
                               float rectX, float rectY, float rectWidth, float rectHeight);
 
+bool CollisionCircleLineSegment(float lineX1, float lineY1, float lineX2, float lineY2,
+                                float circleCenterX, float circleCenterY, float circleRadius);
+
+bool CollisionLineSegmentLineSegment(float line1X1, float line1Y1, float line1X2, float line1Y2,
+                                     float line2X1, float line2Y1, float line2X2, float line2Y2);
+
 Vector3D MakeVector(float speedx, float speedy, float _angle );
 
 Vector3D Vec2Reflection(Vector3D& vector, Vector3D& plane);

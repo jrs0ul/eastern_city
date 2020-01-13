@@ -10,6 +10,7 @@ env = Environment(ENV=os.environ,
 
 code = [
         "app/src/main/cpp/GameStuff/GameMap.cpp",
+        "app/src/main/cpp/GameStuff/Furniture.cpp",
         "app/src/main/cpp/GameStuff/ItemContainer.cpp",
         "app/src/main/cpp/GameStuff/CraftingRecipes.cpp",
         "app/src/main/cpp/GameStuff/GameMapGraph.cpp",
@@ -22,7 +23,7 @@ code = [
         "app/src/main/cpp/GameStuff/Rat.cpp",
         "app/src/main/cpp/GameStuff/Ghost.cpp",
         "app/src/main/cpp/FindPath.cpp",
-        "app/src/main/cpp/Usefull.cpp",
+        "app/src/main/cpp/Useful.cpp",
         "app/src/main/cpp/SDLVideo.cpp",
         "app/src/main/cpp/Extensions.cpp",
         "app/src/main/cpp/gui/OnScreenBoard.cpp",

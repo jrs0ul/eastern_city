@@ -274,6 +274,17 @@
             <td >1</td>
         </tr>
     </Collision>
+    <Polygons>
+        <Polygon>
+            <Point x="231" y="258" />
+            <Point x="446" y="255" />
+            <Point x="566" y="403" />
+            <Point x="4" y="404" />
+            <Point x="2" y="373" />
+            <Point x="231" y="258" />
+        </Polygon>
+    </Polygons>
+
     <Temperature >2</Temperature>
     <Assets >
         <Asset x="0.000000" y="0.000000" >pics/room.tga</Asset>

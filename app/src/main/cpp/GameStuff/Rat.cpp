@@ -1,5 +1,5 @@
 #include "Rat.h"
-#include "../Usefull.h"
+#include "../Useful.h"
 #include <cmath>
 
 void Rat::init(Vector3D& position)
@@ -125,7 +125,7 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
 
     Vector3D newPos = pos + direction;
 
-    if (!Actor::isColiding(newPos, map) && !actors.isColidingWithOthers(this, direction) && !colidesWithHero)
+    if (!Actor::isColiding(newPos, nullptr, map) && !actors.isColidingWithOthers(this, direction) && !colidesWithHero)
     {
         pos = newPos;
     }

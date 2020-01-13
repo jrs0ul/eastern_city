@@ -1,17 +1,23 @@
 #include "GameMap.h"
 #include "../Xml.h"
-#include "../Usefull.h"
+#include "../Useful.h"
 #include <cwchar>
 
 
 GameMap::GameMap()
 {
-    collision = nullptr;
-    collisionOriginal = nullptr;
 }
 
 void GameMap::destroy()
 {
+    for (unsigned long i = 0; i < polygons.count(); ++i)
+    {
+        polygons[i].points.destroy();
+    }
+
+    polygons.destroy();
+
+
     items.destroy();
     assets.destroy();
     regions.destroy();
@@ -19,17 +25,6 @@ void GameMap::destroy()
     containers.destroy();
     furniture.destroy();
 
-    if (collision)
-    {
-        free(collision);
-        collision = nullptr;
-    }
-
-    if (collisionOriginal)
-    {
-        free(collisionOriginal);
-        collisionOriginal = nullptr;
-    }
 }
 
 #ifdef __ANDROID__
@@ -77,44 +72,58 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
 
         printf("width: %d height:%d\n", width, height);
 
-        collision = (bool*)malloc(sizeof(bool) * width * height);
-        collisionOriginal = (bool*)malloc(sizeof(bool) * width * height);
-        memset(collision, 0, sizeof(bool) * width * height);
+    }
+//----------------
+    XmlNode* polygonsNode = mapfile.root.getNode(L"Polygons");
 
-        printf("children count %lu\n", collisionNode->childrenCount());
-
-        for (unsigned long i = 0; i < collisionNode->childrenCount(); ++i)
+    if (polygonsNode)
+    {
+        for (unsigned long i = 0; i < polygonsNode->childrenCount(); ++i)
         {
-            if (i >= height)
+            XmlNode* polygonNode = polygonsNode->getNode(i);
+
+            if (polygonNode)
             {
-                continue;
-            }
+                Polygon poly;
 
-
-            XmlNode* row = collisionNode->getNode(i);
-
-            if (row)
-            {
-                for (unsigned long j = 0; j < row->childrenCount(); ++j)
+                for (unsigned long j = 0; j < polygonNode->childrenCount(); ++j)
                 {
-                    if (j >= width)
+                    XmlNode* pointNode = polygonNode->getNode(j);
+                    
+                    if (pointNode)
                     {
-                        continue;
-                    }
+                        Vector3D point(0,0,0);
 
-                    XmlNode* cell = row->getNode(j);
-                    if (cell)
-                    {
-                        char buffer[100];
-                        sprintf(buffer, "%ls", cell->getValue());
-                        collision[i * width + j] = atoi(buffer);
+                        for (unsigned long h = 0; h < pointNode->attributeCount(); ++h)
+                        {
+                            XmlAttribute* at = pointNode->getAttribute(h);
+
+                            sprintf(buffer, "%ls", at->getName());
+                            puts(buffer);
+
+                            if (strcmp(buffer, "x") == 0)
+                            {
+                                sprintf(buffer, "%ls", at->getValue());
+                                point.x = atof(buffer);
+                                printf("x:%s\n",buffer);
+                            }
+                            else if (strcmp(buffer, "y") == 0)
+                            {
+                                sprintf(buffer, "%ls", at->getValue());
+                                point.y = atof(buffer);
+                                printf("y:%s\n",buffer);
+                            }
+                        }
+
+                        poly.points.add(point);
                     }
                 }
+
+                polygons.add(poly);
             }
         }
-
     }
-
+//--------------
 
     XmlNode* temperatureNode = mapfile.root.getNode(L"Temperature");
 
@@ -373,14 +382,23 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
             assets.add(ass);
         }
 
-        for (unsigned i = 0; i < room->getAdditionalCollisionCount(); ++i)
+        for (unsigned i = 0; i < room->getCollisionPolygonCount(); ++i)
         {
-            CollisionTile* tile = room->getAdditionalCollisionTile(i);
+            Polygon* p = room->getCollisionPolygon(i);
+            Polygon newPol;
+            polygons.add(newPol);
+            Polygon* addedPolygon = &polygons[polygons.count() - 1];
 
-            if (tile && tile->x < width && tile->y < height)
+            for (unsigned j = 0; j < p->points.count(); ++j)
             {
-                collision[tile->y * width + tile->x] = tile->collides;
+                addedPolygon->points.add(p->points[j]);
             }
+        }
+
+        for (unsigned i = 0; i < room->getDoorHoleCount(); ++i)
+        {
+            Vector3D* dh = room->getDoorHole(i);
+            createDoorHole(dh->x, dh->y, dh->z);
         }
 
         for (unsigned i = 0; i < room->getAdditionalRegionsCount(); ++i)
@@ -416,6 +434,8 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
             }
         }
 
+        polygonsBeforeFurnitureAdded = polygons.count();
+
         for (unsigned i = 0; i < room->getFurnitureCount(); ++i)
         {
             Furniture* fur = room->getFurniture(i);
@@ -423,23 +443,25 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
             if (fur)
             {
                 furniture.add(fur);
+                Polygon poly;
+
+                for (unsigned j = 0; j < fur->collisionPolygon.points.count(); ++j)
+                {
+                    poly.points.add(fur->pos + fur->collisionPolygon.points[j]);
+                }
+
+                polygons.add(poly);
             }
         }
     }
 
     mapfile.destroy();
 
-    memcpy(collisionOriginal, collision, sizeof(bool) * width * height);
-
     printf("done.\n");
 }
 
 void GameMap::save(const char* file)
 {
-    if (!collision)
-    {
-        return;
-    }
 
     Xml mapfile;
 
@@ -450,25 +472,7 @@ void GameMap::save(const char* file)
     collisionNode.addAtribute(L"width", buf);
     swprintf(buf, 100, L"%u", height);
     collisionNode.addAtribute(L"height", buf);
-
-    for (unsigned i = 0; i < height; ++i)
-    {
-        XmlNode row;
-        row.setName(L"tr");
-        
-        for (unsigned j = 0; j < width; ++j)
-        {
-            XmlNode cell;
-            cell.setName(L"td");
-            int isColiding = collision[i * width + j];
-            swprintf(buf, 100, L"%d", isColiding);
-            cell.setValue(buf);
-            row.addChild(cell);
-        }
-
-        collisionNode.addChild(row);
-    }
-
+ 
     XmlNode temperatureNode;
     temperatureNode.setName(L"Temperature");
     swprintf(buf, 100, L"%d", temperature);
@@ -591,21 +595,7 @@ void GameMap::draw(float posX,
 
     if (isDebug)
     {
-        for (int i = 0; i < (int)height; ++i)
-        {
-            for(int j = 0; j < (int)width; ++j)
-            {
-                const float x = j * 32 + posX;
-                const float y = i * 32 + posY;
-
-                if (collision[width * i + j] && 
-                    x > -32 &&  x < screenWidth + 32 && y > -32 && y < screenHeight + 32)
-                {
-                    pics.draw(-1, x, y, 0, false, 32, 32, 0.f, COLOR(1, 0,0, 0.5f), COLOR(1,0,0, 0.5f));
-                }
-            }
-        }
-
+        
         for (int i = 0; i < (int)regions.count(); ++i)
         {
             pics.draw(-1, regions[i].pos.x + posX, regions[i].pos.y + posY, 0, false,
@@ -626,9 +616,6 @@ void GameMap::draw(float posX,
 
 void GameMap::update(Actor* mainguy, PicsContainer& pics)
 {
-
-    memcpy(collision, collisionOriginal, sizeof(bool) * width * height);
-
     for (unsigned i = 0; i < furniture.count(); ++i)
     {
         Furniture* fur = furniture[i];
@@ -636,26 +623,7 @@ void GameMap::update(Actor* mainguy, PicsContainer& pics)
         if (fur->removed)
         {
             continue;
-        }
-
-
-        int fromX = (fur->pos.x + fur->collisionBodyPos.x + 16) / 32;
-        int toX = (fur->pos.x + fur->collisionBodyPos.x + fur->collisionBodySize.x) / 32;
-
-        int fromY = (fur->pos.y + fur->collisionBodyPos.y + 16) / 32;
-        int toY = (fur->pos.y + fur->collisionBodyPos.y + fur->collisionBodySize.y - 10) / 32;
-
-        for (int j = fromY; j < toY; ++j)
-        {
-            for (int k = fromX; k < toX; ++k)
-            {
-                if (j * width + k < width * height)
-                {
-                    collision[j * width + k] = true;
-                }
-            }
-        }
-
+        } 
 
         fur->colidedWithHero = false;
 
@@ -672,6 +640,33 @@ void GameMap::update(Actor* mainguy, PicsContainer& pics)
     }
 }
 
+void GameMap::updateFurniturePolygons(Room* currentRoom)
+{
+    for (unsigned i = polygons.count() - 1; i >= polygonsBeforeFurnitureAdded; --i)
+    {
+        polygons[i].points.destroy();
+        polygons.remove(i);
+    }
+
+    for (unsigned i = 0; i < currentRoom->getFurnitureCount(); ++i)
+    {
+        Furniture* fur = currentRoom->getFurniture(i);
+
+        if (fur->removed)
+        {
+            continue;
+        }
+
+        Polygon pol;
+
+        for (unsigned j = 0; j < fur->collisionPolygon.points.count(); ++j)
+        {
+            Vector3D* p = &(fur->collisionPolygon.points[j]);
+            pol.points.add(Vector3D(fur->pos.x + p->x, fur->pos.y + p->y, 0));
+        }
+        polygons.add(pol);
+    }
+}
 
 void GameMap::drawDarknessBorder(float offsetX, float offsetY,
                                    unsigned screenWidth, unsigned screenHeight,
@@ -723,75 +718,6 @@ void GameMap::addItem(ItemInstance* item)
     items.add(item);
 }
 
-int GameMap::canTraverse(int x, int y)
-{
-
-    if (!collision)
-    {
-        return -1;
-    }
-
-    if (x <= -1 || y <= -1)
-    {
-        return -1;
-    }
-
-    if (x >= (int)width || y >= (int)height)
-    {
-        return -1;
-    }
-
-
-    return !collision[y * width + x];
-}
-
-
-Vector3D GameMap::getNearestReachableSquare(int dx, int dy)
-{
-    Vector3D dv = Vector3D(dx, dy, 0);
-    DArray<Vector3D> emptySquares;
-    
-    for (unsigned y = 0; y < height; ++y)
-    {
-        for (unsigned x = 0; x < width; ++x)
-        {
-            Vector3D v(x, y, 0);
-            if (canTraverse(x, y))
-            {
-                emptySquares.add(v);
-            }
-        }
-    }
-
-    float smallestDistFromDest = 99999;
-
-    int nearestSquareFromDest = -1;
-
-    for (unsigned i = 0; i < emptySquares.count(); ++i)
-    {
-        Vector3D res = dv - emptySquares[i];
-
-        float distDest = res.length();
-
-        if (distDest < smallestDistFromDest)
-        {
-            smallestDistFromDest = distDest;
-            nearestSquareFromDest = i;
-        }
-    }
-
-    Vector3D result(-1, -1, 0);
-
-    if (nearestSquareFromDest != -1)
-    {
-        result = emptySquares[nearestSquareFromDest];
-    }
-
-    emptySquares.destroy();
-
-    return result;
-
-}
 
 Furniture* GameMap::getClickedFurniture(float mapOffsetX, float mapOffsetY,
                                         PicsContainer& pics,
@@ -844,26 +770,6 @@ Furniture* GameMap::getClickedFurniture(float mapOffsetX, float mapOffsetY,
     return nullptr;
 }
 
-void GameMap::setCollision(int x, int y, bool bColide)
-{
-    if (!collision)
-    {
-        return;
-    }
-
-    if (x < 0 || y < 0)
-    {
-        return;
-    }
-
-    if (x >= (int)width || y >= (int)width)
-    {
-        return;
-    }
-
-     collision[y * width + x] = bColide;
-}
-
 Vector3D* GameMap::getPlayerPos(unsigned index)
 {
     if (index < entries.count())
@@ -885,5 +791,69 @@ ItemContainer* GameMap::getItemContainer(unsigned index)
     }
 
     return nullptr;
+}
+
+void GameMap::createDoorHole(float x1, float x2, float height)
+{
+    if (polygons.count())
+    {
+
+        int insertDoorAferIndex = -1;
+        float y1 = 200;
+        float y2 = 200;
+
+        for (unsigned i = 1; i < polygons[0].points.count(); ++i)
+        {
+            Vector3D* point1 = &polygons[0].points[i - 1];
+            Vector3D* point2 = &polygons[0].points[i];
+
+            if (point1->x < x1 && point2->x > x2)
+            {
+                //y = ax + b
+                float a = (point2->y - point1->y) / (point2->x - point1->x);
+                float b = point1->y - point1->x * a;
+ 
+                y1 = a * x1 + b;
+                y2 = a * x2 + b;
+
+                insertDoorAferIndex = i - 1;
+                break;
+            }
+        }
+
+        if (insertDoorAferIndex != -1)
+        {
+            printf("add door after point:%d\n", insertDoorAferIndex);
+            DArray<Vector3D> copyPoints;
+            
+            for (unsigned i = 0; i < polygons[0].points.count(); ++i)
+            {
+                copyPoints.add(polygons[0].points[i]);
+            }
+
+            polygons[0].points.destroy();
+
+            for (unsigned i = 0; i < (unsigned)insertDoorAferIndex + 1; ++i)
+            {
+                polygons[0].points.add(copyPoints[i]);
+            }
+
+            float smallestY = (y1 < y2) ? y1 : y2;
+
+            polygons[0].points.add(Vector3D(x1, y1, 0));
+            polygons[0].points.add(Vector3D(x1, smallestY - height, 0));
+            polygons[0].points.add(Vector3D(x2, smallestY - height, 0));
+            polygons[0].points.add(Vector3D(x2, y2, 0));
+
+            for (unsigned i = insertDoorAferIndex + 1; i < copyPoints.count(); ++i)
+            {
+                polygons[0].points.add(copyPoints[i]);
+            }
+
+            copyPoints.destroy();
+        }
+
+    }
+
 }
 

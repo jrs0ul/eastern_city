@@ -19,7 +19,7 @@ public:
                          GameMap& map,
                          float darkness,
                          ItemDatabase& itemDb, 
-                         Path& path);
+                         FindPath& path);
 
     void          drawInventory(PicsContainer& pics, ItemDatabase& itemDb, ItemInstance* selectedItem);
     int           hasItem(unsigned itemId);
@@ -73,11 +73,11 @@ private:
                       bool useKeys, 
                       unsigned char* Keys,
                       GameMap& map,
-                      Path& path);
+                      FindPath& path);
 
 private:
     ItemContainer        itemBag;
-    int                  pathIndex;
+    unsigned             pathIndex;
     bool                 playWalkAnimation;
     bool                 walkAnimationDone;
     bool                 sleeping;

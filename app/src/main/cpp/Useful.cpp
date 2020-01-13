@@ -1,4 +1,4 @@
-#include "Usefull.h"
+#include "Useful.h"
 #include <cmath>
 #include "Matrix.h"
  
@@ -40,6 +40,76 @@ bool CollisionCircleRectangle(float circleCenterX, float circleCenterY, float ci
     if (distance < circleRadius) return true;
 
     return false; 
+}
+
+bool CollisionCircleLineSegment(float lineX1, float lineY1, float lineX2, float lineY2,
+                                float circleCenterX, float circleCenterY, float circleRadius)
+{
+    Vector3D lineV1(lineX1, lineY1, 0);
+    Vector3D lineV2(lineX2, lineY2, 0);
+    Vector3D segmentVector = lineV2 - lineV1;
+    Vector3D circlePos(circleCenterX, circleCenterY, 0);
+    Vector3D pointVector = circlePos - lineV1;
+
+    Vector3D segmentVectorNornalized = segmentVector;
+    segmentVectorNornalized.normalize();
+
+    float projection = pointVector * segmentVectorNornalized;
+
+    Vector3D closestPointOnSegment;
+
+    if (projection <= 0.f)
+    {
+        closestPointOnSegment = lineV1;
+    }
+    else if (projection >= segmentVector.length())
+    {
+        closestPointOnSegment = lineV2;
+    }
+    else
+    {
+        Vector3D projectionVector(segmentVectorNornalized.x * projection,
+                                  segmentVectorNornalized.y * projection,
+                                  0);
+        closestPointOnSegment = projectionVector + lineV1;
+
+    }
+
+
+    Vector3D distanceVector = circlePos - closestPointOnSegment;
+    float distance = distanceVector.length();
+
+    return (distance <= circleRadius);
+}
+
+bool CollisionLineSegmentLineSegment(float line1X1, float line1Y1, float line1X2, float line1Y2,
+                                     float line2X1, float line2Y1, float line2X2, float line2Y2)
+{
+    Vector3D a(line1X1, line1Y1, 0);
+    Vector3D b(line1X2, line1Y2, 0);
+    Vector3D c(line2X1, line2Y1, 0);
+    Vector3D d(line2X2, line2Y2, 0);
+
+    float denominator = ((b.x - a.x) * (d.y - c.y)) - ((b.y - a.y) * (d.x - c.x));
+
+    if (denominator == 0)
+    {
+        return false;
+    }
+
+    float numerator1 = ((a.y - c.y) * (d.x - c.x)) - ((a.x - c.x) * (d.y - c.y));
+
+    float numerator2 = ((a.y - c.y) * (b.x - a.x)) - ((a.x - c.x) * (b.y - a.y));
+
+    if (numerator1 == 0 || numerator2 == 0)
+    {
+        return false;
+    }
+
+    float r = numerator1 / denominator;
+    float s = numerator2 / denominator;
+
+    return (r > 0 && r < 1) && (s > 0 && s < 1);
 }
 
 

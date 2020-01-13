@@ -7,12 +7,14 @@
 #include "ItemInstance.h"
 #include "ItemContainer.h"
 #include "GameMapGraph.h"
+#include "Polygon.h"
 #include "Actor.h"
 #include "Asset.h"
 #include "Region.h"
 #include "Furniture.h"
 
 class Actor;
+
 
 class GameMap
 {
@@ -34,21 +36,23 @@ public:
                      bool debugInfo = false);
 
     void        update(Actor* mainguy, PicsContainer& pics);
+    void        updateFurniturePolygons(Room* currentRoom);
 
     void        drawDarknessBorder(float offsetX, float offsetY,
                                    unsigned screenWidth, unsigned screenHeight,
                                    PicsContainer& pics);
     void        addItem(ItemInstance* item);
-    int         canTraverse(int x, int y);
-    Vector3D    getNearestReachableSquare(int x, int y);
-    bool*       getCollisionData(){return collision;}
     Furniture*  getClickedFurniture(float mapOffsetX, float mapOffsetY,
                                 PicsContainer& pics,
                                 int x, int y,
                                 bool returnIfColidesWithHero,
                                 float heroX = 0.f, float heroY = 0.f);
 
-    void        setCollision(int x, int y, bool bColide);
+    unsigned    getPolygonCount(){return polygons.count();}
+    Polygon*    getPolygon(unsigned index){
+                    return (index < polygons.count()) ? &polygons[index] : nullptr;
+                }
+    Polygon*    getPolygonData(){return (Polygon*)polygons.getData();}
     Vector3D*   getPlayerPos(unsigned index);
     int         getRegionCount(){return regions.count();}
     Region*     getRegion(int index){return &regions[index];}
@@ -59,6 +63,9 @@ public:
     int         getTemperature(){return temperature;}
     unsigned    getWidth(){return width;}
     unsigned    getHeight(){return height;}
+private:
+    void        createDoorHole(float x1, float x2, float height);
+
 
 private:
 
@@ -68,10 +75,11 @@ private:
     DArray<Vector3D>       entries;
     DArray<ItemContainer*> containers;
     DArray<Furniture*>     furniture;
-    bool*                  collision;
-    bool*                  collisionOriginal;
+
+    DArray<Polygon>        polygons;
 
     int                    temperature;
+    unsigned               polygonsBeforeFurnitureAdded;
 
     unsigned               width;
     unsigned               height;

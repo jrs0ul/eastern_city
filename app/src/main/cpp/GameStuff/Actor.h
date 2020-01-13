@@ -27,10 +27,15 @@ public:
     void            draw(float offsetX, float offsetY,
                          PicsContainer& pics, 
                          bool debugInfo = false);
-    bool            isColiding(Vector3D newPos, GameMap& map);
+    bool            isColiding(Vector3D newPos, Vector3D* movement, GameMap& map);
     virtual int     getType(){return -1;}
     void            setHealth(float newHealth);
+protected:
+    void            calcCollisionResponce(Vector3D* movement,
+                                          float lineX1, float lineX2,
+                                          float lineY1, float lineY2);
 
+public:
     DArray<FrameSet> animations;
     char             spriteName[256];
     Vector3D         pos;

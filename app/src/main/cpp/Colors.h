@@ -12,7 +12,18 @@
 
 struct COLOR{
 
-    float c[4];
+    union
+    {
+        float c[4];
+
+        struct
+        {
+            float r;
+            float g;
+            float b;
+            float a;
+        };
+    };
     
     COLOR(float nr, float ng, float nb, float na = 1.0f){
         c[0] = nr; c[1] = ng; c[2] = nb; c[3] = na;
@@ -27,9 +38,5 @@ struct COLOR{
         c[0] = 1.0f; c[1] = 1.0f; c[2] = 1.0f; c[3] = 1.0f;
     }
 
-    float r() {return c[0];}
-    float g() {return c[1];}
-    float b() {return c[2];}
-    float a() {return c[3];}
 };
 #endif //_COLORS_H__
