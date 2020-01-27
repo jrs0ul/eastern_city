@@ -25,6 +25,12 @@ struct Node
 
 };
 
+struct PointIndex
+{
+    unsigned pointIndex;
+    bool removed;
+};
+
 
 class FindPath{
 
@@ -36,19 +42,38 @@ public:
     bool find(Vector3D& source,
                   Vector3D& destination,
                   Polygon* polygons,
-                  unsigned polygonCount);
+                  unsigned polygonCount,
+                  Vector3D* additionalPathPoints,
+                  unsigned additionalPathPointsCount);
     
     void destroy();
 
     unsigned getPathLength();
+    unsigned getNodeCount();
     Vector3D* getPathStep(unsigned index);
+    Vector3D* getNodePos(unsigned index);
+
+    unsigned getDebugPointsCount();
+    Vector3D* getDebugPoint(unsigned index);
 
 private:
 
     void makeGraph(Vector3D& source,
                    Vector3D& destination,
                    Polygon* polygons,
-                   unsigned polygonCount);
+                   unsigned polygonCount,
+                   Vector3D* additionalPathPoints,
+                   unsigned additionalPathPointsCount);
+
+    bool isPointOutsidePolygon(Vector3D& destination,
+                               Polygon* polygons,
+                               unsigned polygonIndex,
+                               bool justCheck = false
+                               );
+
+    Vector3D findBetterDestination(Vector3D& destination,
+                                    Polygon* polygons,
+                                    unsigned polygonCount);
 
     bool isPointReachable(Vector3D& source,
                           Vector3D& destination,
@@ -65,13 +90,30 @@ private:
                          unsigned polygonIndex,
                          unsigned pointIndex);
 
+    bool checkLinks(Link* link);
+
     void deleteGraph();
+
+    bool CollisionCirclePolygon(Vector3D circle, float radius,
+                                Polygon* polygons,
+                                unsigned polygonCount,
+                                bool checkAll = false
+                                );
+
+    bool collisionLineEdge(Vector3D* p1, Vector3D* p2, Vector3D* d1, Vector3D* d2, bool addPoint = true);
 
 
 
 private:
     DArray<Vector3D> path;
+
+    //-----------
+    DArray<Vector3D> debugPoints;
+    DArray<unsigned> polyIndexesWherePointsBelong;
+    //-----------
+
     DArray<Node*> graph;
+    DArray<Vector3D> collidedEdges;
 
 };
 

@@ -187,13 +187,16 @@ private:
     void drawActiveContainer();
     void drawRecipes();
     void drawDarkness();
-    void calcDarknessValue(); 
+    void calcDarknessValue();
+
+    static void doubleClickContainerItem(ItemInstance*, void**);
+    static void useItem(ItemInstance*, void**);
 
     bool interactWithFurniture(float clickX, float clickY);
 
     void centerCamera(float x, float y);
     void createEnemies();
-    void drawPolygon(Polygon* poly, ShaderProgram& shader, COLOR c = COLOR(0,0,1,1));
+    void drawPolygon(Polygon* poly, ShaderProgram& shader, int method = GL_LINE_STRIP, COLOR c = COLOR(0,0,1,1));
 
     bool handleShooting(float x, float y);
     bool handleCrafting(float x, float y);

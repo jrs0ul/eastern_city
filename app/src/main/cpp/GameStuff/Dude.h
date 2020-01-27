@@ -24,12 +24,14 @@ public:
     void          drawInventory(PicsContainer& pics, ItemDatabase& itemDb, ItemInstance* selectedItem);
     int           hasItem(unsigned itemId);
     void          removeItem(unsigned index);
-    void          useItem(unsigned index, ItemDatabase& itemDb);
+    void          useItem(ItemInstance*, ItemDatabase* itemDb);
     void          craftItem(Recipe* recipe, ItemDatabase& itemDb);
-    bool          checkInventoryInput(TouchData& touches, 
+    bool          checkInventoryInput(float deltaTime,
+                                      TouchData& touches, 
                                       ItemInstance** selectedItem, 
                                       bool& itemSelected, 
-                                      Vector3D& itemPos);
+                                      Vector3D& itemPos,
+                                      void** doubleClickCallbackData);
 
     bool          colidesWithRegion(GameMap& map, unsigned* regionIndex, unsigned* entryIndex);
     void          setPosition(Vector3D& position);
@@ -55,13 +57,14 @@ public:
     bool          isSleepAnimationDone(){return sleepAnimationDone;}
 
     virtual int   getType() override {return 0;}
-private:
 
     bool isColiding(Vector3D newPos, GameMap& map);
 
     void addItemToInventory(ItemInstance* item, int inventorySlotIndex);
     int  findFreedInventorySlot();
     bool isNoMorePlaceInBag(int freedSlotIndex);
+    void addDoubleClickCallbackForItems(void (*func)(ItemInstance*, void**));
+private:
     void wearClothes(float deltaTime, ItemDatabase& itemdb);
     void drainBatteries(float deltaTime, ItemDatabase& itemdb);
     

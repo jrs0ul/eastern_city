@@ -213,17 +213,15 @@ void Dude::removeItem(unsigned index)
     }
 }
 
-void Dude::useItem(unsigned index, ItemDatabase& itemDb)
+void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
 {
-    ItemInstance* item = itemBag.getItem(index);
-
     if (!item || item->isRemoved())
     {
         printf("shit item\n");
         return;
     }
 
-    ItemData* data = itemDb.get(item->getIndex());
+    ItemData* data = itemDb->get(item->getIndex());
 
     if (data->isConsumable)
     {
@@ -372,17 +370,20 @@ void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
     itemsToRemove.destroy();
 }
 
-bool Dude::checkInventoryInput(TouchData& touches, 
-        ItemInstance** selectedItem, 
-        bool& itemSelected, 
-        Vector3D& itemPos)
+bool Dude::checkInventoryInput(float deltaTime,
+                               TouchData& touches, 
+                               ItemInstance** selectedItem, 
+                               bool& itemSelected, 
+                               Vector3D& itemPos,
+                               void** doubleClickCallbackData)
 {
     itemBag.setActive(true);
-    itemBag.checkInput(touches, selectedItem, itemSelected, itemPos);
+    bool res = itemBag.checkInput(deltaTime, touches, selectedItem, itemSelected, itemPos, doubleClickCallbackData);
     equipedItems.setActive(true);
-    equipedItems.checkInput(touches, selectedItem, itemSelected, itemPos);
+    res = equipedItems.checkInput(deltaTime, touches, selectedItem, itemSelected, itemPos, nullptr);
 
-    return true;
+    //printf("%d\n", res);
+    return res;
 }
 
 
@@ -510,6 +511,11 @@ int Dude::findFreedInventorySlot()
 bool Dude::isNoMorePlaceInBag(int freedSlotIndex)
 {
     return (itemBag.getItemCount() >= itemBag.getSlotCount()) ? (freedSlotIndex == -1 ?  true : false) : false;
+}
+
+void Dude::addDoubleClickCallbackForItems(void (*func)(ItemInstance*, void**))
+{
+    itemBag.setDoubleClickCallback(func);
 }
 
 void Dude::wearClothes(float deltaTime, ItemDatabase& itemdb)

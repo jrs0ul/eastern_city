@@ -300,6 +300,7 @@ void Game::renderGame()
 {
     map.draw(mapPosX, mapPosY, SCREEN_WIDTH, SCREEN_HEIGHT, pics, itemDB, DebugMode);
     actors.draw(mapPosX, mapPosY, pics, DebugMode);
+    map.drawFrontLayerAssets(mapPosX, mapPosY, *dude.getPos(), pics);
     map.drawDarknessBorder(mapPosX, mapPosY, SCREEN_WIDTH, SCREEN_HEIGHT, pics);
 
     if (DebugMode)
@@ -325,8 +326,30 @@ void Game::renderGame()
             pp.points.add(point);
         }
 
-        drawPolygon(&pp, colorShader, COLOR(1,0,0,1));
+        drawPolygon(&pp, colorShader, GL_LINE_STRIP, COLOR(1,0,0,1));
         pp.points.destroy();
+
+        glPointSize(10.f);
+
+        for (unsigned i = 0; i < path.getNodeCount(); ++i)
+        {
+            Vector3D point = *(path.getNodePos(i));
+            pp.points.add(point);
+        }
+
+        drawPolygon(&pp, colorShader, GL_POINTS, COLOR(1,0,1,1));
+        pp.points.destroy();
+
+        for (unsigned i = 0; i < path.getDebugPointsCount(); ++i)
+        {
+            Vector3D point = *(path.getDebugPoint(i));
+            pp.points.add(point);
+        }
+
+        drawPolygon(&pp, colorShader, GL_POINTS, COLOR(1,1,0,1));
+        pp.points.destroy();
+
+
         
         glEnable(GL_TEXTURE_2D);
     }
@@ -491,18 +514,23 @@ void Game::gameLogic()
     }
 
    
+    //dude.update(DeltaTime, Keys, map, darkness, itemDB, path);
     updateWorld(DeltaTime);
 
 
     if (activeContainer)
     {
-        if (activeContainer->checkInput(touches, &selectedItem, itemSelected, selectedItemPos))
+        void* data[] = {&dude};
+
+        if (activeContainer->checkInput(DeltaTime, touches, &selectedItem, itemSelected, selectedItemPos, data))
         {
             return;
         }
     }
 
-    dude.checkInventoryInput(touches, &selectedItem, itemSelected, selectedItemPos);
+    void* data[] = {&dude, &itemDB}; 
+
+    dude.checkInventoryInput(DeltaTime, touches, &selectedItem, itemSelected, selectedItemPos, data);
 
     if (touches.move.count())
     {
@@ -526,21 +554,11 @@ void Game::gameLogic()
                     touches.up[0].y > 445 && touches.up[0].y < 477
                )
             {
-                if (clickOnItem == i)
-                {
-                    printf("using item %d\n", i);
-                    dude.useItem(i, itemDB);
-                    itemSelected = false;
-                    clickOnItem = -1;
-                    return;
-                }
-                else
-                {
-                    clickOnItem = i;
-                }
+              return;            
+            
             }
         }
-        //--
+        //--*/
 
         if (itemSelected)
         {
@@ -598,7 +616,12 @@ void Game::gameLogic()
         Vector3D src = Vector3D(dude.getPos()->x, dude.getPos()->y + 39.0f, 0);
         Vector3D destination = Vector3D(touches.up[0].x - mapPosX, touches.up[0].y - mapPosY, 0);
         dude.resetPathIndex();
-        path.find(src, destination, map.getPolygonData(), map.getPolygonCount());
+        path.find(src, 
+                  destination, 
+                  map.getPolygonData(), 
+                  map.getPolygonCount(), 
+                  map.getAdditionalPathPoints(),
+                  map.getAdditionalPathPointCount());
     }
 
 
@@ -717,6 +740,7 @@ void Game::titleLogic()
     if (touches.up.count() && !touches.oldDown.count())
     {
         //mapGraph.init();
+        path.destroy();
         mapGraph.destroy();
         mapGraph.init();
         currentRoom = mapGraph.root;
@@ -733,6 +757,7 @@ void Game::titleLogic()
         map.load(currentRoom->getMapName(), &itemsInWorld, currentRoom);
 #endif
         dude.init(*map.getPlayerPos(0));
+        dude.addDoubleClickCallbackForItems(&useItem);
 
         createEnemies();
 
@@ -975,6 +1000,46 @@ void Game::calcDarknessValue()
     darkness = (worldTime >= 60 && worldTime < 200) ? 1.f - sinf(((worldTime - 60) / 140.f) * M_PI) : 1.f;
 }
 
+void Game::doubleClickContainerItem(ItemInstance* item, void** dud)
+{
+    if (item)
+    {
+        if (item->isRemoved())
+        {
+            return;
+        }
+
+        Dude* d = (Dude*)dud[0];
+
+        int freedSlot = d->findFreedInventorySlot();
+        if (!d->isNoMorePlaceInBag(freedSlot))
+        {
+            d->addItemToInventory(item, freedSlot);
+            item->setAsRemoved();
+        }
+    }
+}
+
+void Game::useItem(ItemInstance* item, void** data)
+{
+    if (item)
+    {
+        if (item->isRemoved())
+        {
+            return;
+        }
+
+        Dude* dud = (Dude*)data[0];
+        ItemDatabase* db = (ItemDatabase*)data[1];
+
+        if (dud)
+        {
+            dud->useItem(item, db);
+        }
+
+    }
+}
+
 bool Game::interactWithFurniture(float clickX, float clickY)
 {
     Furniture * fur = map.getClickedFurniture(mapPosX, mapPosY, 
@@ -1019,6 +1084,7 @@ bool Game::interactWithFurniture(float clickX, float clickY)
             activeContainer = map.getItemContainer(fur->itemContainerIndex);
             activeContainer->setPosition(Vector3D(touches.up[0].x, touches.up[1].y, 0));
             activeContainer->setActive(true);
+            activeContainer->setDoubleClickCallback(&doubleClickContainerItem);
             return true;
         }
         else if (fur->isBed)
@@ -1107,7 +1173,7 @@ void Game::createEnemies()
 
 }
 
-void Game::drawPolygon(Polygon* poly, ShaderProgram& shader, COLOR c)
+void Game::drawPolygon(Polygon* poly, ShaderProgram& shader, int method, COLOR c)
 {
     DArray<float> vertices;
     DArray<float> colors;
@@ -1135,7 +1201,7 @@ void Game::drawPolygon(Polygon* poly, ShaderProgram& shader, COLOR c)
     glVertexAttribPointer(ColorAttribID, 4, GL_FLOAT, GL_FALSE, 0, colors.getData());
     glEnableVertexAttribArray(ColorAttribID);
 
-    glDrawArrays(GL_LINE_STRIP, 0, vertexCount);
+    glDrawArrays(method, 0, vertexCount);
     glDisableVertexAttribArray(ColorAttribID);
     glDisableVertexAttribArray(attribID);
     vertices.destroy();

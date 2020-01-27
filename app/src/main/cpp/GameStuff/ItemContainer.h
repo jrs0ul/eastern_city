@@ -14,10 +14,12 @@ public:
     bool          addItem(ItemInstance& item, int slotIndex = -1);
     void          addItem(unsigned itemIndex); //for procedural generation;
     void          draw(PicsContainer& pics, ItemDatabase& itemDB, ItemInstance* selectedItem);
-    bool          checkInput(TouchData& touches, 
+    bool          checkInput(float deltaTime,
+                             TouchData& touches, 
                              ItemInstance** selectedItem, 
                              bool& itemSelected, 
-                             Vector3D& itemPos);
+                             Vector3D& itemPos,
+                             void** callbackData);
 
     ItemInstance* getItem(unsigned index);
     int           hasItem(unsigned itemId);
@@ -27,13 +29,24 @@ public:
 
     void          setPosition(Vector3D position);
     void          setActive(bool act){active = act;}
+
+    void          setDoubleClickCallback(void (*callback)(ItemInstance*, void**));
     
 private:
     DArray<ItemInstance> items;
     unsigned slotCount;
     Vector3D pos;
+
+    void (*doubleClickCallback)(ItemInstance*, void**);
+
     bool active;
     unsigned width;
+
+    float doubleClickTimer;
+    int selectedLocalItem;
+    bool tappedTwoTimes;
+
+    
 };
 
 

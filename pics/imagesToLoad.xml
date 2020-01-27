@@ -25,7 +25,7 @@
     <Img src="pics/room.tga" width="600" height="406" filter="0" />
     <Img src="pics/stairwell.tga" width="760" height="352" filter="0" />
     <Img src="pics/stairwell2.tga" width="760" height="352" filter="0" />
-    <Img src="pics/outside.tga" width="1376" height="800" filter="0" />
+    <Img src="pics/outside.tga" width="688" height="800" filter="0" />
     <Img src="pics/dude.tga" width="64" height="110" filter="0" />
     <Img src="pics/glow.tga" width="137" height="189" filter="1" />
     <Img src="pics/darkness.tga" width="1" height="1" filter="1" />
@@ -37,4 +37,17 @@
     <Img src="pics/baubas.tga" width="76" height="120" filter="0" />
     <Img src="pics/hud_icons.tga" width="32" height="32" filter="0" />
     <Img src="pics/buttons.tga" width="64" height="64" filter="1" />
+    <Img filter="0">
+        <Path>pics/outside_sprites.tga</Path>
+        <Sprites>
+            <Sprite name="door_front" x="0" y="0" width="231" height="236"/>
+            <Sprite name="door_side" x="1" y="239" width="303" height="432"/>
+            <Sprite name="grafity" x="345" y="15" width="154" height="89"/>
+            <Sprite name="grating" x="370" y="137" width="97" height="49"/>
+            <Sprite name="tunel_side" x="308" y="187" width="234" height="534"/>
+            <Sprite name="tunel_back" x="548" y="3" width="247" height="330"/>
+            <Sprite name="rat_grafity" x="558" y="449" width="103" height="141"/>
+            <Sprite name="tunel_front" x="671" y="388" width="234" height="235"/>
+        </Sprites>
+    </Img>
 </Images>

@@ -17,6 +17,8 @@ void GameMap::destroy()
 
     polygons.destroy();
 
+    addititionalNodePoints.destroy();
+
 
     items.destroy();
     assets.destroy();
@@ -99,19 +101,16 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
                             XmlAttribute* at = pointNode->getAttribute(h);
 
                             sprintf(buffer, "%ls", at->getName());
-                            puts(buffer);
 
                             if (strcmp(buffer, "x") == 0)
                             {
                                 sprintf(buffer, "%ls", at->getValue());
                                 point.x = atof(buffer);
-                                printf("x:%s\n",buffer);
                             }
                             else if (strcmp(buffer, "y") == 0)
                             {
                                 sprintf(buffer, "%ls", at->getValue());
                                 point.y = atof(buffer);
-                                printf("y:%s\n",buffer);
                             }
                         }
 
@@ -124,6 +123,44 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
         }
     }
 //--------------
+    XmlNode* additionalPathPointsNode = mapfile.root.getNode(L"AdditionalPathNodes");
+
+    if (additionalPathPointsNode)
+    {
+        for (unsigned i = 0; i < additionalPathPointsNode->childrenCount(); ++i)
+        {
+
+            XmlNode* pointNode = additionalPathPointsNode->getNode(i);
+
+            if (pointNode)
+            {
+                Vector3D point(0,0,0);
+
+                for (unsigned long h = 0; h < pointNode->attributeCount(); ++h)
+                {
+                    XmlAttribute* at = pointNode->getAttribute(h);
+
+                    sprintf(buffer, "%ls", at->getName());
+
+                    if (strcmp(buffer, "x") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        point.x = atof(buffer);
+                        printf("x:%s\n",buffer);
+                    }
+                    else if (strcmp(buffer, "y") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        point.y = atof(buffer);
+                        printf("y:%s\n",buffer);
+                    }
+                }
+
+                addititionalNodePoints.add(point);
+            }
+
+        }
+    }
 
     XmlNode* temperatureNode = mapfile.root.getNode(L"Temperature");
 
@@ -171,6 +208,18 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
                         sprintf(buffer, "%ls", at->getValue());
                         ass.spriteIndex = atoi(buffer);
                     }
+                    else if (strcmp(buffer, "flipped") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        ass.isFlipped = atoi(buffer);
+                    }
+                    else if (strcmp(buffer, "front") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        ass.isInFrontLayer = atoi(buffer);
+                    }
+
+
 
                 }
 
@@ -394,6 +443,33 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
                 addedPolygon->points.add(p->points[j]);
             }
         }
+        //---
+        for (unsigned i = 0; i < room->getAdditionalVerticesCount(); ++i)
+        {
+            AdditionalVertices* av = room->getAdditionalVertices(i);
+            
+            Polygon pol;
+
+            for (unsigned j = 0; j <= av->index; ++j)
+            {
+                pol.points.add(polygons[0].points[j]);
+            }
+
+            for (unsigned j = 0; j < av->p.points.count(); ++j)
+            {
+                pol.points.add(av->p.points[j]);
+            }
+
+            for (unsigned j = av->index + 1; j < polygons[0].points.count(); ++j)
+            {
+                pol.points.add(polygons[0].points[j]);
+            }
+
+            polygons[0].points.destroy();
+
+            polygons[0] = pol; // ??
+        }
+        //--
 
         for (unsigned i = 0; i < room->getDoorHoleCount(); ++i)
         {
@@ -559,12 +635,23 @@ void GameMap::draw(float posX,
 
     for (unsigned i = 0; i < assets.count(); ++i)
     {
+        if (assets[i].isInFrontLayer)
+        {
+            continue;
+        }
 
-        pics.draw(pics.findByName(assets[i].name), 
-                                  assets[i].pos.x + posX, 
-                                  assets[i].pos.y + posY,
-                                  assets[i].spriteIndex
-                                  );
+        unsigned long picIndex = pics.findByName(assets[i].name);
+
+        PicData* data = pics.getInfo(picIndex);
+
+        pics.draw(picIndex, 
+                  assets[i].pos.x + posX + (assets[i].isFlipped ? data->htilew * 2 : 0), 
+                  assets[i].pos.y + posY,
+                  assets[i].spriteIndex,
+                  false,
+                  (assets[i].isFlipped ? -1.f: 1.f),
+                   1.f
+                  );
     }
 
     for (unsigned i = 0; i < furniture.count(); ++i)
@@ -667,6 +754,53 @@ void GameMap::updateFurniturePolygons(Room* currentRoom)
         polygons.add(pol);
     }
 }
+
+void GameMap::drawFrontLayerAssets(float offsetX, float offsetY,
+                                     Vector3D& characterPos,
+                                     PicsContainer& pics)
+{
+    for (unsigned i = 0; i < assets.count(); ++i)
+    {
+        if (!assets[i].isInFrontLayer)
+        {
+            continue;
+        }
+
+        unsigned long picIndex = pics.findByName(assets[i].name);
+
+        PicData* data = pics.getInfo(picIndex);
+
+        float charPosY = characterPos.y + 39;
+
+        float assetHeight = (data->sprites.count() ? data->sprites[assets[i].spriteIndex].height :
+                             data->theight);
+
+
+
+        float alpha = (charPosY - assets[i].pos.y) / assetHeight;
+        if (alpha < 0.f)
+        {
+            alpha = 0;
+        }
+
+        pics.draw(picIndex, 
+                  assets[i].pos.x + offsetX + (assets[i].isFlipped ? data->htilew * 2 : 0), 
+                  assets[i].pos.y + offsetY,
+                  assets[i].spriteIndex,
+                  false,
+                  (assets[i].isFlipped ? -1.f: 1.f),
+                   1.f,
+                   0.f,
+                   COLOR(1.f, 1.f, 1.f, alpha),
+                   COLOR(1.f, 1.f, 1.f, alpha)
+
+                  );
+    }
+
+
+}
+
+
 
 void GameMap::drawDarknessBorder(float offsetX, float offsetY,
                                    unsigned screenWidth, unsigned screenHeight,

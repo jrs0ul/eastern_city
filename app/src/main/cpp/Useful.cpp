@@ -1,7 +1,8 @@
 #include "Useful.h"
-#include <cmath>
 #include "Matrix.h"
  
+#include <cmath>
+#include <cstdio>
  
 int roundDouble2Int(double x){
     return int(x > 0.0 ? x + 0.5 : x - 0.5);
@@ -83,7 +84,8 @@ bool CollisionCircleLineSegment(float lineX1, float lineY1, float lineX2, float 
 }
 
 bool CollisionLineSegmentLineSegment(float line1X1, float line1Y1, float line1X2, float line1Y2,
-                                     float line2X1, float line2Y1, float line2X2, float line2Y2)
+                                     float line2X1, float line2Y1, float line2X2, float line2Y2,
+                                     float* resR, float* resS)
 {
     Vector3D a(line1X1, line1Y1, 0);
     Vector3D b(line1X2, line1Y2, 0);
@@ -97,6 +99,8 @@ bool CollisionLineSegmentLineSegment(float line1X1, float line1Y1, float line1X2
         return false;
     }
 
+
+
     float numerator1 = ((a.y - c.y) * (d.x - c.x)) - ((a.x - c.x) * (d.y - c.y));
 
     float numerator2 = ((a.y - c.y) * (b.x - a.x)) - ((a.x - c.x) * (b.y - a.y));
@@ -108,6 +112,17 @@ bool CollisionLineSegmentLineSegment(float line1X1, float line1Y1, float line1X2
 
     float r = numerator1 / denominator;
     float s = numerator2 / denominator;
+
+
+    if (resR)
+    {
+        *resR = r;
+    }
+
+    if (resS)
+    {
+        *resS = s;
+    }
 
     return (r > 0 && r < 1) && (s > 0 && s < 1);
 }

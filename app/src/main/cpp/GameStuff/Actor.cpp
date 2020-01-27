@@ -53,7 +53,6 @@ bool Actor::isColiding(Vector3D newPos, Vector3D* movement, GameMap& map)
 {
     newPos = newPos + collisionBodyOffset;
     bool colides = false;
-    int collisionCount = 0;
 
     for (unsigned long i = 0; i < map.getPolygonCount(); ++i)
     {
@@ -84,35 +83,31 @@ bool Actor::isColiding(Vector3D newPos, Vector3D* movement, GameMap& map)
                     normal.normalize();
 
                     Vector3D mov = *movement;
+                    
+                    float angleBetweenEdgeAndMov = atan2( mov * normal , wd * mov);
 
+                    //if circle is inside polygon angle must be > 0, outside angle > 0
+                    if ((i == 0 && angleBetweenEdgeAndMov <= 0.f) 
+                        || (i > 0 && angleBetweenEdgeAndMov > 0.f))
+                    {
+                        continue; //let's not change movement vector
+                    }
+                    
                     float dot = mov * normal;
                     normal.x *= dot;
                     normal.y *= dot;
                     mov = mov - normal;
-                    //if (collisionCount == 0)
-                    {
-                        (*movement) = mov;
-                    }
-                    //else
-                    {
-                    //    (*movement) = (*movement) - mov;
-                    }
-                    //printf("%f %f\n", mov.x, mov.y);
+
+                    (*movement) = mov;
+
                 }
 
-                ++collisionCount;
                 colides = true;
             }
 
         }
 
     }
-
-    if (collisionCount)
-    {
-        //printf("collisions %d\n", collisionCount);
-    }
-
 
     return colides;
 

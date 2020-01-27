@@ -8,6 +8,10 @@ void ItemContainer::init(unsigned sCount, unsigned newWidth)
     items.destroy();
     active = false;
     width = newWidth;
+    selectedLocalItem = -1;
+    tappedTwoTimes = false;
+    doubleClickTimer = 0.f;
+    doubleClickCallback = nullptr;
 }
 
 void ItemContainer::destroy()
@@ -108,15 +112,28 @@ void ItemContainer::draw(PicsContainer& pics, ItemDatabase& itemDB, ItemInstance
 
 }
 
-bool ItemContainer::checkInput(TouchData& touches,
+bool ItemContainer::checkInput(float deltaTime,
+                               TouchData& touches,
                                ItemInstance** selectedItem, 
-                               bool& itemSelected, Vector3D& itemPos)
+                               bool& itemSelected, 
+                               Vector3D& itemPos,
+                               void** callbackData)
 {
     if (!active)
     {
         return false;
     }
     
+    if (doubleClickTimer > 0.f)
+    {
+        doubleClickTimer -= deltaTime;
+    }
+
+    if (doubleClickTimer <= 0.f)
+    {
+        selectedLocalItem = -1;
+    }
+
     const int height = ceil(slotCount / (width * 1.f));
 
 
@@ -137,6 +154,11 @@ bool ItemContainer::checkInput(TouchData& touches,
                 *selectedItem = &items[itemIndex];
                 itemSelected = true;
                 itemPos = Vector3D(touches.down[0].x, touches.down[0].y, 0);
+
+                tappedTwoTimes = (selectedLocalItem == (int)itemIndex);
+                
+                selectedLocalItem = (int)itemIndex;
+                doubleClickTimer = 1.f;
                 return true;
             }
         }
@@ -151,7 +173,11 @@ bool ItemContainer::checkInput(TouchData& touches,
                 && (touches.up[0].x < pos.x || touches.up[0].x > pos.x + 34 * width
                     || touches.up[0].y < pos.y || touches.up[0].y > height * 34 + pos.y))
         {
-            active = false;
+            if (!itemSelected)
+            {
+                active = false;
+            }
+
             return !itemSelected;
         }
         else if (itemSelected && active && touches.up[0].x > pos.x && touches.up[0].x < pos.x + 34 * width
@@ -170,6 +196,17 @@ bool ItemContainer::checkInput(TouchData& touches,
 
             itemSelected = false;
             *selectedItem = nullptr;
+
+            if (tappedTwoTimes)
+            {
+                if (doubleClickCallback)
+                {
+                    (*doubleClickCallback)(&items[itemIndex], callbackData);
+                }
+                selectedLocalItem = -1;
+                tappedTwoTimes = false;
+            }
+
             return true;
 
         }
@@ -208,5 +245,10 @@ int ItemContainer::hasItem(unsigned itemId)
 void ItemContainer::setPosition(Vector3D position)
 {
     pos = position;
+}
+
+void ItemContainer::setDoubleClickCallback(void (*callback)(ItemInstance*, void**))
+{
+    doubleClickCallback = callback;
 }
 

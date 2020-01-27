@@ -38,6 +38,9 @@ public:
     void        update(Actor* mainguy, PicsContainer& pics);
     void        updateFurniturePolygons(Room* currentRoom);
 
+    void        drawFrontLayerAssets(float offsetX, float offsetY,
+                                     Vector3D& characterPos,
+                                     PicsContainer& pics);
     void        drawDarknessBorder(float offsetX, float offsetY,
                                    unsigned screenWidth, unsigned screenHeight,
                                    PicsContainer& pics);
@@ -52,6 +55,8 @@ public:
     Polygon*    getPolygon(unsigned index){
                     return (index < polygons.count()) ? &polygons[index] : nullptr;
                 }
+    unsigned    getAdditionalPathPointCount(){return addititionalNodePoints.count();}
+    Vector3D*   getAdditionalPathPoints(){return (Vector3D*)addititionalNodePoints.getData();}
     Polygon*    getPolygonData(){return (Polygon*)polygons.getData();}
     Vector3D*   getPlayerPos(unsigned index);
     int         getRegionCount(){return regions.count();}
@@ -77,6 +82,7 @@ private:
     DArray<Furniture*>     furniture;
 
     DArray<Polygon>        polygons;
+    DArray<Vector3D>       addititionalNodePoints;
 
     int                    temperature;
     unsigned               polygonsBeforeFurnitureAdded;
