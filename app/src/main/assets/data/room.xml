@@ -1,279 +1,22 @@
 <?xml version="1.0"?>
-    <Collision width="19" height="13" >
-        <tr >
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >1</td>
-            <td >1</td>
-        </tr>
-        <tr >
-            <td >1</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >0</td>
-            <td >1</td>
-        </tr>
+    <Collision width="19" height="13" > 
     </Collision>
+    <Polygons>
+        <Polygon>
+            <Point x="220" y="250" />
+            <Point x="460" y="250" />
+            <Point x="590" y="410" />
+            <Point x="15" y="410" />
+            <Point x="15" y="370" />
+
+            <Point x="40" y="360" />
+            <Point x="40" y="300" />
+            <Point x="100" y="300" />
+            <Point x="100" y="320" />
+
+            <Point x="220" y="250" />
+        </Polygon>
+    </Polygons>
     <Temperature >20</Temperature>
     <Assets >
         <Asset x="0.000000" y="0.000000" >pics/room.tga</Asset>
@@ -282,8 +25,8 @@
     </Assets>
     <Entries >
         <Entry x="350.000000" y="310.000000" />
-        <Entry x="50.000000" y="298.000000" />
+        <Entry x="60.000000" y="298.000000" />
     </Entries>
     <Regions >
-        <Region x="32.000000" y="288.000000" width="48.000000" height="40.000000" entry="0" >data/stairwell.xml</Region>
+        <Region x="38.000000" y="288.000000" width="48.000000" height="40.000000" entry="0" >data/stairwell.xml</Region>
     </Regions>

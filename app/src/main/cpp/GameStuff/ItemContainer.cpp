@@ -241,6 +241,20 @@ int ItemContainer::hasItem(unsigned itemId)
 
 }
 
+unsigned ItemContainer::getActualItemCount()
+{
+    unsigned count = 0;
+
+    for (unsigned i = 0; i < items.count(); ++i)
+    {
+        if (!items[i].isRemoved())
+        {
+            ++count;
+        }
+    }
+
+    return count;
+}
 
 void ItemContainer::setPosition(Vector3D position)
 {

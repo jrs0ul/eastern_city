@@ -1,4 +1,5 @@
 #include "GameMap.h"
+#include "Statistics.h"
 #include "../Xml.h"
 #include "../Useful.h"
 #include <cwchar>
@@ -532,6 +533,8 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
     }
 
     mapfile.destroy();
+
+    Statistics::getInstance()->increaseVisitedRooms();
 
     printf("done.\n");
 }

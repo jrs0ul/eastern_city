@@ -29,7 +29,7 @@ add_library(game SHARED
              src/main/cpp/ShaderProgram.cpp
              src/main/cpp/rm2.cpp
 
-             src/main/cpp/Usefull.cpp
+             src/main/cpp/Useful.cpp
              src/main/cpp/Image.cpp
 
 
@@ -51,6 +51,7 @@ add_library(game SHARED
              src/main/cpp/GameStuff/ItemDatabase.cpp
              src/main/cpp/GameStuff/CraftingRecipes.cpp
              src/main/cpp/GameStuff/Dude.cpp
+             src/main/cpp/GameStuff/Furniture.cpp
              src/main/cpp/FindPath.cpp
 
              )

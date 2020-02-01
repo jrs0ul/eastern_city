@@ -30,6 +30,7 @@
 #include "GameStuff/Rat.h"
 #include "GameStuff/GameMapGraph.h"
 #include "GameStuff/ActorContainer.h"
+#include "GameStuff/Statistics.h"
 
 
 
@@ -42,6 +43,7 @@
 //   #define _DEBUG_ 1
 #endif
 
+static const char* GameVersion = "0.01";
 
 const float posX = 45;
 const float posY = 5;
@@ -117,9 +119,10 @@ public:
     
     
     unsigned globalKEY;
-    
-    
-    
+
+    bool sendStats;
+    char statsPostRequest[666];
+
     bool useAccel;
     Vector3D _acceleration;
     Vector3D firstTouch;
@@ -142,6 +145,16 @@ public:
     {
 
 
+        Statistics::getInstance()->init(GameVersion,
+#ifdef WIN32
+                1
+#else
+                0
+#endif
+                );
+
+
+
 #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
         ScreenWidth = 850;
         ScreenHeight = 480;
@@ -159,6 +172,7 @@ public:
         TimeTicks = 0;
 
         DebugMode = 0;
+        sendStats = false;
     }
     
     void init();
@@ -237,6 +251,8 @@ private:
     GlobalItemList itemsInWorld;
 
     GameMapGraph   mapGraph;
+    int yardMapWidth;
+    int yardMapHeight;
     Room* currentRoom;
 
     ItemContainer* activeContainer;
@@ -253,6 +269,8 @@ private:
     float worldTime;
     float darkness;
     int days;
+
+    time_t sessionStarted;
 
     unsigned fbo;
     unsigned fboTexture;

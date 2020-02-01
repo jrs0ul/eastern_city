@@ -1,0 +1,32 @@
+* Death animation
+* Different item look in the map and inventory
+* Ability to build furnace
+* Ability to group items
+* Main characters attack animation and flying projectile
+* Character's animation without a coat
+* Ability to build furniture/things in general
+* Ability to PAUSE the game
+* Saving
+* Batteries last too long
+* Flashlight preloaded with batteries?
+* light glow around windows
+* Bigger light blob around the main character
+* wider beam for the flashlight
+* Doors with locks
+* Some sort of energy drink/food/pills
+* benches outside
+* dead tree outside
+* A bear enemy
+* more than one room in apartaments
+* stats reporting code
+* a sleep confirmation dialog
+* ability to drag the items nearby with the mouse
+* Make the blanket usable
+* Fix the broken pathfinding outside and pathfinding in general
+* Consuming alcohol should increase your tiredness
+* Characters should be able to go behind furniture
+* When destroying furniture/objects they should drop items that were inside
+* Axe should wear with each use
+* lighter
+* candles. They can be lit when the lighter is equiped
+* ability too cook on the furnace

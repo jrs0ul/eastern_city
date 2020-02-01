@@ -20,9 +20,10 @@
             <Sprite name="fridge" x="509" y="0" width="108" height="146"/>
             <Sprite name="cupboard1" x="619" y="0" width="101" height="118"/>
             <Sprite name="cupboard2" x="722" y="0" width="92" height="118"/>
+            <Sprite name="bigcarpet" x="563" y="385" width="460" height="127"/>
         </Sprites>
     </Img>
-    <Img src="pics/room.tga" width="600" height="406" filter="0" />
+    <Img src="pics/room.tga" width="600" height="374" filter="0" />
     <Img src="pics/stairwell.tga" width="760" height="352" filter="0" />
     <Img src="pics/stairwell2.tga" width="760" height="352" filter="0" />
     <Img src="pics/outside.tga" width="688" height="800" filter="0" />
@@ -48,6 +49,7 @@
             <Sprite name="tunel_back" x="548" y="3" width="247" height="330"/>
             <Sprite name="rat_grafity" x="558" y="449" width="103" height="141"/>
             <Sprite name="tunel_front" x="671" y="388" width="234" height="235"/>
+            <Sprite name="dumpster" x="14" y="676" width="159" height="139"/>
         </Sprites>
     </Img>
 </Images>

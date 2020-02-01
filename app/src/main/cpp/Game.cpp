@@ -247,6 +247,8 @@ void Game::logic(){
 //-------------------------
 void Game::destroy(){
 
+    Statistics::getInstance()->send(days * 240.f + worldTime - 100, time(0) - sessionStarted, true, statsPostRequest);
+    sendStats = true;
 
     glDeleteFramebuffers(1, &fbo);
 
@@ -329,7 +331,9 @@ void Game::renderGame()
         drawPolygon(&pp, colorShader, GL_LINE_STRIP, COLOR(1,0,0,1));
         pp.points.destroy();
 
+        #ifndef __ANDROID__
         glPointSize(10.f);
+        #endif
 
         for (unsigned i = 0; i < path.getNodeCount(); ++i)
         {
@@ -363,10 +367,10 @@ void Game::renderGame()
                   COLOR(0, 0, 0, (stateInTheGame == FADEIN) ? 1.f - fadeProgress : fadeProgress)
                   );
     }
-   
-    if (DebugMode)
-    {
-    }
+
+    mapGraph.drawYardMap(SCREEN_WIDTH - (yardMapWidth + 2) * 16,
+                         64,
+                         pics, currentRoom);
     
     dude.drawInventory(pics, itemDB, selectedItem);
 
@@ -426,7 +430,7 @@ void Game::renderDefeat()
     
     char buf[255];
 
-    float totalTime = days * 240 + worldTime - 10;
+    float totalTime = days * 240 + worldTime - 100;
 
     int survivedDays = totalTime / 240;
 
@@ -656,6 +660,9 @@ void Game::gameLogic()
     if (dude.getHealth() <= 0)
     {
         gameMode = DEFEAT;
+        Statistics::getInstance()->send(days * 240.f + worldTime - 100, time(0) - sessionStarted, false, statsPostRequest);
+        sendStats = true;
+        Statistics::getInstance()->reset();
     }
 
 }
@@ -743,6 +750,8 @@ void Game::titleLogic()
         path.destroy();
         mapGraph.destroy();
         mapGraph.init();
+        mapGraph.findYardMapWidthHeight(yardMapWidth, yardMapHeight);
+        printf("yard map size: %d %d\n", yardMapWidth, yardMapHeight);
         currentRoom = mapGraph.root;
 #ifdef __ANDROID__
         itemsInWorld.load("data/itemLocations.xml", AssetManager);
@@ -750,6 +759,7 @@ void Game::titleLogic()
         itemsInWorld.load("data/itemLocations.xml");
 #endif
         gameMode = GAME;
+        sessionStarted = time(0);
         dude.destroy();
 #ifdef __ANDROID__
         map.load(currentRoom->getMapName(), AssetManager, &itemsInWorld, currentRoom);
@@ -1015,6 +1025,7 @@ void Game::doubleClickContainerItem(ItemInstance* item, void** dud)
         if (!d->isNoMorePlaceInBag(freedSlot))
         {
             d->addItemToInventory(item, freedSlot);
+            Statistics::getInstance()->increaseItemAddition();
             item->setAsRemoved();
         }
     }

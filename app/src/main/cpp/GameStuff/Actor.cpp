@@ -1,5 +1,6 @@
 #include "Actor.h"
 #include "../Useful.h"
+#include <cmath>
 
 Actor::~Actor()
 {

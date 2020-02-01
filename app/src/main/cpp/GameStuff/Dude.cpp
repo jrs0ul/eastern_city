@@ -1,4 +1,5 @@
 #include "Dude.h"
+#include "Statistics.h"
 #include "../TextureLoader.h"
 #include "../Useful.h"
 #include "../gui/Text.h"
@@ -170,6 +171,7 @@ void Dude::update(float deltaTime,
         {
             printf("adding to slot %d\n", replacableItemIndex);
             addItemToInventory(itm, replacableItemIndex);
+            Statistics::getInstance()->increaseItemAddition();
             itm->setAsRemoved();
         }
     }
@@ -221,6 +223,7 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
         return;
     }
 
+
     ItemData* data = itemDb->get(item->getIndex());
 
     if (data->isConsumable)
@@ -262,12 +265,14 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
         }
 
         item->setAsRemoved();
+        Statistics::getInstance()->increaseItemUsage();
     }
     else if (data->isWearable)
     {
         if (equipedItems.addItem(*item, 0))
         {
             item->setAsRemoved();
+            Statistics::getInstance()->increaseEquipedTimes();
         }
     }
     else if (data->isWeapon)
@@ -291,6 +296,7 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
         if (equipedItems.addItem(*item, 1))
         {
             item->setAsRemoved();
+            Statistics::getInstance()->increaseEquipedTimes();
         }
     }
     else if (data->imageIndex == 13) // batteries
@@ -300,6 +306,7 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
             equipedItems.getItem(1)->setAmmoLoaded(1);
             equipedItems.getItem(1)->setQuality(100.f);
             item->setAsRemoved();
+            Statistics::getInstance()->increaseItemUsage();
         }
     }
     
@@ -368,6 +375,7 @@ void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
     }
 
     itemsToRemove.destroy();
+    Statistics::getInstance()->increaseCraftedItems();
 }
 
 bool Dude::checkInventoryInput(float deltaTime,
@@ -378,9 +386,25 @@ bool Dude::checkInventoryInput(float deltaTime,
                                void** doubleClickCallbackData)
 {
     itemBag.setActive(true);
+    unsigned  itemsBefore = itemBag.getActualItemCount();
     bool res = itemBag.checkInput(deltaTime, touches, selectedItem, itemSelected, itemPos, doubleClickCallbackData);
+    unsigned itemsAfter = itemBag.getActualItemCount();
+    
+    if (itemsBefore < itemsAfter)
+    {
+        Statistics::getInstance()->increaseItemAddition();
+    }
+
     equipedItems.setActive(true);
+    itemsBefore = equipedItems.getActualItemCount();
     res = equipedItems.checkInput(deltaTime, touches, selectedItem, itemSelected, itemPos, nullptr);
+    itemsAfter = equipedItems.getActualItemCount();
+    
+    if (itemsBefore < itemsAfter)
+    {
+        Statistics::getInstance()->increaseEquipedTimes();
+    }
+
 
     //printf("%d\n", res);
     return res;

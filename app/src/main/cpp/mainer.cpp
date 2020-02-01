@@ -23,6 +23,7 @@
 
 #include <ctime>
 #include "Game.h"
+#include "Threads.h"
 #include "SDLVideo.h"
 #include "Utils.h"
 #ifdef __APPLE__
@@ -30,7 +31,8 @@
 #include <unistd.h>
 #include <CoreFoundation/CoreFoundation.h>
 #endif
-
+#include <curl/curl.h>
+#include <string>
 
 
 SDLVideo SDL;
@@ -40,6 +42,8 @@ int JoyY = 0;
 int MouseX, MouseY; //relative mouse coords
 int _MouseX, _MouseY;
 unsigned long tick;
+
+static std::string buffer;
 
 Game Game;
 
@@ -172,6 +176,48 @@ void CheckKeys()
         SDL_JoystickClose(0);
     }
 }
+
+static int writer(char *data, size_t size, size_t nmemb,
+                  std::string *buffer){
+
+    int result = 0;
+    if (buffer){
+            buffer->append(data, size * nmemb);
+            result = size * nmemb;
+    }
+
+        return result;
+}
+
+THREADFUNC sendStats(void * args){
+
+    CURLcode result;
+    CURL * cu = 0;
+
+    cu = curl_easy_init();
+    curl_easy_setopt( cu, CURLOPT_POST, 1);
+
+    char request[1024];
+    strcpy(request, Game.statsPostRequest);
+    //puts(request);
+
+    curl_easy_setopt( cu, CURLOPT_POSTFIELDSIZE, strlen(request) );
+
+    curl_easy_setopt( cu, CURLOPT_POSTFIELDS, request ) ;
+
+    curl_easy_setopt(cu, CURLOPT_URL, "http://slavsdream.xyz/stats/index.php");
+    curl_easy_setopt(cu, CURLOPT_FOLLOWLOCATION, 1);
+    curl_easy_setopt(cu, CURLOPT_WRITEFUNCTION, writer);
+    curl_easy_setopt(cu, CURLOPT_WRITEDATA, &buffer);
+
+    result = curl_easy_perform(cu);
+    if (cu)
+    {
+        curl_easy_cleanup(cu);
+    }
+
+    return 0;
+}
 //--------------------
 int main( int   argc, char *argv[] ){
 
@@ -251,11 +297,24 @@ int main( int   argc, char *argv[] ){
 
         process_events();
 
+        if (Game.sendStats)
+        {
+            Thread t;
+            t.create(&sendStats, 0);
+            Game.sendStats = false;
+        }
+
 
 
     }
 
     Game.destroy();
+
+    if (Game.sendStats)
+    {
+        sendStats(nullptr);
+    }
+
 
     SDL.Quit();
 

@@ -22,6 +22,7 @@ code = [
         "app/src/main/cpp/GameStuff/Dude.cpp",
         "app/src/main/cpp/GameStuff/Rat.cpp",
         "app/src/main/cpp/GameStuff/Ghost.cpp",
+        "app/src/main/cpp/GameStuff/Statistics.cpp",
         "app/src/main/cpp/FindPath.cpp",
         "app/src/main/cpp/Useful.cpp",
         "app/src/main/cpp/SDLVideo.cpp",
@@ -33,6 +34,7 @@ code = [
         "app/src/main/cpp/Particles2D.cpp",
         "app/src/main/cpp/Image.cpp",
         "app/src/main/cpp/Shader.cpp",
+        "app/src/main/cpp/Threads.cpp",
         "app/src/main/cpp/ShaderProgram.cpp",
         "app/src/main/cpp/TextureLoader.cpp",
         "app/src/main/cpp/SysConfig.cpp",
@@ -64,7 +66,7 @@ else: #Mac OS X
         env.Append(LINKFLAGS = ['-arch', 'i386'])
     else: #Linux
         env.Append(LIBS = ['SDL2','GL', 'openal', 'vorbisfile',
-                           'ogg', 'pthread'])
+                           'ogg', 'pthread', 'curl'])
 
 
 env.Program(target = "empty", 

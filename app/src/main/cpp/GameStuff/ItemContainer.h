@@ -24,6 +24,7 @@ public:
     ItemInstance* getItem(unsigned index);
     int           hasItem(unsigned itemId);
     unsigned      getItemCount(){return items.count();}
+    unsigned      getActualItemCount();
     unsigned      getSlotCount(){return slotCount;}
     bool          isActive(){return active;}
 

@@ -16,6 +16,23 @@ struct AdditionalVertices
     unsigned index;
 };
 
+class Room;
+
+struct iPos
+{
+    int x;
+    int y;
+    Room* room;
+    bool visited;
+
+    iPos(int nx, int ny)
+    : x(nx)
+    , y(ny)
+    , room(nullptr)
+    , visited(false)
+    {}
+};
+
 class Room
 {
 public:
@@ -97,13 +114,21 @@ public:
 
     void init();
 
+    void buildCity(Room* firstYard, Room* firstBuilding);
+    void makeYard(Room* yard, Room* parent, int reachedFrom, iPos yardPos);
+    bool isYardPositionTaken(iPos pos);
+    void drawYardMap(float x, float y, PicsContainer& pics, Room* currentRoom);
+    void findYardMapWidthHeight(int& w, int& h);
+
     Room* addFloors(Room* mainfloor, unsigned entranceIndex);
 
     void addTunnelLeft(Room* room);
     void addTunnelRight(Room* room);
     void addTunnelBottom(Room* room);
+    void addTunnelFront(Room* room);
     void addFrontBuidingDoor(Room* room);
     void addLeftBuildingDoor(Room* room);
+    void addRightBuildingDoor(Room* room);
 
     void addBuilding(Room* outside, unsigned regionIndex);
 
@@ -118,7 +143,8 @@ public:
                     unsigned assetIndex,
                     float doorWidth = 64.f,
                     float doorwayOffsetX = 0.f,
-                    bool isLeft = true);
+                    bool isLeft = true,
+                    bool connectWithOtherRoom = true);
     
     void generateRoom(Room* floor, 
                       unsigned entryPoint, 
@@ -131,10 +157,15 @@ public:
     void addCupboard(Room* room);
     void addCouch(Room* room, int x, int y);
 
+    void addDumpster(Room* room, int x, int y);
+
     void destroy();
 
 
     Room* root;
+    DArray<iPos> yardPositions;
+    int firstPointX;
+    int firstPointY;
 };
 
 #endif //GAME_MAP_GRAPH_H

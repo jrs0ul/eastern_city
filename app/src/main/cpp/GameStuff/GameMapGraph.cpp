@@ -381,11 +381,16 @@ void Room::destroy(Room* parent, int level)
 }
 
 
+static int yards = 0;
 
 void GameMapGraph::init()
 {
+    yards = 10;
+
     root = new Room();
-    root->setMapName("data/room.xml");
+    root->setMapName("data/genericroom.xml");
+    root->addEntry(Vector3D(350, 278, 0));
+    addDoorway(root, 25, 158, 0, 0, 0, 30, nullptr, 6, 78, 5, true, false);
 
     root->addChildRoom("data/stairwell.xml", 2, 0);
     root->addItem(Vector3D(300, 260, 0), rand() % 2);
@@ -395,7 +400,7 @@ void GameMapGraph::init()
     Furniture ward;
     ward.pictureIndex = 5;
     ward.spriteIndex = 1;
-    ward.pos = Vector3D(480, 180, 0);
+    ward.pos = Vector3D(480, 148, 0);
     ward.collisionBodySize = Vector3D(78, 200, 0);
     ward.collisionPolygon.points.add(Vector3D(2, 169, 0));
     ward.collisionPolygon.points.add(Vector3D(42, 168, 0));
@@ -423,7 +428,7 @@ void GameMapGraph::init()
     root->addItemContainer(1, wardrobe);
     //---
 
-    addCouch(root, 110, 200);
+    addCouch(root, 110, 168);
     
 
     Room* stairwell = root->getChildRoom(0)->room;
@@ -450,54 +455,252 @@ void GameMapGraph::init()
     addDoorway(stairwell, 288, 98, 3, 0, 3, 0, nullptr, 2, 72, 5);
     addDoorway(stairwell, 544, 96, 4, 0, 4, 0,  nullptr, 2, 72, 5);
 
-    //---------
-    Room* outside = stairwell->getChildRoom(0)->room;
-    
-    addFrontBuidingDoor(outside);
-    outside->addChildRoom(stairwell, 0, 0);
-
-    outside->addAsset(Vector3D(421, 132, 0), "pics/outside_sprites.tga", 2);//maroz
-
-    addTunnelLeft(outside);
-    addTunnelRight(outside);
-    addTunnelBottom(outside);
-    //-----------
-    //LEFT
-    outside->addChildRoom("data/out.xml", 2, 1);
-    
-    Room* outsideLeft = outside->getChildRoom(1)->room;
-    addFrontBuidingDoor(outsideLeft);
-    addLeftBuildingDoor(outsideLeft);
-    addTunnelRight(outsideLeft);
-    addBuilding(outsideLeft, 1);
-    addBuilding(outsideLeft, 0);
-
-    //----------
-
-    outside->addChildRoom("data/outsideR.xml", 1, 2);
-    outside->addChildRoom("data/outsideB.xml", 0, 3);
-
-    Room* outsideRight = outside->getChildRoom(2)->room;
-    Room* outsideBottom = outside->getChildRoom(3)->room;
-
-    outsideLeft->addChildRoom(outside, 1, 2);
-    outsideRight->addChildRoom(outside, 2, 1);
-    outsideBottom->addChildRoom(outside, 3, 0);
-
-    outsideRight->addDoorHole(669, 736, 15);
-    outsideBottom->addDoorHole(629, 766, 35);
-
-
-    addBuilding(outsideRight, 0);
-    addBuilding(outsideRight, 2);
-
-    for (int i = 0; i < 15; ++i)
-    {
-        outside->addEnemyPosition(Vector3D(400 + i * 32, 400 + rand() % 100, 0 ));
-    }
+    buildCity(stairwell->getChildRoom(0)->room, stairwell);
 
     poly.points.destroy();
     printf("done generating\n");
+}
+
+void GameMapGraph::buildCity(Room* firstYard, Room* firstBuilding)
+{
+    addFrontBuidingDoor(firstYard);
+    firstYard->addChildRoom(firstBuilding, 0, 0);
+
+    firstYard->addAsset(Vector3D(421, 132, 0), "pics/outside_sprites.tga", 2);//maroz
+
+    
+
+    yardPositions.destroy();
+    makeYard(firstYard, nullptr, -1, iPos(0, 0));
+}
+
+
+void GameMapGraph::makeYard(Room* yard, Room* parent, int reachedFrom, iPos yardPos)
+{
+    --yards;
+    printf("YARD %d, located at (%d %d)\n", yards, yardPos.x, yardPos.y);
+    yardPos.room = yard;
+    yardPositions.add(yardPos);
+
+
+    int entriesInThisYard = rand() % 2 + 1;
+
+    if (entriesInThisYard > yards)
+    {
+        entriesInThisYard = yards;
+    }
+
+    bool canGoUp = !isYardPositionTaken(iPos(yardPos.x, yardPos.y - 1));
+    bool canGoLeft = !isYardPositionTaken(iPos(yardPos.x - 1, yardPos.y));
+    bool canGoRight = !isYardPositionTaken(iPos(yardPos.x + 1, yardPos.y));
+    bool canGoDown = !isYardPositionTaken(iPos(yardPos.x, yardPos.y + 1));
+    
+
+    bool directions[4] = {canGoUp && reachedFrom != 3 && reachedFrom != -1,
+                          canGoLeft && reachedFrom != 2,
+                          canGoRight && reachedFrom != 1,
+                          canGoDown && reachedFrom != 0};
+
+    DArray<int> indexes;
+    for (unsigned i = 0; i < 4; ++i)
+    {
+        if (directions[i] == 1)
+        {
+            indexes.add(i);
+        }
+    }
+
+    if ((int)indexes.count() < entriesInThisYard)
+    {
+        entriesInThisYard = (int)indexes.count();
+    }
+
+
+    memset(directions, 0, sizeof(bool) * 4);
+
+    for (int i = 0; i < entriesInThisYard; ++i)
+    {
+        int r = rand() % indexes.count();
+        int randomIndex = indexes[r];
+        directions[randomIndex] = 1;
+        indexes.remove(r);
+    }
+
+    indexes.destroy();
+
+
+    for (int i = 0; i < rand() % 15; ++i)
+    {
+        yard->addEnemyPosition(Vector3D(400 + i * 32, 400 + rand() % 100, 0 ));
+    }
+
+    //FRONT
+    if (reachedFrom != -1)
+    {
+        if (reachedFrom != 3)
+        {
+            if (directions[0] && !isYardPositionTaken(iPos(yardPos.x, yardPos.y - 1)))
+            {
+                yard->addChildRoom("data/out.xml", 3, 0);
+                addTunnelFront(yard);
+                makeYard(yard->getChildRoom(0)->room, yard, 0, iPos(yardPos.x, yardPos.y - 1));
+            }
+            else
+            {
+                addFrontBuidingDoor(yard);
+                addBuilding(yard, 0);
+            }
+
+        }
+        else
+        {
+            addTunnelFront(yard);
+            yard->addChildRoom(parent, 3, 0);
+        }
+    }
+
+    //LEFT
+    if (reachedFrom != 2)
+    {
+        if (directions[1] && !isYardPositionTaken(iPos(yardPos.x - 1, yardPos.y)))
+        {
+            addTunnelLeft(yard);
+            yard->addChildRoom("data/out.xml", 2, 1);
+
+            makeYard(yard->getChildRoom(1)->room, yard, 1, iPos(yardPos.x - 1, yardPos.y));
+
+
+        }
+        else
+        {
+            addLeftBuildingDoor(yard);
+            addBuilding(yard, 1);
+        }
+    }
+    else
+    {
+        addTunnelLeft(yard);
+        yard->addChildRoom(parent, 2, 1);
+    }
+
+    //RIGHT
+    if (reachedFrom != 1)
+    {
+        if (directions[2] && !isYardPositionTaken(iPos(yardPos.x + 1, yardPos.y)))
+        {
+            addTunnelRight(yard);
+            yard->addChildRoom("data/out.xml", 1, 2);
+            makeYard(yard->getChildRoom(2)->room, yard, 2, iPos(yardPos.x + 1, yardPos.y));
+        }
+        else
+        {
+            addRightBuildingDoor(yard);
+            addBuilding(yard,2);
+        }
+
+    }
+    else
+    {
+        addTunnelRight(yard);
+        yard->addChildRoom(parent, 1, 2);
+    }
+
+    //BOTTOM
+    if (reachedFrom != 0)
+    {
+        if (directions[3] && !isYardPositionTaken(iPos(yardPos.x, yardPos.y + 1)))
+        {
+            addTunnelBottom(yard);
+            yard->addChildRoom("data/out.xml", 0, 3);
+            makeYard(yard->getChildRoom(3)->room, yard, 3, iPos(yardPos.x, yardPos.y + 1));
+        }
+
+    }
+    else
+    {
+        addTunnelBottom(yard);
+        yard->addChildRoom(parent, 0, 3);
+    }
+
+    if (rand() % 5 > 2)
+    {
+        addDumpster(yard, 830 + rand() % 30, 220 + rand() % 50);
+    }
+
+}
+
+bool GameMapGraph::isYardPositionTaken(iPos pos)
+{
+    for (unsigned i = 0; i < yardPositions.count(); ++i)
+    {
+        if (yardPositions[i].x == pos.x && yardPositions[i].y == pos.y)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void GameMapGraph::drawYardMap(float x, float y, PicsContainer& pics, Room* currentRoom)
+{
+    
+    for (unsigned i = 0; i < yardPositions.count(); ++i)
+    {
+        if (!yardPositions[i].visited)
+        {
+            if (currentRoom == yardPositions[i].room)
+            {
+                yardPositions[i].visited = true;
+            }
+
+            continue;
+        }
+
+        COLOR roomColor = (currentRoom == yardPositions[i].room) ? COLOR(1,0,0, 0.6f) : COLOR(1,1,1,0.8f);
+        pics.draw(-1, x + firstPointX * 16 + yardPositions[i].x * 16 ,
+                      y + firstPointY * 16 + yardPositions[i].y * 16, 0, false, 16.f, 16.f, 0.f,
+                  roomColor, roomColor);
+    }
+}
+
+void GameMapGraph::findYardMapWidthHeight(int& w, int& h)
+{
+    int smallestX = 9999;
+    int biggestX = -9999;
+    int smallestY = 9999;
+    int biggestY = -9999;
+    
+    for (unsigned i = 0; i < yardPositions.count(); ++i)
+    {
+        if (yardPositions[i].x > biggestX)
+        {
+            biggestX = yardPositions[i].x;
+        }
+
+        if (yardPositions[i].x < smallestX)
+        {
+            smallestX = yardPositions[i].x;
+        }
+
+        if (yardPositions[i].y > biggestY)
+        {
+            biggestY = yardPositions[i].y;
+        }
+
+        if (yardPositions[i].y < smallestY)
+        {
+            smallestY = yardPositions[i].y;
+        }
+    }
+
+    w = biggestX - smallestX;
+    h = biggestY - smallestY;
+
+    firstPointX = yardPositions[0].x - smallestX;
+    firstPointY = yardPositions[0].y - smallestY;
+
+    printf("%d %d\n", firstPointX, firstPointY);
 }
 
 Room* GameMapGraph::addFloors(Room* mainfloor, unsigned entranceIndex)
@@ -505,14 +708,14 @@ Room* GameMapGraph::addFloors(Room* mainfloor, unsigned entranceIndex)
     mainfloor->addChildRoom("data/stairwell2.xml", 0, 1);
 
     int additionalFloors = rand() % 3 + 1;
-    printf("BUILDING FLOORS: %d\n", additionalFloors + 2);
+    //printf("BUILDING FLOORS: %d\n", additionalFloors + 2);
 
     Room* previousFloor = mainfloor;
     Room* currentFloor = mainfloor->getChildRoom(entranceIndex)->room;;
 
     for (int i = 0; i < additionalFloors; ++i)
     {
-        printf("floor %d\n", 1 + i);
+        //printf("floor %d\n", 1 + i);
 
         if (previousFloor == mainfloor)
         {
@@ -554,6 +757,10 @@ void GameMapGraph::addTunnelLeft(Room* room)
     p.points.destroy();
 
     room->addAsset(Vector3D(25, 151, 0), "pics/outside_sprites.tga", 4);
+    if (rand() % 2 == 0)
+    {
+        room->addAsset(Vector3D(85, 296, 0), "pics/outside_sprites.tga", 6);
+    }
     room->addEntry(Vector3D(44.f, 425.f, 0.f));
     room->addRegion(Vector3D(10.f, 400.f, 0.f), Vector3D(64.f, 128.f, 0.f));
 }
@@ -578,6 +785,14 @@ void GameMapGraph::addTunnelBottom(Room* room)
     room->addRegion(Vector3D(480.f, 765.f, 0.f), Vector3D(370.f, 40.f, 0.f));
     room->addAsset(Vector3D(440, 470, 0), "pics/outside_sprites.tga", 5, false, true);
     room->addAsset(Vector3D(855, 470, 0), "pics/outside_sprites.tga", 5, true, true);
+}
+
+void GameMapGraph::addTunnelFront(Room* room)
+{
+    room->addEntry(Vector3D(700.f, 185.f, 0.f));
+    room->addRegion(Vector3D(674.f, 160.f, 0.f), Vector3D(64.f, 64.f, 0.f));
+    room->addDoorHole(629, 766, 35);
+    room->addAsset(Vector3D(570, 13, 0), "pics/outside_sprites.tga", 7);
 }
 
 void GameMapGraph::addFrontBuidingDoor(Room* room)
@@ -612,6 +827,31 @@ void GameMapGraph::addLeftBuildingDoor(Room* room)
     room->addRegion(Vector3D(120.f, 360.f, 0.f), Vector3D(64.f, 64.f, 0.f));
 }
 
+void GameMapGraph::addRightBuildingDoor(Room* room)
+{
+    Polygon p;
+
+    p.points.add(Vector3D(1119, 370, 0));
+    p.points.add(Vector3D(1042, 403, 0));
+    p.points.add(Vector3D(1049, 417, 0));
+    p.points.add(Vector3D(1153, 369, 0));
+    p.points.add(Vector3D(1156, 352, 0));
+    p.points.add(Vector3D(1214, 403, 0));
+    p.points.add(Vector3D(1214, 413, 0));
+    p.points.add(Vector3D(1272, 475, 0));
+    p.points.add(Vector3D(1266, 496, 0));
+    p.points.add(Vector3D(1179, 567, 0));
+    p.points.add(Vector3D(1260, 577, 0));
+
+    room->addVerticesAfter(p, 1);
+    p.points.destroy();
+
+    room->addAsset(Vector3D(1265, 200, 0), "pics/outside_sprites.tga", 1, true);
+    room->addEntry(Vector3D(1183.f, 370.f, 0.f));
+    room->addRegion(Vector3D(1170.f, 330.f, 0.f), Vector3D(64.f, 64.f, 0.f));
+}
+
+
 void GameMapGraph::addBuilding(Room* outside, unsigned regionIndex)
 {
     outside->addChildRoom("data/stairwell.xml", 0, regionIndex);
@@ -644,7 +884,8 @@ void GameMapGraph::addDoorway(Room* floor,
                               unsigned assetIndex,
                               float doorWidth,
                               float doorwayOffsetX,
-                              bool isLeft)
+                              bool isLeft,
+                              bool connectWithOtherRoom)
 {
 
     floor->addAsset(Vector3D(rx, ry, 0), "pics/test.tga", assetIndex);
@@ -653,6 +894,11 @@ void GameMapGraph::addDoorway(Room* floor,
    
     floor->addRegion(Vector3D(rx + doorwayOffsetX, ry + 64 + regionOffsetY, 0), Vector3D(64,32,0));
     floor->addEntry(Vector3D(rx + 32 + doorwayOffsetX, ry + 64 + 4 + regionOffsetY, 0));
+
+    if (!connectWithOtherRoom)
+    {
+        return;
+    }
 
     if (destination)
     {
@@ -673,27 +919,32 @@ void GameMapGraph::generateRoom(Room* floor,
     floor->addChildRoom("data/genericroom.xml", entryPoint, doorRegion);
     Room* genericRoom = floor->getChildRoom(floor->getChildRoomCount() - 1)->room;
 
+    if (rand() % 3 != 1)
+    {//big carpet
+        genericRoom->addAsset(Vector3D(66, 250, 0), "pics/test.tga", 12);
+    }
+
     int itemArray[] = {5, 3, 8, 0, 6, 7, 10, 11, 4};
-    genericRoom->addItem(Vector3D(250 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
-    genericRoom->addItem(Vector3D(350 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
-    genericRoom->addItem(Vector3D(200 + rand() % 100, 280 + rand() % 100, 0), itemArray[rand() % 9]);
+    genericRoom->addItem(Vector3D(250 + rand() % 100, 248 + rand() % 100, 0), itemArray[rand() % 9]);
+    genericRoom->addItem(Vector3D(350 + rand() % 100, 248 + rand() % 100, 0), itemArray[rand() % 9]);
+    genericRoom->addItem(Vector3D(200 + rand() % 100, 248 + rand() % 100, 0), itemArray[rand() % 9]);
 
     if (isLeft)
     {
         for (int i = 0; i < rand() % 4; ++i)
         {
-            genericRoom->addEnemyPosition(Vector3D(200 + i * 32, 300 + rand() % 100, 0 ));
+            genericRoom->addEnemyPosition(Vector3D(200 + i * 32, 260 + rand() % 100, 0 ));
         }
     }
 
 
     if (isLeft)
     {
-        addDoorway(genericRoom, 25, 190, 0, returnPoint, 0, 30, floor, 6, 78, 5);
+        addDoorway(genericRoom, 25, 158, 0, returnPoint, 0, 30, floor, 6, 78, 5);
     }
     else
     {
-        addDoorway(genericRoom, 500, 195, 0, returnPoint, 0, 20, floor, 7, 56, -12);
+        addDoorway(genericRoom, 500, 163, 0, returnPoint, 0, 20, floor, 7, 56, -12);
     }
 
     if ((rand() % 100) % 2 == 0)
@@ -715,7 +966,7 @@ void GameMapGraph::generateRoom(Room* floor,
 
     if (!isLeft)
     {
-        addCouch(genericRoom, 20, 264);
+        addCouch(genericRoom, 20, 232);
     }
 
 }
@@ -723,7 +974,7 @@ void GameMapGraph::generateRoom(Room* floor,
 void GameMapGraph::addFridge(Room* room)
 {
     Furniture fridge;
-    fridge.pos = Vector3D(472, 235, 0);
+    fridge.pos = Vector3D(472, 203, 0);
     fridge.collisionBodySize = Vector3D(108, 146, 0);
     fridge.spriteIndex = 9;
     fridge.pictureIndex = 5;
@@ -749,7 +1000,7 @@ void GameMapGraph::addFridge(Room* room)
 void GameMapGraph::addTvCupboard(Room* room)
 {
     Furniture tvCupboard;
-    tvCupboard.pos = Vector3D(135, 200, 0);
+    tvCupboard.pos = Vector3D(135, 168, 0);
     tvCupboard.collisionBodySize = Vector3D(101, 118, 0);
     tvCupboard.pictureIndex = 5;
     tvCupboard.spriteIndex = 10;
@@ -776,7 +1027,7 @@ void GameMapGraph::addTvCupboard(Room* room)
 void GameMapGraph::addCupboard(Room* room)
 {
     Furniture cupboard;
-    cupboard.pos = Vector3D(445, 235, 0);
+    cupboard.pos = Vector3D(445, 203, 0);
     cupboard.pictureIndex = 5;
     cupboard.spriteIndex = 11;
     cupboard.collisionBodySize = Vector3D(92, 118, 0);
@@ -818,8 +1069,40 @@ void GameMapGraph::addCouch(Room* room, int x, int y)
     room->addFurniture(&couch);
 }
 
+void GameMapGraph::addDumpster(Room* room, int x, int y)
+{
+    Furniture dumpster;
+    dumpster.pos = Vector3D(x, y, 0);
+    dumpster.pictureIndex = 21;
+    dumpster.spriteIndex = 8;
+    dumpster.collisionBodySize = Vector3D(159, 124, 0);
+
+    dumpster.collisionPolygon.points.add(Vector3D((63 - 54),(329 - 248), 0));
+    dumpster.collisionPolygon.points.add(Vector3D((110 - 54), (323 - 248), 0));
+    dumpster.collisionPolygon.points.add(Vector3D((169 - 54), (325 - 248), 0));
+    dumpster.collisionPolygon.points.add(Vector3D((184 - 54), (355 - 248), 0));
+    dumpster.collisionPolygon.points.add(Vector3D((78 - 54), (355 - 248), 0));
+    dumpster.collisionPolygon.points.add(Vector3D((63 - 54),(329 - 248), 0));
+
+    room->addFurniture(&dumpster);
+
+    ItemContainer container;
+    container.init(3, 3);
+    
+    int junkstuff[] = {1, 4, 8, 20};
+
+    for (int i = 0; i < 3; ++i)
+    {
+        container.addItem(junkstuff[rand() % 4]);
+    }
+
+    room->addItemContainer(room->getFurnitureCount() - 1, container);
+}
+
 void GameMapGraph::destroy()
 {
+    yardPositions.destroy();
+
     if (root)
     {
         printf("Destroying graph... root:%p\n", root);
