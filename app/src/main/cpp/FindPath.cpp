@@ -7,7 +7,7 @@
 
 bool FindPath::find(Vector3D& source,
                   Vector3D& destination,
-                  Polygon* polygons,
+                  SPolygon* polygons,
                   unsigned polygonCount,
                   Vector3D* additionalPathPoints,
                   unsigned additionalPathPointsCount)
@@ -181,7 +181,7 @@ Vector3D* FindPath::getDebugPoint(unsigned index)
 
 void FindPath::makeGraph(Vector3D& source,
                                Vector3D& destination,
-                               Polygon* polygons,
+                               SPolygon* polygons,
                                unsigned polygonCount,
                                Vector3D* additionalPathPoints,
                                unsigned additionalPathPointsCount)
@@ -269,7 +269,7 @@ void FindPath::makeGraph(Vector3D& source,
 }
 
 bool FindPath::isPointOutsidePolygon(Vector3D& destination,
-                                     Polygon* polygon,
+                                     SPolygon* polygon,
                                      unsigned polygonIndex,
                                      bool justCheck)
 {
@@ -330,7 +330,7 @@ bool FindPath::isPointOutsidePolygon(Vector3D& destination,
 }
 
 Vector3D FindPath::findBetterDestination(Vector3D& destination,
-                                          Polygon* polygons,
+                                          SPolygon* polygons,
                                           unsigned polygonCount)
 {
     float shortest = 999999;
@@ -464,7 +464,7 @@ Vector3D FindPath::findBetterDestination(Vector3D& destination,
 bool FindPath::isPointReachable(Vector3D& source,
                                 Vector3D& destination,
                                 float radius,
-                                Polygon* polygons,
+                                SPolygon* polygons,
                                 unsigned polygonCount)
 {
     Vector3D ray = destination - source;
@@ -502,7 +502,7 @@ bool FindPath::isPointReachable(Vector3D& source,
 
 bool FindPath::isPointVisible(Vector3D& source,
         Vector3D& destination,
-        Polygon* polygons,
+        SPolygon* polygons,
         unsigned polygonCount)
 {
     for (unsigned i = 0; i < polygonCount; ++i)
@@ -530,7 +530,7 @@ bool FindPath::isPointVisible(Vector3D& source,
     return true;
 }
 
-bool FindPath::isPointConcave(Polygon* polygonlist,
+bool FindPath::isPointConcave(SPolygon* polygonlist,
                               unsigned polygonIndex,
                               unsigned pointIndex)
 {
@@ -571,7 +571,7 @@ void FindPath::deleteGraph()
 
 
 bool FindPath::CollisionCirclePolygon(Vector3D circle, float radius,
-                                Polygon* polygons,
+                                SPolygon* polygons,
                                 unsigned polygonCount,
                                 bool checkAll
                                 )
@@ -581,7 +581,7 @@ bool FindPath::CollisionCirclePolygon(Vector3D circle, float radius,
 
     for (unsigned long i = 0; i < polygonCount; ++i)
     {
-        Polygon* poly = &polygons[i];
+        SPolygon* poly = &polygons[i];
 
         if (poly->points.count() < 2)
         {

@@ -4,7 +4,7 @@
 #include "../DArray.h"
 #include "../Vectors.h"
 
-struct Polygon
+struct SPolygon
 {
     DArray<Vector3D> points;
 };

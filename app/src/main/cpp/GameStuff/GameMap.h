@@ -52,12 +52,12 @@ public:
                                 float heroX = 0.f, float heroY = 0.f);
 
     unsigned    getPolygonCount(){return polygons.count();}
-    Polygon*    getPolygon(unsigned index){
+    SPolygon*    getPolygon(unsigned index){
                     return (index < polygons.count()) ? &polygons[index] : nullptr;
                 }
     unsigned    getAdditionalPathPointCount(){return addititionalNodePoints.count();}
     Vector3D*   getAdditionalPathPoints(){return (Vector3D*)addititionalNodePoints.getData();}
-    Polygon*    getPolygonData(){return (Polygon*)polygons.getData();}
+    SPolygon*    getPolygonData(){return (SPolygon*)polygons.getData();}
     Vector3D*   getPlayerPos(unsigned index);
     int         getRegionCount(){return regions.count();}
     Region*     getRegion(int index){return &regions[index];}
@@ -81,7 +81,7 @@ private:
     DArray<ItemContainer*> containers;
     DArray<Furniture*>     furniture;
 
-    DArray<Polygon>        polygons;
+    DArray<SPolygon>        polygons;
     DArray<Vector3D>       addititionalNodePoints;
 
     int                    temperature;

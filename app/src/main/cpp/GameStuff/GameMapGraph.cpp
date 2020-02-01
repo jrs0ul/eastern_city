@@ -71,11 +71,11 @@ void Room::addFurniture(Furniture* f)
     furniture.add(fur);
 }
 
-void Room::addCollisionPolygon(Polygon& p)
+void Room::addCollisionPolygon(SPolygon& p)
 {
-    Polygon pol;
+    SPolygon pol;
     collisionPolygons.add(pol);
-    Polygon* pp = &collisionPolygons[collisionPolygons.count() - 1];
+    SPolygon* pp = &collisionPolygons[collisionPolygons.count() - 1];
 
     for (unsigned i = 0; i < p.points.count(); ++i)
     {
@@ -102,7 +102,7 @@ void Room::addEntry(Vector3D pos)
     additionalEntries.add(pos);
 }
 
-void  Room::addVerticesAfter(Polygon& p, unsigned indexToPutVerticesAfter)
+void  Room::addVerticesAfter(SPolygon& p, unsigned indexToPutVerticesAfter)
 {
     AdditionalVertices av;
 
@@ -272,7 +272,7 @@ Vector3D* Room::getAdditionalEntry(unsigned index)
 
 }
 
-Polygon* Room::getCollisionPolygon(unsigned index)
+SPolygon* Room::getCollisionPolygon(unsigned index)
 {
     if (index < collisionPolygons.count())
     {
@@ -445,7 +445,7 @@ void GameMapGraph::init()
     lastFloor->addItem(Vector3D(360, 320, 0), 8);
     lastFloor->addItem(Vector3D(320, 340, 0), 8);
     lastFloor->addItem(Vector3D(360, 305, 0), 8);
-    Polygon poly;
+    SPolygon poly;
     poly.points.add(Vector3D(144, 50, 0));
     poly.points.add(Vector3D(261, 50, 0));
     poly.points.add(Vector3D(262, 205, 0));
@@ -749,7 +749,7 @@ Room* GameMapGraph::addFloors(Room* mainfloor, unsigned entranceIndex)
 
 void GameMapGraph::addTunnelLeft(Room* room)
 {
-    Polygon p;
+    SPolygon p;
     p.points.add(Vector3D(64, 666, 0));
     p.points.add(Vector3D(34, 418, 0));
     p.points.add(Vector3D(208, 432, 0));
@@ -767,7 +767,7 @@ void GameMapGraph::addTunnelLeft(Room* room)
 
 void GameMapGraph::addTunnelRight(Room* room)
 {
-    Polygon p;
+    SPolygon p;
     p.points.add(Vector3D(1167, 427, 0));
     p.points.add(Vector3D(1340, 416, 0));
     p.points.add(Vector3D(1307, 666, 0));
@@ -805,7 +805,7 @@ void GameMapGraph::addFrontBuidingDoor(Room* room)
 
 void GameMapGraph::addLeftBuildingDoor(Room* room)
 {
-    Polygon p;
+    SPolygon p;
 
     p.points.add(Vector3D(89, 610, 0));
     p.points.add(Vector3D(168, 597, 0));
@@ -829,7 +829,7 @@ void GameMapGraph::addLeftBuildingDoor(Room* room)
 
 void GameMapGraph::addRightBuildingDoor(Room* room)
 {
-    Polygon p;
+    SPolygon p;
 
     p.points.add(Vector3D(1119, 370, 0));
     p.points.add(Vector3D(1042, 403, 0));
@@ -859,7 +859,7 @@ void GameMapGraph::addBuilding(Room* outside, unsigned regionIndex)
     building->addChildRoom(outside, regionIndex, 0);
     
     Room* lastFloor = addFloors(building, 1);
-    Polygon poly;
+    SPolygon poly;
     poly.points.add(Vector3D(144, 50, 0));
     poly.points.add(Vector3D(261, 50, 0));
     poly.points.add(Vector3D(262, 205, 0));

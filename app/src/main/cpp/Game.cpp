@@ -316,11 +316,11 @@ void Game::renderGame()
 
         for (unsigned long i = 0; i < map.getPolygonCount(); ++i)
         {
-            Polygon* poly = map.getPolygon(i);
+            SPolygon* poly = map.getPolygon(i);
             drawPolygon(poly, colorShader);
         }
 
-        Polygon pp;
+        SPolygon pp;
 
         for (unsigned long i = 0; i < path.getPathLength(); ++i)
         {
@@ -1184,7 +1184,7 @@ void Game::createEnemies()
 
 }
 
-void Game::drawPolygon(Polygon* poly, ShaderProgram& shader, int method, COLOR c)
+void Game::drawPolygon(SPolygon* poly, ShaderProgram& shader, int method, COLOR c)
 {
     DArray<float> vertices;
     DArray<float> colors;

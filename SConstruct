@@ -54,7 +54,7 @@ if sys.platform == 'win32':
     env.Append(LIBS = ['mingw32','SDL2main', 'SDL2', 'OpenGL32',
 		        'imagehlp', 'dxguid', 'dxerr8',
 			'oleaut32', 'shell32', 'version', 'uuid',
-                       'openal32', 'vorbisfile', 'ole32', 'imm32', 'user32', 'gdi32', 'winmm', 'dinput8', 'vorbis', 'ogg'])
+                       'openal32', 'vorbisfile', 'ole32', 'imm32', 'user32', 'gdi32', 'winmm', 'dinput8', 'vorbis', 'ogg', 'curl'])
 else: #Mac OS X
     if sys.platform == 'darwin':
         env['FRAMEWORKS'] = ['Cocoa', 'SDL', 'OPENGL', 'OpenAL','vorbis', 'Ogg']

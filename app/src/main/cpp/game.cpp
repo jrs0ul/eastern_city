@@ -247,6 +247,8 @@ void Game::logic(){
 //-------------------------
 void Game::destroy(){
 
+    Statistics::getInstance()->send(days * 240.f + worldTime - 100, time(0) - sessionStarted, true, statsPostRequest);
+    sendStats = true;
 
     glDeleteFramebuffers(1, &fbo);
 
@@ -300,7 +302,61 @@ void Game::renderGame()
 {
     map.draw(mapPosX, mapPosY, SCREEN_WIDTH, SCREEN_HEIGHT, pics, itemDB, DebugMode);
     actors.draw(mapPosX, mapPosY, pics, DebugMode);
+    map.drawFrontLayerAssets(mapPosX, mapPosY, *dude.getPos(), pics);
     map.drawDarknessBorder(mapPosX, mapPosY, SCREEN_WIDTH, SCREEN_HEIGHT, pics);
+
+    if (DebugMode)
+    {
+        pics.drawBatch(&colorShader, &defaultShader, 666);
+
+        colorShader.use();
+
+        glDisable(GL_TEXTURE_2D);
+        glLineWidth(4.f);
+
+        for (unsigned long i = 0; i < map.getPolygonCount(); ++i)
+        {
+            SPolygon* poly = map.getPolygon(i);
+            drawPolygon(poly, colorShader);
+        }
+
+        SPolygon pp;
+
+        for (unsigned long i = 0; i < path.getPathLength(); ++i)
+        {
+            Vector3D point = *(path.getPathStep(i));
+            pp.points.add(point);
+        }
+
+        drawPolygon(&pp, colorShader, GL_LINE_STRIP, COLOR(1,0,0,1));
+        pp.points.destroy();
+
+        #ifndef __ANDROID__
+        glPointSize(10.f);
+        #endif
+
+        for (unsigned i = 0; i < path.getNodeCount(); ++i)
+        {
+            Vector3D point = *(path.getNodePos(i));
+            pp.points.add(point);
+        }
+
+        drawPolygon(&pp, colorShader, GL_POINTS, COLOR(1,0,1,1));
+        pp.points.destroy();
+
+        for (unsigned i = 0; i < path.getDebugPointsCount(); ++i)
+        {
+            Vector3D point = *(path.getDebugPoint(i));
+            pp.points.add(point);
+        }
+
+        drawPolygon(&pp, colorShader, GL_POINTS, COLOR(1,1,0,1));
+        pp.points.destroy();
+
+
+        
+        glEnable(GL_TEXTURE_2D);
+    }
 
     drawDarkness();
 
@@ -311,19 +367,10 @@ void Game::renderGame()
                   COLOR(0, 0, 0, (stateInTheGame == FADEIN) ? 1.f - fadeProgress : fadeProgress)
                   );
     }
-   
-    if (DebugMode)
-    {
-        for (unsigned i = 0; i < path.parent.count(); i++)
-        {
-            pics.draw(-1, path.parent[i].x * 32 + mapPosX, 
-                    path.parent[i].y * 32 + mapPosY,
-                    0, false, 32, 32, 0,
-                    COLOR(0,0,1,0.5),
-                    COLOR(0,0,1,0.5));
 
-        }
-    }
+    mapGraph.drawYardMap(SCREEN_WIDTH - (yardMapWidth + 2) * 16,
+                         64,
+                         pics, currentRoom);
     
     dude.drawInventory(pics, itemDB, selectedItem);
 
@@ -383,7 +430,7 @@ void Game::renderDefeat()
     
     char buf[255];
 
-    float totalTime = days * 240 + worldTime - 10;
+    float totalTime = days * 240 + worldTime - 100;
 
     int survivedDays = totalTime / 240;
 
@@ -471,19 +518,23 @@ void Game::gameLogic()
     }
 
    
-    
+    //dude.update(DeltaTime, Keys, map, darkness, itemDB, path);
     updateWorld(DeltaTime);
 
 
     if (activeContainer)
     {
-        if (activeContainer->checkInput(touches, &selectedItem, itemSelected, selectedItemPos))
+        void* data[] = {&dude};
+
+        if (activeContainer->checkInput(DeltaTime, touches, &selectedItem, itemSelected, selectedItemPos, data))
         {
             return;
         }
     }
 
-    dude.checkInventoryInput(touches, &selectedItem, itemSelected, selectedItemPos);
+    void* data[] = {&dude, &itemDB}; 
+
+    dude.checkInventoryInput(DeltaTime, touches, &selectedItem, itemSelected, selectedItemPos, data);
 
     if (touches.move.count())
     {
@@ -495,59 +546,11 @@ void Game::gameLogic()
 
     if (touches.up.count())
     {
-        //----inanimate objects interactions
-        Furniture * fur = map.getClickedFurniture(mapPosX, mapPosY, 
-                                              pics, 
-                                              touches.up[0].x, touches.up[1].y,
-                                              true,
-                                              dude.pos.x, dude.pos.y + 39);
-
-        if (fur)
+        if (interactWithFurniture(touches.up[0].x, touches.up[1].y))
         {
-            if (dude.isWeaponEquiped() == 19)
-            {
-                fur->removed = true;
-                Recipe* r = recipes.getRecipeByFurnitureIndex(fur->spriteIndex);
-                printf("furniture:%d was destroyed %x\n", fur->spriteIndex, r);
-
-                if (r)
-                {
-                    for (unsigned i = 0; i < r->ingredients.count(); ++i)
-                    {
-                        printf("items: %d\n", r->ingredients[i].itemIndex);
-
-                        for (int j = 0; j < r->ingredients[i].count; ++j)
-                        {
-                            currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
-                                        fur->pos.y + fur->collisionBodySize.y, 
-                                        0),
-                                    r->ingredients[i].itemIndex);
-                            map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
-                        }
-
-                    }
-
-                }
-
-                return;
-            }
-
-            if (fur->itemContainerIndex != -1 && (!activeContainer || !activeContainer->isActive()))
-            {
-                activeContainer = map.getItemContainer(fur->itemContainerIndex);
-                activeContainer->setPosition(Vector3D(touches.up[0].x, touches.up[1].y, 0));
-                activeContainer->setActive(true);
-                return;
-            }
-            else if (fur->isBed)
-            {
-                dude.pos.x = fur->pos.x + 113.f;
-                dude.pos.y = fur->pos.y + 67.f;
-                dude.isFlipedX = false;
-                dude.goToSleep();
-            }
+            return;
         }
-
+        
         //---somewhat ugly block-
         for (int i = 0; i < 10; ++i)
         {
@@ -555,21 +558,11 @@ void Game::gameLogic()
                     touches.up[0].y > 445 && touches.up[0].y < 477
                )
             {
-                if (clickOnItem == i)
-                {
-                    printf("using item %d\n", i);
-                    dude.useItem(i, itemDB);
-                    itemSelected = false;
-                    clickOnItem = -1;
-                    return;
-                }
-                else
-                {
-                    clickOnItem = i;
-                }
+              return;            
+            
             }
         }
-        //--
+        //--*/
 
         if (itemSelected)
         {
@@ -624,30 +617,15 @@ void Game::gameLogic()
             return;
         }
 
-        _Point src;
-        Vector3D* dudePos = dude.getPos();
-        src.x = dudePos->x / 32; 
-        src.y = (dudePos->y + 39) / 32;
-        _Point dest;
-        dest.x = (touches.up[0].x - mapPosX) / 32;
-        dest.y = (touches.up[0].y - mapPosY) / 32;
-
-        if (!map.canTraverse(dest.x, dest.y))
-        {  
-            Vector3D res = map.getNearestReachableSquare(dest.x, dest.y);
-
-            if (res.x > -1 && res.y > -1)
-            {
-                dest.x = (int)res.x;
-                dest.y = (int)res.y;
-            }
-        }
-        
-        path.destroy();
-        path.findPath(src, dest, map.getCollisionData(), map.getWidth(), map.getHeight());
+        Vector3D src = Vector3D(dude.getPos()->x, dude.getPos()->y + 39.0f, 0);
+        Vector3D destination = Vector3D(touches.up[0].x - mapPosX, touches.up[0].y - mapPosY, 0);
         dude.resetPathIndex();
-
-        
+        path.find(src, 
+                  destination, 
+                  map.getPolygonData(), 
+                  map.getPolygonCount(), 
+                  map.getAdditionalPathPoints(),
+                  map.getAdditionalPathPointCount());
     }
 
 
@@ -682,6 +660,9 @@ void Game::gameLogic()
     if (dude.getHealth() <= 0)
     {
         gameMode = DEFEAT;
+        Statistics::getInstance()->send(days * 240.f + worldTime - 100, time(0) - sessionStarted, false, statsPostRequest);
+        sendStats = true;
+        Statistics::getInstance()->reset();
     }
 
 }
@@ -726,21 +707,11 @@ void Game::editingLogic()
 {
     if (touches.down.count())
     {
-        int x = (touches.down[0].x - mapPosX) / 32;
-        int y = (touches.down[0].y - mapPosY) / 32;
-
-        //printf("%d %d\n", x, y);
-
-        map.setCollision(x, y, Keys[4]);
-
+        
     }
     else if (touches.move.count())
     {
-        int x = (touches.move[0].x - mapPosX) / 32;
-        int y = (touches.move[0].y - mapPosY) / 32;
-
-        //printf("%d %d\n", x, y);
-        map.setCollision(x, y, Keys[4]);
+      
     }
 
     if (Keys[0])
@@ -776,8 +747,11 @@ void Game::titleLogic()
     if (touches.up.count() && !touches.oldDown.count())
     {
         //mapGraph.init();
+        path.destroy();
         mapGraph.destroy();
         mapGraph.init();
+        mapGraph.findYardMapWidthHeight(yardMapWidth, yardMapHeight);
+        printf("yard map size: %d %d\n", yardMapWidth, yardMapHeight);
         currentRoom = mapGraph.root;
 #ifdef __ANDROID__
         itemsInWorld.load("data/itemLocations.xml", AssetManager);
@@ -785,6 +759,7 @@ void Game::titleLogic()
         itemsInWorld.load("data/itemLocations.xml");
 #endif
         gameMode = GAME;
+        sessionStarted = time(0);
         dude.destroy();
 #ifdef __ANDROID__
         map.load(currentRoom->getMapName(), AssetManager, &itemsInWorld, currentRoom);
@@ -792,6 +767,7 @@ void Game::titleLogic()
         map.load(currentRoom->getMapName(), &itemsInWorld, currentRoom);
 #endif
         dude.init(*map.getPlayerPos(0));
+        dude.addDoubleClickCallbackForItems(&useItem);
 
         createEnemies();
 
@@ -1034,6 +1010,106 @@ void Game::calcDarknessValue()
     darkness = (worldTime >= 60 && worldTime < 200) ? 1.f - sinf(((worldTime - 60) / 140.f) * M_PI) : 1.f;
 }
 
+void Game::doubleClickContainerItem(ItemInstance* item, void** dud)
+{
+    if (item)
+    {
+        if (item->isRemoved())
+        {
+            return;
+        }
+
+        Dude* d = (Dude*)dud[0];
+
+        int freedSlot = d->findFreedInventorySlot();
+        if (!d->isNoMorePlaceInBag(freedSlot))
+        {
+            d->addItemToInventory(item, freedSlot);
+            Statistics::getInstance()->increaseItemAddition();
+            item->setAsRemoved();
+        }
+    }
+}
+
+void Game::useItem(ItemInstance* item, void** data)
+{
+    if (item)
+    {
+        if (item->isRemoved())
+        {
+            return;
+        }
+
+        Dude* dud = (Dude*)data[0];
+        ItemDatabase* db = (ItemDatabase*)data[1];
+
+        if (dud)
+        {
+            dud->useItem(item, db);
+        }
+
+    }
+}
+
+bool Game::interactWithFurniture(float clickX, float clickY)
+{
+    Furniture * fur = map.getClickedFurniture(mapPosX, mapPosY, 
+            pics, 
+            clickX, clickY,
+            true,
+            dude.pos.x, dude.pos.y + 39);
+
+    if (fur)
+    {
+        if (dude.isWeaponEquiped() == 19) //destroying furniture whith an axe
+        {
+            fur->removed = true;
+            Recipe* r = recipes.getRecipeByFurnitureIndex(fur->spriteIndex);
+
+            if (r)
+            {
+                for (unsigned i = 0; i < r->ingredients.count(); ++i)
+                {
+                    printf("items: %d\n", r->ingredients[i].itemIndex);
+
+                    for (int j = 0; j < r->ingredients[i].count; ++j)
+                    {
+                        currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
+                                    fur->pos.y + fur->collisionBodySize.y, 
+                                    0),
+                                r->ingredients[i].itemIndex);
+                        map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+                    }
+
+                }
+
+            }
+
+            map.updateFurniturePolygons(currentRoom);
+
+            return true;
+        }
+
+        if (fur->itemContainerIndex != -1 && (!activeContainer || !activeContainer->isActive()))
+        {
+            activeContainer = map.getItemContainer(fur->itemContainerIndex);
+            activeContainer->setPosition(Vector3D(touches.up[0].x, touches.up[1].y, 0));
+            activeContainer->setActive(true);
+            activeContainer->setDoubleClickCallback(&doubleClickContainerItem);
+            return true;
+        }
+        else if (fur->isBed)
+        {
+            dude.pos.x = fur->pos.x + 113.f;
+            dude.pos.y = fur->pos.y + 67.f;
+            dude.isFlipedX = false;
+            dude.goToSleep();
+        }
+    }
+
+    return false;
+}
+
 void Game::centerCamera(float x, float y)
 {
     const float mapWidth = map.getWidth() * 32.f;
@@ -1106,6 +1182,41 @@ void Game::createEnemies()
 
     actors.addActor(&dude);
 
+}
+
+void Game::drawPolygon(SPolygon* poly, ShaderProgram& shader, int method, COLOR c)
+{
+    DArray<float> vertices;
+    DArray<float> colors;
+    unsigned vertexCount = 0;
+
+    for (unsigned long j = 0; j < poly->points.count(); ++j)
+    {
+
+        colors.add(c.r);
+        colors.add(c.g);
+        colors.add(c.b);
+        colors.add(c.a);
+        vertices.add(poly->points[j].x + mapPosX);
+        vertices.add(poly->points[j].y + mapPosY);
+        ++vertexCount;
+    }
+
+    int attribID = shader.getAttributeID("aPosition"); 
+    int ColorAttribID = shader.getAttributeID("aColor");
+
+    glVertexAttribPointer(attribID, 2, GL_FLOAT, GL_FALSE, 0, vertices.getData());
+    glEnableVertexAttribArray(attribID);
+
+
+    glVertexAttribPointer(ColorAttribID, 4, GL_FLOAT, GL_FALSE, 0, colors.getData());
+    glEnableVertexAttribArray(ColorAttribID);
+
+    glDrawArrays(method, 0, vertexCount);
+    glDisableVertexAttribArray(ColorAttribID);
+    glDisableVertexAttribArray(attribID);
+    vertices.destroy();
+    colors.destroy();
 }
 
 bool Game::handleShooting(float x, float y)

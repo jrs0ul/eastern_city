@@ -1,20 +1,14 @@
 #ifndef GAME_MAP_GRAPH_H
 #define GAME_MAP_GRAPH_H
 
-#include "../DArray.h"
+#include "Polygon.h"
+#include "AdditionalVertices.h"
+#include "Furniture.h"
 #include "ItemContainer.h"
 #include "Asset.h"
 #include "Region.h"
-#include "Polygon.h"
-#include "Furniture.h"
 
 struct RoomAndEntry;
-
-struct AdditionalVertices
-{
-    Polygon p;
-    unsigned index;
-};
 
 class Room;
 
@@ -48,11 +42,11 @@ public:
                                bool flipped = false,
                                bool frontLayer = false);
     void              addFurniture(Furniture* f);
-    void              addCollisionPolygon(Polygon& p);
+    void              addCollisionPolygon(SPolygon& p);
     void              addDoorHole(float x1, float x2, float height = 50.f);
     void              addRegion(Vector3D pos, Vector3D size);
     void              addEntry(Vector3D pos);
-    void              addVerticesAfter(Polygon& p, unsigned indexToPutVerticesAfter);
+    void              addVerticesAfter(SPolygon& p, unsigned indexToPutVerticesAfter);
     void              removeItem(unsigned index);
     unsigned          getItemCount();
     unsigned          getItemContainerCount();
@@ -74,7 +68,7 @@ public:
     Furniture*        getFurniture(unsigned index);
     Region*           getAdditionalRegion(unsigned index);
     Vector3D*         getAdditionalEntry(unsigned index);
-    Polygon*          getCollisionPolygon(unsigned index);
+    SPolygon*          getCollisionPolygon(unsigned index);
     AdditionalVertices* getAdditionalVertices(unsigned index);
     Vector3D*         getDoorHole(unsigned index);
     const char*       getMapName();
@@ -90,7 +84,7 @@ private:
     DArray<Vector3D>            enemies;
     DArray<Asset>               assets;
     DArray<Furniture>           furniture;
-    DArray<Polygon>             collisionPolygons;
+    DArray<SPolygon>             collisionPolygons;
     DArray<Vector3D>            doorHoles;
     DArray<Region>              additionalRegions;
     DArray<Vector3D>            additionalEntries;

@@ -57,7 +57,7 @@ bool Actor::isColiding(Vector3D newPos, Vector3D* movement, GameMap& map)
 
     for (unsigned long i = 0; i < map.getPolygonCount(); ++i)
     {
-        Polygon* poly = map.getPolygon(i);
+        SPolygon* poly = map.getPolygon(i);
 
         if (poly->points.count() < 2)
         {

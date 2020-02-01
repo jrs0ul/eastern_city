@@ -210,7 +210,7 @@ private:
 
     void centerCamera(float x, float y);
     void createEnemies();
-    void drawPolygon(Polygon* poly, ShaderProgram& shader, int method = GL_LINE_STRIP, COLOR c = COLOR(0,0,1,1));
+    void drawPolygon(SPolygon* poly, ShaderProgram& shader, int method = GL_LINE_STRIP, COLOR c = COLOR(0,0,1,1));
 
     bool handleShooting(float x, float y);
     bool handleCrafting(float x, float y);

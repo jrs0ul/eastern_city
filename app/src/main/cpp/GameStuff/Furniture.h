@@ -16,7 +16,7 @@ struct Furniture
 
     void destroy();
 
-    Polygon  collisionPolygon;
+    SPolygon  collisionPolygon;
     Vector3D pos;
     Vector3D collisionBodyPos;
     Vector3D collisionBodySize;

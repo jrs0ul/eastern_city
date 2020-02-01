@@ -41,7 +41,7 @@ public:
 
     bool find(Vector3D& source,
                   Vector3D& destination,
-                  Polygon* polygons,
+                  SPolygon* polygons,
                   unsigned polygonCount,
                   Vector3D* additionalPathPoints,
                   unsigned additionalPathPointsCount);
@@ -60,33 +60,33 @@ private:
 
     void makeGraph(Vector3D& source,
                    Vector3D& destination,
-                   Polygon* polygons,
+                   SPolygon* polygons,
                    unsigned polygonCount,
                    Vector3D* additionalPathPoints,
                    unsigned additionalPathPointsCount);
 
     bool isPointOutsidePolygon(Vector3D& destination,
-                               Polygon* polygons,
+                               SPolygon* polygons,
                                unsigned polygonIndex,
                                bool justCheck = false
                                );
 
     Vector3D findBetterDestination(Vector3D& destination,
-                                    Polygon* polygons,
+                                    SPolygon* polygons,
                                     unsigned polygonCount);
 
     bool isPointReachable(Vector3D& source,
                           Vector3D& destination,
                           float radius,
-                          Polygon* polygons,
+                          SPolygon* polygons,
                           unsigned polygonCount);
 
     bool isPointVisible(Vector3D& source,
                         Vector3D& destination,
-                        Polygon* polygons,
+                        SPolygon* polygons,
                         unsigned polygonCount);
 
-    bool isPointConcave(Polygon* polygonlist,
+    bool isPointConcave(SPolygon* polygonlist,
                          unsigned polygonIndex,
                          unsigned pointIndex);
 
@@ -95,7 +95,7 @@ private:
     void deleteGraph();
 
     bool CollisionCirclePolygon(Vector3D circle, float radius,
-                                Polygon* polygons,
+                                SPolygon* polygons,
                                 unsigned polygonCount,
                                 bool checkAll = false
                                 );

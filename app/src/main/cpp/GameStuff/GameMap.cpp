@@ -87,7 +87,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
 
             if (polygonNode)
             {
-                Polygon poly;
+                SPolygon poly;
 
                 for (unsigned long j = 0; j < polygonNode->childrenCount(); ++j)
                 {
@@ -434,10 +434,10 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
 
         for (unsigned i = 0; i < room->getCollisionPolygonCount(); ++i)
         {
-            Polygon* p = room->getCollisionPolygon(i);
-            Polygon newPol;
+            SPolygon* p = room->getCollisionPolygon(i);
+            SPolygon newPol;
             polygons.add(newPol);
-            Polygon* addedPolygon = &polygons[polygons.count() - 1];
+            SPolygon* addedPolygon = &polygons[polygons.count() - 1];
 
             for (unsigned j = 0; j < p->points.count(); ++j)
             {
@@ -449,7 +449,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
         {
             AdditionalVertices* av = room->getAdditionalVertices(i);
             
-            Polygon pol;
+            SPolygon pol;
 
             for (unsigned j = 0; j <= av->index; ++j)
             {
@@ -520,7 +520,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
             if (fur)
             {
                 furniture.add(fur);
-                Polygon poly;
+                SPolygon poly;
 
                 for (unsigned j = 0; j < fur->collisionPolygon.points.count(); ++j)
                 {
@@ -747,7 +747,7 @@ void GameMap::updateFurniturePolygons(Room* currentRoom)
             continue;
         }
 
-        Polygon pol;
+        SPolygon pol;
 
         for (unsigned j = 0; j < fur->collisionPolygon.points.count(); ++j)
         {
