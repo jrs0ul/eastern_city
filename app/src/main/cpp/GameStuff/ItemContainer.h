@@ -13,7 +13,10 @@ public:
 
     bool          addItem(ItemInstance& item, int slotIndex = -1);
     void          addItem(unsigned itemIndex); //for procedural generation;
-    void          draw(PicsContainer& pics, ItemDatabase& itemDB, ItemInstance* selectedItem);
+    void          draw(PicsContainer& pics,
+                       ItemDatabase& itemDB,
+                       ItemInstance* selectedItem,
+                       bool showQuality = false);
     bool          checkInput(float deltaTime,
                              TouchData& touches, 
                              ItemInstance** selectedItem, 

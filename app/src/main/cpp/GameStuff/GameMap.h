@@ -68,6 +68,9 @@ public:
     int         getTemperature(){return temperature;}
     unsigned    getWidth(){return width;}
     unsigned    getHeight(){return height;}
+    
+    DArray<Furniture*>&   getFurnitureData(){return furniture;}
+
 private:
     void        createDoorHole(float x1, float x2, float height);
 

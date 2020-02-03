@@ -113,7 +113,7 @@ void Game::init(){
 
 
 
-    MatrixOrtho(0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, -400, 400, OrthoMatrix);
+    MatrixOrtho(0.0, ScreenWidth, ScreenHeight, 0.0, -400, 400, OrthoMatrix);
 
     //-----create fbo
     glGenFramebuffers(1, &fbo);
@@ -190,6 +190,8 @@ void Game::init(){
         itemDB.load("data/items.xml");
         recipes.load("data/recipes.xml");
 #endif
+
+        furnitureDB.load("data/furniture.xml");
     }
 
 }
@@ -268,6 +270,7 @@ void Game::destroy(){
     path.destroy();
 
     recipes.destroy();
+    furnitureDB.destroy();
     itemDB.destroy();
     dude.destroy();
     itemsInWorld.destroy();
@@ -300,10 +303,12 @@ void Game::onBack()
 
 void Game::renderGame()
 {
-    map.draw(mapPosX, mapPosY, SCREEN_WIDTH, SCREEN_HEIGHT, pics, itemDB, DebugMode);
-    actors.draw(mapPosX, mapPosY, pics, DebugMode);
+    map.draw(mapPosX, mapPosY, ScreenWidth, ScreenHeight, pics, itemDB, DebugMode);
+    actors.draw(mapPosX, mapPosY, pics, map.getFurnitureData(), DebugMode);
     map.drawFrontLayerAssets(mapPosX, mapPosY, *dude.getPos(), pics);
-    map.drawDarknessBorder(mapPosX, mapPosY, SCREEN_WIDTH, SCREEN_HEIGHT, pics);
+    map.drawDarknessBorder(mapPosX, mapPosY, ScreenWidth, ScreenHeight, pics);
+
+
 
     if (DebugMode)
     {
@@ -362,13 +367,13 @@ void Game::renderGame()
 
     if (stateInTheGame != GAMEPLAY)
     {
-        pics.draw(-1, 0, 0, 0, false, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 
+        pics.draw(-1, 0, 0, 0, false, ScreenWidth, ScreenHeight, 0, 
                   COLOR(0, 0, 0, (stateInTheGame == FADEIN) ? 1.f - fadeProgress : fadeProgress),
                   COLOR(0, 0, 0, (stateInTheGame == FADEIN) ? 1.f - fadeProgress : fadeProgress)
                   );
     }
 
-    mapGraph.drawYardMap(SCREEN_WIDTH - (yardMapWidth + 2) * 16,
+    mapGraph.drawYardMap(ScreenWidth - (yardMapWidth + 2) * 16,
                          64,
                          pics, currentRoom);
     
@@ -393,34 +398,36 @@ void Game::renderGame()
     
     int stats[] = {dude.getHealth(), dude.getSatiation(), dude.getWarmth(), dude.getWakefullness()};
 
+    const float hudStartX = (ScreenWidth / 2) - (2 * 68) - 16;
+
     for (int i = 0; i < 4; ++i)
     {
-        pics.draw(19, 270 + i * 68, 2, i);
+        pics.draw(19, hudStartX + i * 68, 2, i);
         sprintf(buf, "%d", stats[i]);
         COLOR statColor = (stats[i] < 20) ? COLOR(1,0,0,1) : COLOR(1,1,1,1);
-        WriteText(270 + i * 68 + 32, 16, pics, 0, buf, 0.8f, 0.8f, statColor, statColor);
+        WriteText(hudStartX + i * 68 + 32, 16, pics, 0, buf, 0.8f, 0.8f, statColor, statColor);
     }
 
     sprintf(buf, "Temperature:%d", map.getTemperature());
-    WriteText(700, 2, pics, 0, buf, 0.8f, 0.8f);
+    WriteText(ScreenWidth - 150, 2, pics, 0, buf, 0.8f, 0.8f);
     sprintf(buf, "Day %d %dh", days, (int)(worldTime / 10));
-    WriteText(700, 20, pics, 0, buf, 0.8f, 0.8f);
+    WriteText(ScreenWidth - 150, 20, pics, 0, buf, 0.8f, 0.8f);
 
 }
 
 void Game::renderEditing()
 {
-    map.draw(mapPosX, mapPosY, SCREEN_WIDTH, SCREEN_HEIGHT, pics, itemDB, DebugMode);
+    map.draw(mapPosX, mapPosY, ScreenWidth, ScreenHeight, pics, itemDB, DebugMode);
 }
 
 void Game::renderTitle()
 {
     glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
-    pics.draw(3, SCREEN_WIDTH/2.f, SCREEN_HEIGHT/2.f, 0, true);
+    pics.draw(3, ScreenWidth/2.f, ScreenHeight/2.f, 0, true);
 #ifndef __ANDROID__
-    WriteText(SCREEN_WIDTH/2.f - 120, SCREEN_HEIGHT/2.f + 120, pics, 0, "click anywhere to continue...");
+    WriteText(ScreenWidth/2.f - 120, ScreenHeight/2.f + 120, pics, 0, "click anywhere to continue...");
 #else
-    WriteText(SCREEN_WIDTH/2.f - 110, SCREEN_HEIGHT/2.f + 120, pics, 0, "tap anywhere to continue...");
+    WriteText(ScreenWidth/2.f - 110, ScreenHeight/2.f + 120, pics, 0, "tap anywhere to continue...");
 #endif
 }
 
@@ -435,12 +442,12 @@ void Game::renderDefeat()
     int survivedDays = totalTime / 240;
 
     sprintf(buf, "You have survived for %d days %d hours", survivedDays, (int)((totalTime - (survivedDays * 240)) / 10));
-    WriteText(SCREEN_WIDTH/2.f - 120, 100, pics, 0, buf);
+    WriteText(ScreenWidth/2.f - 120, 100, pics, 0, buf);
 
 #ifndef __ANDROID__
-    WriteText(SCREEN_WIDTH/2.f - 120, SCREEN_HEIGHT/2.f + 120, pics, 0, "click anywhere to continue...");
+    WriteText(ScreenWidth/2.f - 120, ScreenHeight/2.f + 120, pics, 0, "click anywhere to continue...");
 #else
-    WriteText(SCREEN_WIDTH/2.f - 110, SCREEN_HEIGHT/2.f + 120, pics, 0, "tap anywhere to continue...");
+    WriteText(ScreenWidth/2.f - 110, ScreenHeight/2.f + 120, pics, 0, "tap anywhere to continue...");
 #endif
 
 }
@@ -551,7 +558,7 @@ void Game::gameLogic()
             return;
         }
         
-        //---somewhat ugly block-
+        //---somewhat ugly block which is no longer functional
         for (int i = 0; i < 10; ++i)
         {
             if (touches.up[0].x > 100 + i * 34 && touches.up[0].x < 100 + i * 34 + 32 &&
@@ -766,7 +773,7 @@ void Game::titleLogic()
 #else
         map.load(currentRoom->getMapName(), &itemsInWorld, currentRoom);
 #endif
-        dude.init(*map.getPlayerPos(0));
+        dude.init(*map.getPlayerPos(0), ScreenWidth, ScreenHeight);
         dude.addDoubleClickCallbackForItems(&useItem);
 
         createEnemies();
@@ -946,6 +953,7 @@ void Game::drawDarkness()
     pics.drawBatch(&colorShader, &defaultShader, 666);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, ScreenWidth, ScreenHeight);
+    //printf("%d %d\n", ScreenWidth, ScreenHeight);
 
     int dark  = darknessShader.getUniformID("uDarkness");
     int light = darknessShader.getUniformID("uLight");
@@ -956,11 +964,11 @@ void Game::drawDarkness()
 
 
     float verts[] = {0, 0, 
-        SCREEN_WIDTH, 0,
-        SCREEN_WIDTH, SCREEN_HEIGHT,
+        ScreenWidth * 1.f, 0,
+        ScreenWidth * 1.f, ScreenHeight * 1.f,
         0, 0,
-        SCREEN_WIDTH, SCREEN_HEIGHT,
-        0, SCREEN_HEIGHT};
+        ScreenWidth * 1.f, ScreenHeight * 1.f,
+        0, ScreenHeight * 1.f};
 
     float uvs[] = {
         0,1,//0,0,
@@ -1063,8 +1071,17 @@ bool Game::interactWithFurniture(float clickX, float clickY)
     {
         if (dude.isWeaponEquiped() == 19) //destroying furniture whith an axe
         {
+            printf("YOU ATEMPTED TO DESTROY!!!ĄĄ\n");
+            printf("Furniture db index %d\n", fur->furnitureDbIndex);
+
             fur->removed = true;
-            Recipe* r = recipes.getRecipeByFurnitureIndex(fur->spriteIndex);
+            Recipe* r = recipes.getRecipeByFurnitureIndex(fur->furnitureDbIndex);
+            FurnitureData* fd = furnitureDB.getFurniture(fur->furnitureDbIndex);
+
+            if (fd)
+            {
+                printf("Axe dmg: %u\n", fd->damageToAxe);
+            }
 
             if (r)
             {
@@ -1081,6 +1098,30 @@ bool Game::interactWithFurniture(float clickX, float clickY)
                         map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
                     }
 
+                    if (fur->itemContainerIndex != -1)
+                    {
+                        ItemContainer* ic = map.getItemContainer(fur->itemContainerIndex);
+                        for (unsigned j = 0; j < ic->getItemCount(); ++j)
+                        {
+                            ItemInstance* item = ic->getItem(j);
+
+                            if (!item->isRemoved())
+                            {
+                                 currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
+                                    fur->pos.y + fur->collisionBodySize.y, 
+                                    0),
+                                item);
+                        map.addItem(item);
+                            }
+                        }
+                        
+                    }
+
+                }
+
+                if (fd)
+                {
+                    dude.wearWeapon(fd->damageToAxe * -1.f);
                 }
 
             }
@@ -1115,42 +1156,42 @@ void Game::centerCamera(float x, float y)
     const float mapWidth = map.getWidth() * 32.f;
     const float mapHeight = map.getHeight() * 32.f;
 
-    if (mapWidth > SCREEN_WIDTH)
+    if (mapWidth > ScreenWidth)
     {
-        mapPosX = SCREEN_WIDTH / 2.f - dude.pos.x;
+        mapPosX = ScreenWidth / 2.f - dude.pos.x;
 
         if (mapPosX > 0)
         {
             mapPosX = 0;
         }
 
-        if (mapPosX + mapWidth < SCREEN_WIDTH)
+        if (mapPosX + mapWidth < ScreenWidth)
         {
-            mapPosX =  SCREEN_WIDTH - mapWidth;
+            mapPosX =  ScreenWidth - mapWidth;
         }
     }
     else
     {
-        mapPosX = SCREEN_WIDTH / 2.f - mapWidth / 2.f;
+        mapPosX = ScreenWidth / 2.f - mapWidth / 2.f;
     }
 //----
-    if (mapHeight > SCREEN_HEIGHT)
+    if (mapHeight > ScreenHeight)
     {
-        mapPosY = SCREEN_HEIGHT / 2.f - dude.pos.y;
+        mapPosY = ScreenHeight / 2.f - dude.pos.y;
 
         if (mapPosY > 0)
         {
             mapPosY = 0;
         }
 
-        if (mapPosY + mapHeight < SCREEN_HEIGHT)
+        if (mapPosY + mapHeight < ScreenHeight)
         {
-            mapPosY = SCREEN_HEIGHT - mapHeight;
+            mapPosY = ScreenHeight - mapHeight;
         }
     }
     else
     {
-        mapPosY = SCREEN_HEIGHT / 2.f  - mapHeight / 2.f;
+        mapPosY = ScreenHeight / 2.f  - mapHeight / 2.f;
     }
 
 

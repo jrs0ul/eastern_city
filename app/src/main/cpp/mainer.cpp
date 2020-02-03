@@ -69,8 +69,8 @@ void Logic(){
 static void  process_events(){
     
     SDL_Event event;
-    float scaleX = 850.0f/Game.ScreenWidth;
-    float scaleY = 480.0f/Game.ScreenHeight;
+    float scaleX = 1.f;//850.f/Game.ScreenWidth;
+    float scaleY = 1.f;//480.f/Game.ScreenHeight;
 
     while( SDL_PollEvent( &event ) ) {
 
@@ -211,6 +211,11 @@ THREADFUNC sendStats(void * args){
     curl_easy_setopt(cu, CURLOPT_WRITEDATA, &buffer);
 
     result = curl_easy_perform(cu);
+    if (result != CURLE_OK)
+    {
+        printf("ERROR sending stats");
+    }
+
     if (cu)
     {
         curl_easy_cleanup(cu);

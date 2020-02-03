@@ -1,12 +1,15 @@
 #ifndef FURNITURE_H
 #define FURNITURE_H
 
+#include "Drawable.h"
 #include "Polygon.h"
 
-struct Furniture
+class Furniture : public Drawable
 {
+public:
     Furniture()
-    : collisionBodyPos(0, 0, 0)
+    : Drawable()
+    , collisionBodyPos(0, 0, 0)
     , itemContainerIndex(-1)
     , colidedWithHero(false)
     , isBed(false)
@@ -15,14 +18,19 @@ struct Furniture
     }
 
     void destroy();
+    void draw(float offsetX, float offsetY,
+              PicsContainer& pics,
+              bool debugInfo = false);
+    //void test(){}
 
-    SPolygon  collisionPolygon;
-    Vector3D pos;
+
+    SPolygon collisionPolygon;
     Vector3D collisionBodyPos;
     Vector3D collisionBodySize;
     int      spriteIndex;
     int      pictureIndex;
     int      itemContainerIndex;
+    int      furnitureDbIndex;
     bool     colidedWithHero;
     bool     isBed;
     bool     removed;

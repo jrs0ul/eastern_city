@@ -20,6 +20,7 @@ void Actor::destroy()
 void Actor::draw(float offsetX, float offsetY,
                  PicsContainer& pics, bool debugInfo)
 {
+
     int frame = animations[animationSubset].frames[animationFrame];
     pics.draw(pics.findByName(spriteName), 
               pos.x + offsetX + animations[animationSubset].offsetX, 

@@ -1,6 +1,7 @@
 #ifndef ACTOR_H
 #define ACTOR_H
 
+#include "Drawable.h"
 #include "GameMap.h"
 #include "../Vectors.h"
 
@@ -18,15 +19,17 @@ struct FrameSet
 
 class GameMap;
 
-class Actor
+class Actor : public Drawable
 {
 public:
     virtual         ~Actor();
     void            destroy();
     void            kill(){isDead = true;}
+
     void            draw(float offsetX, float offsetY,
                          PicsContainer& pics, 
-                         bool debugInfo = false);
+                         bool debugInfo = false) override;
+
     bool            isColiding(Vector3D newPos, Vector3D* movement, GameMap& map);
     virtual int     getType(){return -1;}
     void            setHealth(float newHealth);
@@ -38,8 +41,6 @@ protected:
 public:
     DArray<FrameSet> animations;
     char             spriteName[256];
-    Vector3D         pos;
-    Vector3D         collisionBodyOffset;
     float            collisionBodyRadius;
     float            health;
     float            animationProgress;

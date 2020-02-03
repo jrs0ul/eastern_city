@@ -45,14 +45,16 @@ public:
         _count++;
 
         if (_count == 1)
+        {
             mas = (T *)malloc(capacity*sizeof(T));
-        else
-        if ( _count > capacity ){
+        }
+        else if ( _count > capacity )
+        {
             capacity += batch;
-            mas = (T *)realloc(mas, sizeof(T)*capacity);
+            mas = (T *)realloc(mas, sizeof(T) * capacity);
         }
 
-        mas[_count-1]=newitem;
+        mas[_count - 1] = newitem;
 
     }
     //---------------------------

@@ -513,6 +513,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
 
         polygonsBeforeFurnitureAdded = polygons.count();
 
+
         for (unsigned i = 0; i < room->getFurnitureCount(); ++i)
         {
             Furniture* fur = room->getFurniture(i);
@@ -656,22 +657,7 @@ void GameMap::draw(float posX,
                    1.f
                   );
     }
-
-    for (unsigned i = 0; i < furniture.count(); ++i)
-    {
-        if (furniture[i]->removed)
-        {
-            continue;
-        }
-
-        COLOR furnitureColor = (furniture[i]->colidedWithHero) ? COLOR(2.f, 2.f, 2.f, 1) : COLOR(1, 1, 1, 1);
-        pics.draw(furniture[i]->pictureIndex,
-                  furniture[i]->pos.x + posX,
-                  furniture[i]->pos.y + posY,
-                  furniture[i]->spriteIndex,
-                  false, 1,1, 0, furnitureColor, furnitureColor);
-    }
-
+ 
     for (unsigned i = 0; i < items.count(); ++i)
     {
         if (items[i]->isRemoved())

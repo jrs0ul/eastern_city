@@ -12,7 +12,7 @@
 class Dude : public Actor
 {
 public:
-    void          init(Vector3D& position);
+    void          init(Vector3D& position, int ScreenWidth, int ScreenHeight);
     void          destroy();
     void          update(float deltaTime, 
                          unsigned char* Keys, 
@@ -38,6 +38,8 @@ public:
     void          resetPathIndex(){pathIndex = 0;}
     void          goToSleep();
     void          stopSleep(){sleeping = false;}
+
+    void          wearWeapon(float damage);
 
     int           isClothesEquiped();
     int           isWeaponEquiped();

@@ -41,7 +41,7 @@ public:
                                unsigned spriteIndex,
                                bool flipped = false,
                                bool frontLayer = false);
-    void              addFurniture(Furniture* f);
+    void              addFurniture(Furniture& f);
     void              addCollisionPolygon(SPolygon& p);
     void              addDoorHole(float x1, float x2, float height = 50.f);
     void              addRegion(Vector3D pos, Vector3D size);
@@ -83,8 +83,8 @@ private:
     DArray<ItemInstance>        items;
     DArray<Vector3D>            enemies;
     DArray<Asset>               assets;
-    DArray<Furniture>           furniture;
-    DArray<SPolygon>             collisionPolygons;
+    DArray<Furniture*>          furniture;
+    DArray<SPolygon>            collisionPolygons;
     DArray<Vector3D>            doorHoles;
     DArray<Region>              additionalRegions;
     DArray<Vector3D>            additionalEntries;
@@ -146,6 +146,7 @@ public:
                       unsigned returnPoint,
                       bool isLeft = true);
 
+    void addWardrobe(Room* room);
     void addFridge(Room* room);
     void addTvCupboard(Room* room);
     void addCupboard(Room* room);

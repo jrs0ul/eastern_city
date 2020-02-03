@@ -39,18 +39,22 @@
         <Ingredient itemIndex="6" count="5"/>
         <Ingredient itemIndex="8" count="1"/>
     </Recipe>
-    <Recipe resultFurnitureIndex="9" craftable="0">
+    <Recipe resultFurnitureIndex="2" craftable="0">
         <Ingredient itemIndex="20" count="4"/>
         <Ingredient itemIndex="7" count="2"/>
         <Ingredient itemIndex="8" count="1"/>
     </Recipe>
-    <Recipe resultFurnitureIndex="10" craftable="0">
+    <Recipe resultFurnitureIndex="3" craftable="0">
         <Ingredient itemIndex="6" count="3"/>
         <Ingredient itemIndex="8" count="2"/>
         <Ingredient itemIndex="20" count="1"/>
     </Recipe>
-    <Recipe resultFurnitureIndex="11" craftable="0">
+    <Recipe resultFurnitureIndex="4" craftable="0">
         <Ingredient itemIndex="6" count="3"/>
         <Ingredient itemIndex="8" count="1"/>
+    </Recipe>
+    <Recipe resultFurnitureIndex="5" craftable="0">
+        <Ingredient itemIndex="20" count="4"/>
+        <Ingredient itemIndex="8" count="3"/>
     </Recipe>
 </Recipes>

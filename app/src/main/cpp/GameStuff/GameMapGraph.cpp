@@ -41,7 +41,7 @@ void Room::addItemContainer(unsigned furnitureIndex, ItemContainer& container)
         return;
     }
 
-    furniture[furnitureIndex].itemContainerIndex = itemContainers.count();
+    furniture[furnitureIndex]->itemContainerIndex = itemContainers.count();
     itemContainers.add(container);
 }
 
@@ -65,9 +65,36 @@ void Room::addAsset(Vector3D pos,
     assets.add(ass);
 }
 
-void Room::addFurniture(Furniture* f)
+void Room::addFurniture(Furniture& f)
 {
-    Furniture fur = *f;
+    Furniture* fur = new Furniture();
+
+    fur->isBed = f.isBed;
+    fur->removed = f.removed;
+    fur->colidedWithHero = f.colidedWithHero;
+    fur->pictureIndex = f.pictureIndex;
+    fur->spriteIndex = f.spriteIndex;
+    fur->collisionBodySize = f.collisionBodySize;
+    fur->collisionBodyPos = f.collisionBodyPos;
+    fur->furnitureDbIndex = f.furnitureDbIndex;
+
+    float smallestY = 99999;
+
+    for (unsigned i = 0; i < f.collisionPolygon.points.count(); ++i)
+    {
+        if (f.collisionPolygon.points[i].y < smallestY)
+        {
+            smallestY = f.collisionPolygon.points[i].y;
+        }
+
+        fur->collisionPolygon.points.add(f.collisionPolygon.points[i]);
+        
+    }
+
+    fur->pos = f.pos;
+
+    fur->collisionBodyOffset = Vector3D(0, smallestY, 0);
+
     furniture.add(fur);
 }
 
@@ -244,7 +271,7 @@ Furniture* Room::getFurniture(unsigned index)
 {
     if (index < furniture.count())
     {
-        return &furniture[index];
+        return furniture[index];
     }
 
     return nullptr;
@@ -370,7 +397,8 @@ void Room::destroy(Room* parent, int level)
     
     for (unsigned i = 0; i < furniture.count(); ++i)
     {
-        furniture[i].destroy();
+        furniture[i]->destroy();
+        delete furniture[i];
     }
 
     furniture.destroy();
@@ -396,38 +424,7 @@ void GameMapGraph::init()
     root->addItem(Vector3D(300, 260, 0), rand() % 2);
 
     addCupboard(root);
-    //---
-    Furniture ward;
-    ward.pictureIndex = 5;
-    ward.spriteIndex = 1;
-    ward.pos = Vector3D(480, 148, 0);
-    ward.collisionBodySize = Vector3D(78, 200, 0);
-    ward.collisionPolygon.points.add(Vector3D(2, 169, 0));
-    ward.collisionPolygon.points.add(Vector3D(42, 168, 0));
-    ward.collisionPolygon.points.add(Vector3D(70, 185, 0));
-    ward.collisionPolygon.points.add(Vector3D(25, 187, 0));
-    ward.collisionPolygon.points.add(Vector3D(2, 169, 0));
-
-
-    root->addFurniture(&ward);
-
-    ItemContainer wardrobe;
-    wardrobe.init(10, 3);
-
-    int itemArray[] = {5, 3, 8, 0, 6, 7, 10, 11, 4};
-
-
-    wardrobe.addItem(itemArray[rand() % 9]);
-    wardrobe.addItem(itemArray[rand() % 9]);
-    wardrobe.addItem(itemArray[rand() % 9]);
-    wardrobe.addItem(12);
-    wardrobe.addItem(13);
-    wardrobe.addItem(2);
-    wardrobe.addItem(19);
-   
-    root->addItemContainer(1, wardrobe);
-    //---
-
+    addWardrobe(root);
     addCouch(root, 110, 168);
     
 
@@ -971,6 +968,43 @@ void GameMapGraph::generateRoom(Room* floor,
 
 }
 
+void GameMapGraph::addWardrobe(Room* room)
+{
+    Furniture ward;
+    ward.pictureIndex = 5;
+    ward.spriteIndex = 1;
+    ward.furnitureDbIndex = 1;
+    ward.pos = Vector3D(480, 148, 0);
+    ward.collisionBodySize = Vector3D(78, 200, 0);
+    ward.collisionPolygon.points.add(Vector3D(2, 169, 0));
+    ward.collisionPolygon.points.add(Vector3D(42, 168, 0));
+    ward.collisionPolygon.points.add(Vector3D(70, 185, 0));
+    ward.collisionPolygon.points.add(Vector3D(25, 187, 0));
+    ward.collisionPolygon.points.add(Vector3D(2, 169, 0));
+
+
+    room->addFurniture(ward);
+
+    ward.destroy();
+
+    ItemContainer wardrobe;
+    wardrobe.init(10, 3);
+
+    int itemArray[] = {5, 3, 8, 0, 6, 7, 10, 11, 4};
+
+
+    wardrobe.addItem(itemArray[rand() % 9]);
+    wardrobe.addItem(itemArray[rand() % 9]);
+    wardrobe.addItem(itemArray[rand() % 9]);
+    wardrobe.addItem(12);
+    wardrobe.addItem(13);
+    wardrobe.addItem(2);
+    wardrobe.addItem(19);
+   
+    room->addItemContainer(1, wardrobe);
+
+}
+
 void GameMapGraph::addFridge(Room* room)
 {
     Furniture fridge;
@@ -978,13 +1012,17 @@ void GameMapGraph::addFridge(Room* room)
     fridge.collisionBodySize = Vector3D(108, 146, 0);
     fridge.spriteIndex = 9;
     fridge.pictureIndex = 5;
+    fridge.furnitureDbIndex = 2;
     fridge.collisionPolygon.points.add(Vector3D(5, 90, 0));
     fridge.collisionPolygon.points.add(Vector3D(45, 90, 0));
     fridge.collisionPolygon.points.add(Vector3D(70, 120, 0));
     fridge.collisionPolygon.points.add(Vector3D(30, 120, 0));
     fridge.collisionPolygon.points.add(Vector3D(5, 90, 0));
 
-    room->addFurniture(&fridge);
+    room->addFurniture(fridge);
+
+    fridge.destroy();
+
     ItemContainer container;
     container.init(6, 3);
     int foods[] = {1, 0, 10, 14, 15};
@@ -1004,13 +1042,17 @@ void GameMapGraph::addTvCupboard(Room* room)
     tvCupboard.collisionBodySize = Vector3D(101, 118, 0);
     tvCupboard.pictureIndex = 5;
     tvCupboard.spriteIndex = 10;
+    tvCupboard.furnitureDbIndex = 3;
     tvCupboard.collisionPolygon.points.add(Vector3D(60, 73, 0));
     tvCupboard.collisionPolygon.points.add(Vector3D(94, 75, 0));
     tvCupboard.collisionPolygon.points.add(Vector3D(42, 104, 0));
     tvCupboard.collisionPolygon.points.add(Vector3D(4, 96, 0));
     tvCupboard.collisionPolygon.points.add(Vector3D(60, 73, 0));
 
-    room->addFurniture(&tvCupboard);
+    room->addFurniture(tvCupboard);
+
+    tvCupboard.destroy();
+
     ItemContainer container;
     container.init(3, 1);
 
@@ -1030,6 +1072,7 @@ void GameMapGraph::addCupboard(Room* room)
     cupboard.pos = Vector3D(445, 203, 0);
     cupboard.pictureIndex = 5;
     cupboard.spriteIndex = 11;
+    cupboard.furnitureDbIndex = 4;
     cupboard.collisionBodySize = Vector3D(92, 118, 0);
     cupboard.collisionPolygon.points.add(Vector3D(1, 62, 0));
     cupboard.collisionPolygon.points.add(Vector3D(44, 62, 0));
@@ -1037,7 +1080,10 @@ void GameMapGraph::addCupboard(Room* room)
     cupboard.collisionPolygon.points.add(Vector3D(34, 107, 0));
     cupboard.collisionPolygon.points.add(Vector3D(1, 62, 0));
 
-    room->addFurniture(&cupboard);
+    room->addFurniture(cupboard);
+
+    cupboard.destroy();
+
     ItemContainer container2;
     container2.init(4, 2);
     
@@ -1058,6 +1104,7 @@ void GameMapGraph::addCouch(Room* room, int x, int y)
     couch.pictureIndex = 5;
     couch.spriteIndex = 0;
     couch.isBed = true;
+    couch.furnitureDbIndex = 0;
     couch.collisionBodySize = Vector3D(150, 126, 0);
 
     couch.collisionPolygon.points.add(Vector3D(80, 60, 0));
@@ -1066,7 +1113,9 @@ void GameMapGraph::addCouch(Room* room, int x, int y)
     couch.collisionPolygon.points.add(Vector3D(70, 105, 0));
     couch.collisionPolygon.points.add(Vector3D(5, 95, 0));
     couch.collisionPolygon.points.add(Vector3D(80, 60, 0));
-    room->addFurniture(&couch);
+    room->addFurniture(couch);
+
+    couch.destroy();
 }
 
 void GameMapGraph::addDumpster(Room* room, int x, int y)
@@ -1075,6 +1124,7 @@ void GameMapGraph::addDumpster(Room* room, int x, int y)
     dumpster.pos = Vector3D(x, y, 0);
     dumpster.pictureIndex = 21;
     dumpster.spriteIndex = 8;
+    dumpster.furnitureDbIndex = 5;
     dumpster.collisionBodySize = Vector3D(159, 124, 0);
 
     dumpster.collisionPolygon.points.add(Vector3D((63 - 54),(329 - 248), 0));
@@ -1084,7 +1134,9 @@ void GameMapGraph::addDumpster(Room* room, int x, int y)
     dumpster.collisionPolygon.points.add(Vector3D((78 - 54), (355 - 248), 0));
     dumpster.collisionPolygon.points.add(Vector3D((63 - 54),(329 - 248), 0));
 
-    room->addFurniture(&dumpster);
+    room->addFurniture(dumpster);
+
+    dumpster.destroy();
 
     ItemContainer container;
     container.init(3, 3);

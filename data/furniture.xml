@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<Furniture>
+    <Object name="Couch" index="0">
+        <AxeDamage>30</AxeDamage>
+        <SpriteIndex>0</SpriteIndex>
+        <PictureIndex>5</PictureIndex>
+    </Object>
+    <Object name="Wardrobe" index="1">
+        <AxeDamage>20</AxeDamage>
+        <SpriteIndex>1</SpriteIndex>
+        <PictureIndex>5</PictureIndex>
+    </Object>
+    <Object name="Fridge" index="2">
+        <AxeDamage>40</AxeDamage>
+        <SpriteIndex>9</SpriteIndex>
+        <PictureIndex>5</PictureIndex>
+    </Object>
+    <Object name="Cupboard1" index="3">
+        <AxeDamage>20</AxeDamage>
+        <SpriteIndex>10</SpriteIndex>
+        <PictureIndex>5</PictureIndex>
+    </Object>
+    <Object name="Cupboard2" index="4">
+        <AxeDamage>20</AxeDamage>
+        <SpriteIndex>11</SpriteIndex>
+        <PictureIndex>5</PictureIndex>
+    </Object>
+    <Object name="Dumpster" index="5">
+        <AxeDamage>60</AxeDamage>
+        <SpriteIndex>8</SpriteIndex>
+        <PictureIndex>21</PictureIndex>
+    </Object>
+</Furniture>

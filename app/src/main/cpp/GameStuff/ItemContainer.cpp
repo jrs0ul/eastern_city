@@ -1,4 +1,5 @@
 #include "ItemContainer.h"
+#include "../gui/Text.h"
 #include <cmath>
 
 void ItemContainer::init(unsigned sCount, unsigned newWidth)
@@ -70,7 +71,10 @@ void ItemContainer::addItem(unsigned itemIndex)
     items.add(item);
 }
 
-void ItemContainer::draw(PicsContainer& pics, ItemDatabase& itemDB, ItemInstance* selectedItem)
+void ItemContainer::draw(PicsContainer& pics, 
+                         ItemDatabase& itemDB, 
+                         ItemInstance* selectedItem,
+                         bool showQuality)
 {
 
     unsigned col = 0;
@@ -93,12 +97,20 @@ void ItemContainer::draw(PicsContainer& pics, ItemDatabase& itemDB, ItemInstance
     col = 0;
     row = 0;
 
+    char buf[50];
+
     for (unsigned i = 0; i < items.count(); ++i)
     {
         if (!items[i].isRemoved() && selectedItem != &items[i])
         {
             ItemData* data = itemDB.get(items[i].getIndex());
             pics.draw(4, pos.x + col * 34, pos.y + row * 34, data->imageIndex);
+
+            if (showQuality)
+            {
+                sprintf(buf, "%.1f", items[i].getQuality());
+                WriteShadedText(pos.x + col * 34, pos.y + row * 34 + 20, pics, 0, buf, 0.6f, 0.6f);
+            }
         }
 
         ++col;

@@ -5,7 +5,7 @@
 #include "../gui/Text.h"
 #include <cmath>
 
-void Dude::init(Vector3D& position)
+void Dude::init(Vector3D& position, int ScreenWidth, int ScreenHeight)
 {
     pathIndex = 0;
     animationFrame = 0;
@@ -21,9 +21,9 @@ void Dude::init(Vector3D& position)
     sleeping = false;
     sleepAnimationDone = true;
     itemBag.init(10, 10);
-    itemBag.setPosition(Vector3D(100, 445, 0));
+    itemBag.setPosition(Vector3D(100, ScreenHeight - (32 + 3), 0));
     equipedItems.init(2, 2);
-    equipedItems.setPosition(Vector3D(746, 445,0));
+    equipedItems.setPosition(Vector3D(ScreenWidth - 3 * 32, ScreenHeight - (32 + 3), 0));
     satiationProgress = 0.f;
     freezingProgress = 0.f;
     satiation = 100;
@@ -178,25 +178,12 @@ void Dude::update(float deltaTime,
 
 }
 
-void Dude::drawInventory(PicsContainer& pics, ItemDatabase& itemDb, ItemInstance* selectedItem)
+void Dude::drawInventory(PicsContainer& pics,
+                         ItemDatabase& itemDb,
+                         ItemInstance* selectedItem)
 {
     itemBag.draw(pics, itemDb, selectedItem);
-    equipedItems.draw(pics, itemDb, selectedItem);
-
-    
-    char buf[100];
-
-    if (isClothesEquiped() != -1)
-    {
-        sprintf(buf, "%.1f", equipedItems.getItem(0)->getQuality());
-        WriteShadedText(746, 445 + 20, pics, 0, buf, 0.6f, 0.6f);
-    }
-
-    if (isWeaponEquiped() != -1)
-    {
-        sprintf(buf, "%.1f", equipedItems.getItem(1)->getQuality());
-        WriteShadedText(746 + 34, 445 + 20, pics, 0, buf, 0.6f, 0.6f);
-    }
+    equipedItems.draw(pics, itemDb, selectedItem, true);
 }
 
 
@@ -441,6 +428,16 @@ void Dude::goToSleep()
     animationSubset = 3; 
     animationFrame = 0;
     timeAwake = 0.f;
+}
+
+void Dude::wearWeapon(float damage)
+{
+    ItemInstance* wep = equipedItems.getItem(1);
+
+    if (wep && !wep->isRemoved())
+    {
+        wep->setQuality(wep->getQuality() + damage);
+    }
 }
 
 void Dude::setPosition(Vector3D& position)

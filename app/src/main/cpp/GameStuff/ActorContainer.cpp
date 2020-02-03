@@ -20,22 +20,32 @@ void ActorContainer::addActor(Actor* actor)
 
 void ActorContainer::draw(float offsetX, float offsetY, 
                           PicsContainer& pics,
+                          DArray<Furniture*>& furniture,
                           bool debug)
 {
 
-    DArray<Actor*> renderUnits;
+
+    
+
+    DArray<Drawable*> renderUnits;
 
     for (unsigned i = 0; i < actors.count(); ++i)
     {
-        Actor* dude = actors[i];
+        Drawable* dude = static_cast<Drawable*>(actors[i]);
         
-        if (dude->isDead)
+        if (actors[i]->isDead)
         {
             continue;
         }
 
         renderUnits.add(dude);
     }
+
+    for (unsigned i = 0; i < furniture.count(); ++i)
+    {
+        renderUnits.add(furniture[i]);
+    }
+
 
     //sorts by Y
     while (renderUnits.count())
@@ -55,10 +65,15 @@ void ActorContainer::draw(float offsetX, float offsetY,
             }
         }
 
+        /*printf("%f + %f = %f\n", renderUnits[smallestYIndex]->pos.y, 
+                                 renderUnits[smallestYIndex]->collisionBodyOffset.y,
+                                 minY);*/
+
         renderUnits[smallestYIndex]->draw(offsetX, offsetY, pics, debug);
         renderUnits.remove(smallestYIndex);
 
     }
+    //printf("-------------\n");
 
     renderUnits.destroy();
 }
