@@ -368,13 +368,20 @@ void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
 bool Dude::checkInventoryInput(float deltaTime,
                                TouchData& touches, 
                                ItemInstance** selectedItem, 
-                               bool& itemSelected, 
+                               bool& itemSelected,
+                               bool& clickedOnInventory,
                                Vector3D& itemPos,
                                void** doubleClickCallbackData)
 {
     itemBag.setActive(true);
     unsigned  itemsBefore = itemBag.getActualItemCount();
-    bool res = itemBag.checkInput(deltaTime, touches, selectedItem, itemSelected, itemPos, doubleClickCallbackData);
+
+    bool clickedOnInventoryItems = false;
+    bool clickedOnEquipedItems = false;
+
+    bool res = itemBag.checkInput(deltaTime, touches, selectedItem, itemSelected, clickedOnInventoryItems, itemPos, doubleClickCallbackData);
+
+   
     unsigned itemsAfter = itemBag.getActualItemCount();
     
     if (itemsBefore < itemsAfter)
@@ -384,13 +391,15 @@ bool Dude::checkInventoryInput(float deltaTime,
 
     equipedItems.setActive(true);
     itemsBefore = equipedItems.getActualItemCount();
-    res = equipedItems.checkInput(deltaTime, touches, selectedItem, itemSelected, itemPos, nullptr);
+    res = equipedItems.checkInput(deltaTime, touches, selectedItem, itemSelected, clickedOnEquipedItems, itemPos, nullptr);
     itemsAfter = equipedItems.getActualItemCount();
     
     if (itemsBefore < itemsAfter)
     {
         Statistics::getInstance()->increaseEquipedTimes();
     }
+
+    clickedOnInventory = clickedOnInventoryItems | clickedOnEquipedItems;
 
 
     //printf("%d\n", res);
@@ -654,6 +663,11 @@ void Dude::doTemperatureDamage(float deltaTime, int temperature, ItemDatabase& i
         if (isClothesEquiped() != -1)
         {
             clothingTemperature = itemdb.get(equipedItems.getItem(0)->getIndex())->coldDecrease;
+        }
+
+        if (itemBag.hasItem(21) != -1 && sleeping)
+        {
+            clothingTemperature = itemdb.get(21)->coldDecrease;
         }
 
         for (int i = 0; i < hitCount; ++i)

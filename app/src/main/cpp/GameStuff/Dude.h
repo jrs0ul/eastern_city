@@ -29,7 +29,8 @@ public:
     bool          checkInventoryInput(float deltaTime,
                                       TouchData& touches, 
                                       ItemInstance** selectedItem, 
-                                      bool& itemSelected, 
+                                      bool& itemSelected,
+                                      bool& clickedOnInventory,
                                       Vector3D& itemPos,
                                       void** doubleClickCallbackData);
 

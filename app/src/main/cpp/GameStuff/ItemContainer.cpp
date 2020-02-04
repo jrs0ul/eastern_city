@@ -127,7 +127,8 @@ void ItemContainer::draw(PicsContainer& pics,
 bool ItemContainer::checkInput(float deltaTime,
                                TouchData& touches,
                                ItemInstance** selectedItem, 
-                               bool& itemSelected, 
+                               bool& itemSelected,
+                               bool& clickedOnInventory,
                                Vector3D& itemPos,
                                void** callbackData)
 {
@@ -192,34 +193,39 @@ bool ItemContainer::checkInput(float deltaTime,
 
             return !itemSelected;
         }
-        else if (itemSelected && active && touches.up[0].x > pos.x && touches.up[0].x < pos.x + 34 * width
+        else if (touches.up[0].x > pos.x && touches.up[0].x < pos.x + 34 * width
                     && touches.up[0].y > pos.y && touches.up[0].y < height * 34 + pos.y)
         {
+            clickedOnInventory = true;
 
-            unsigned row = (touches.up[0].y - pos.y) / 34;
-            unsigned col = (touches.up[0].x - pos.x) / 34;
-
-            unsigned itemIndex = row * width + col;
-
-            if (addItem(**selectedItem, itemIndex))
+            if (itemSelected && active)
             {
-                (**selectedItem).setAsRemoved();
-            }
 
-            itemSelected = false;
-            *selectedItem = nullptr;
+                unsigned row = (touches.up[0].y - pos.y) / 34;
+                unsigned col = (touches.up[0].x - pos.x) / 34;
 
-            if (tappedTwoTimes)
-            {
-                if (doubleClickCallback)
+                unsigned itemIndex = row * width + col;
+
+                if (addItem(**selectedItem, itemIndex))
                 {
-                    (*doubleClickCallback)(&items[itemIndex], callbackData);
+                    (**selectedItem).setAsRemoved();
                 }
-                selectedLocalItem = -1;
-                tappedTwoTimes = false;
-            }
 
-            return true;
+                itemSelected = false;
+                *selectedItem = nullptr;
+
+                if (tappedTwoTimes)
+                {
+                    if (doubleClickCallback)
+                    {
+                        (*doubleClickCallback)(&items[itemIndex], callbackData);
+                    }
+                    selectedLocalItem = -1;
+                    tappedTwoTimes = false;
+                }
+
+                return true;
+            }
 
         }
 

@@ -1,8 +1,8 @@
 * Death animation
-* Different item look in the map and inventory
-* Ability to build furnace
+* Different item look in the map and the inventory
+* Ability to build a furnace
 * Ability to group items
-* Main characters attack animation and flying projectile
+* Make a hero's attack animation and a flying projectile
 * Character's animation without a coat
 * Ability to build furniture/things in general
 * Ability to PAUSE the game
@@ -12,18 +12,19 @@
 * light glow around windows
 * Bigger light blob around the main character
 * wider beam for the flashlight
-* Doors with locks
+* Doors with locks and with K+M+B 2020 graffity
 * Some sort of energy drink/food/pills
 --> * benches outside
-* dead tree outside
+* dead tree outside ??
 * A bear enemy
 * more than one room in apartaments
 * a sleep confirmation dialog
---> * ability to drag the items nearby with the mouse
---> * Make the blanket usable
 * Fix the broken pathfinding outside and pathfinding in general
 * Consuming alcohol should increase your tiredness
 * lighter
-* candles. They can be lit when the lighter is equiped
+* candles. They can be lit when a lighter is equiped
 * ability too cook on the furnace
 * scale base game graphics(640x360) 2x, 4x times and so on
+* fix the memleak
+* draw the blanket's sprite on sleeping character.
+* Make a sprite for a wall carpet

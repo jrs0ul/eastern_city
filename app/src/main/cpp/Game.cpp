@@ -533,7 +533,9 @@ void Game::gameLogic()
     {
         void* data[] = {&dude};
 
-        if (activeContainer->checkInput(DeltaTime, touches, &selectedItem, itemSelected, selectedItemPos, data))
+        bool clickedOn = false;
+
+        if (activeContainer->checkInput(DeltaTime, touches, &selectedItem, itemSelected, clickedOn, selectedItemPos, data))
         {
             return;
         }
@@ -541,10 +543,44 @@ void Game::gameLogic()
 
     void* data[] = {&dude, &itemDB}; 
 
-    dude.checkInventoryInput(DeltaTime, touches, &selectedItem, itemSelected, selectedItemPos, data);
+    bool clickedInventory = false;
+    dude.checkInventoryInput(DeltaTime,
+                             touches,
+                             &selectedItem,
+                             itemSelected,
+                             clickedInventory,
+                             selectedItemPos,
+                             data);
+
+    //picking up items with mouse--
+    if (!itemSelected && touches.down.count())
+    {
+        for (int i = 0; i < map.getItemCount(); ++i)
+        {
+            ItemInstance* itm = map.getItem(i);
+            
+            if (itm->isRemoved())
+            {
+                continue;
+            }
+
+            if (!CollisionCircleCircle(itm->getPosition()->x + mapPosX, itm->getPosition()->y + mapPosY, 16,
+                                      dude.getPos()->x + mapPosX, dude.getPos()->y + mapPosY, 100))
+            {
+                continue;
+            }
+
+            if (CollisionCircleCircle(itm->getPosition()->x + mapPosX, itm->getPosition()->y + mapPosY, 16,
+                                      touches.down[0].x, touches.down[0].y, 4))
+                    {
+                        itemSelected = true;
+                        selectedItem = itm;
+                    }
+        }
+    }//----
 
     if (touches.move.count())
-    {
+    { 
         if (itemSelected)
         {
             selectedItemPos = touches.move[0];
@@ -558,18 +594,10 @@ void Game::gameLogic()
             return;
         }
         
-        //---somewhat ugly block which is no longer functional
-        for (int i = 0; i < 10; ++i)
+        if (clickedInventory)
         {
-            if (touches.up[0].x > 100 + i * 34 && touches.up[0].x < 100 + i * 34 + 32 &&
-                    touches.up[0].y > 445 && touches.up[0].y < 477
-               )
-            {
-              return;            
-            
-            }
+            return;
         }
-        //--*/
 
         if (itemSelected)
         {
@@ -1074,7 +1102,6 @@ bool Game::interactWithFurniture(float clickX, float clickY)
             printf("YOU ATEMPTED TO DESTROY!!!ĄĄ\n");
             printf("Furniture db index %d\n", fur->furnitureDbIndex);
 
-            fur->removed = true;
             Recipe* r = recipes.getRecipeByFurnitureIndex(fur->furnitureDbIndex);
             FurnitureData* fd = furnitureDB.getFurniture(fur->furnitureDbIndex);
 
@@ -1096,33 +1123,37 @@ bool Game::interactWithFurniture(float clickX, float clickY)
                                     0),
                                 r->ingredients[i].itemIndex);
                         map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
-                    }
+                    } 
+                }
 
-                    if (fur->itemContainerIndex != -1)
+                if (fur->itemContainerIndex != -1)
+                {
+                    printf("Has some items inside\n");
+                    ItemContainer* ic = map.getItemContainer(fur->itemContainerIndex);
+                    for (unsigned j = 0; j < ic->getItemCount(); ++j)
                     {
-                        ItemContainer* ic = map.getItemContainer(fur->itemContainerIndex);
-                        for (unsigned j = 0; j < ic->getItemCount(); ++j)
-                        {
-                            ItemInstance* item = ic->getItem(j);
+                        ItemInstance* item = ic->getItem(j);
+                        printf("items: %d\n", item->getIndex());
 
-                            if (!item->isRemoved())
-                            {
-                                 currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
-                                    fur->pos.y + fur->collisionBodySize.y, 
-                                    0),
-                                item);
-                        map.addItem(item);
-                            }
+                        if (!item->isRemoved())
+                        {
+                            currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
+                                        fur->pos.y + fur->collisionBodySize.y, 
+                                        0),
+                                    item);
+                            map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
                         }
-                        
                     }
 
                 }
+
 
                 if (fd)
                 {
                     dude.wearWeapon(fd->damageToAxe * -1.f);
                 }
+
+                fur->removed = true;
 
             }
 

@@ -20,7 +20,8 @@ public:
     bool          checkInput(float deltaTime,
                              TouchData& touches, 
                              ItemInstance** selectedItem, 
-                             bool& itemSelected, 
+                             bool& itemSelected,
+                             bool& clickedOnInventory,
                              Vector3D& itemPos,
                              void** callbackData);
 

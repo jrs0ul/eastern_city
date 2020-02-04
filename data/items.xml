@@ -21,6 +21,6 @@
     <Item name="Anticeptic" imageIndex="18" isConsumable="1" hpUp="10"/>
     <Item name="Makeshift Axe" imageIndex="19" isWeapon="1"/>
     <Item name="Metal scrap" imageIndex="20"/>
-    <Item name="Blanket" imageIndex="21"/>
+    <Item name="Blanket" imageIndex="21" coldDecrease="25"/>
 </Items>
 
