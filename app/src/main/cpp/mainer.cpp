@@ -119,8 +119,8 @@ static void  process_events(){
 //--------------------
 void CheckKeys()
 {
-    float scaleX = 850.0f/Game.ScreenWidth;
-    float scaleY = 480.0f/Game.ScreenHeight;
+    float scaleX = 1.f;//850.0f/Game.ScreenWidth;
+    float scaleY = 1.f;//480.0f/Game.ScreenHeight;
     
     int JoyNum = 0;
     

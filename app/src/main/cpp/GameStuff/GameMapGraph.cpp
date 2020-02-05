@@ -344,12 +344,12 @@ void  Room::setMapName(const char* name)
 
 void Room::destroy(Room* parent, int level)
 {
-    for (int i = 0; i < level; ++i)
+    /*for (int i = 0; i < level; ++i)
     {
         printf("-");
     }
 
-    printf("deleting %s [child rooms:%lu assets:%lu; parent: %s]\n", mapName, childRooms.count(), assets.count(), parent->mapName);
+    printf("deleting %s [child rooms:%lu assets:%lu; parent: %s]\n", mapName, childRooms.count(), assets.count(), parent->mapName);*/
 
     for (unsigned i = 0; i < childRooms.count(); ++i)
     {
@@ -361,12 +361,12 @@ void Room::destroy(Room* parent, int level)
         }
     }
 
-    for (int i = 0; i < level; ++i)
+    /*for (int i = 0; i < level; ++i)
     {
         printf("-");
     }
 
-    printf("%s children deleted\n", mapName);
+    printf("%s children deleted\n", mapName);*/
 
     for (unsigned i = 0; i < itemContainers.count(); ++i)
     {
@@ -619,9 +619,13 @@ void GameMapGraph::makeYard(Room* yard, Room* parent, int reachedFrom, iPos yard
         yard->addChildRoom(parent, 0, 3);
     }
 
-    if (rand() % 5 > 2)
+    if ((rand() % 4) % 2)
     {
         addDumpster(yard, 830 + rand() % 30, 220 + rand() % 50);
+    }
+    else
+    {
+        addBench(yard, 402, 197, false);
     }
 
 }
@@ -1149,6 +1153,28 @@ void GameMapGraph::addDumpster(Room* room, int x, int y)
     }
 
     room->addItemContainer(room->getFurnitureCount() - 1, container);
+}
+
+void GameMapGraph::addBench(Room* room, int x, int y, bool flipped)
+{
+    Furniture bench;
+
+    bench.pos = Vector3D(x, y, 0);
+    bench.pictureIndex = 21;
+    bench.spriteIndex = 9;
+    bench.furnitureDbIndex = 6; 
+    bench.collisionBodySize = Vector3D(145, 91, 0);
+
+    bench.collisionPolygon.points.add(Vector3D(12, 56, 0));
+    bench.collisionPolygon.points.add(Vector3D(75, 51, 0));
+    bench.collisionPolygon.points.add(Vector3D(136, 59, 0));
+    bench.collisionPolygon.points.add(Vector3D(125, 84, 0));
+    bench.collisionPolygon.points.add(Vector3D(125, 84, 0));
+    bench.collisionPolygon.points.add(Vector3D(1, 84, 0));
+    bench.collisionPolygon.points.add(Vector3D(12, 56, 0));
+
+    room->addFurniture(bench);
+    bench.destroy();
 }
 
 void GameMapGraph::destroy()

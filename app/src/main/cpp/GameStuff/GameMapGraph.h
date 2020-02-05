@@ -153,6 +153,7 @@ public:
     void addCouch(Room* room, int x, int y);
 
     void addDumpster(Room* room, int x, int y);
+    void addBench(Room* room, int x, int y, bool flipped);
 
     void destroy();
 

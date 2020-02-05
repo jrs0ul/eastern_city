@@ -90,7 +90,6 @@ public:
     char fileName[255];
 
 
-    SoundSystem ss;
 #ifndef __ANDROID__
     OggStream music;
 #endif
@@ -139,7 +138,6 @@ public:
     Game()
     {
 
-
         Statistics::getInstance()->init(GameVersion,
 #ifdef WIN32
                 1
@@ -154,8 +152,8 @@ public:
         ScreenWidth = 850;
         ScreenHeight = 480;
 #else
-        ScreenWidth = 850;
-        ScreenHeight = 480;
+        ScreenWidth = 800;
+        ScreenHeight = 450;
         windowed = false;
 #endif
 

@@ -30,4 +30,9 @@
         <SpriteIndex>8</SpriteIndex>
         <PictureIndex>21</PictureIndex>
     </Object>
+    <Object name="Bench" index="6">
+        <AxeDamage>20</AxeDamage>
+        <SpriteIndex>9</SpriteIndex>
+        <PictureIndex>21</PictureIndex>
+    </Object>
 </Furniture>

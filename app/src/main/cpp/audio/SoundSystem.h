@@ -58,7 +58,13 @@ class SoundSystem{
 
 
 public:
-    SoundSystem(){alcdev=0; buffers=0; sources=0; }
+
+    static SoundSystem* getInstance()
+    {
+        static SoundSystem instance;
+        return &instance;
+    }
+
     bool init(ALCchar* dev);
     void loadFiles(const char* BasePath, const char* list);
     void setupListener(float * pos, float * orientation);
@@ -70,6 +76,10 @@ public:
     void stopAll();
     void exit();
 
+private:
+
+    SoundSystem(){}
+    ~SoundSystem(){}
 };
 
 

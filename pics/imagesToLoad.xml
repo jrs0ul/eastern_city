@@ -50,6 +50,7 @@
             <Sprite name="rat_grafity" x="558" y="449" width="103" height="141"/>
             <Sprite name="tunel_front" x="671" y="388" width="234" height="235"/>
             <Sprite name="dumpster" x="14" y="676" width="159" height="139"/>
+            <Sprite name="bench" x="13" y="820" width="147" height="91"/>
         </Sprites>
     </Img>
 </Images>

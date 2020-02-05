@@ -144,7 +144,8 @@ void Game::init(){
 
 #ifndef __ANDROID__
     pics.load("pics/imagesToLoad.xml");
-    ss.init(0);
+    SoundSystem::getInstance()->init(0);
+    SoundSystem::getInstance()->loadFiles("sfx/", "list.txt");
     music.open("music/music.ogg");
     music.setVolume(sys.musicVolume);
     //music.playback();
@@ -155,7 +156,7 @@ void Game::init(){
         LOGI("FAIL!\n");
         ss.exit();
     }
-    //ss.loadFiles("sfx/", "list.txt", AssetManager);
+    ss.loadFiles("sfx/", "list.txt", AssetManager);
     ss.playMusic("music/music.ogg", AssetManager);
 
 
@@ -257,8 +258,9 @@ void Game::destroy(){
 
 #ifndef __ANDROID__
     music.release();
-    ss.freeData();
-    ss.exit();
+    SoundSystem* ss = SoundSystem::getInstance();
+    ss->freeData();
+    ss->exit();
 #else
     ss.stopMusic();
     ss.exit();

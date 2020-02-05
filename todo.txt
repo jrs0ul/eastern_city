@@ -28,3 +28,4 @@
 * fix the memleak
 * draw the blanket's sprite on sleeping character.
 * Make a sprite for a wall carpet
+* Simple tutorial to teach doubleclicking on food if satiation is low or clothes if it's cold

@@ -18,7 +18,7 @@ public:
                          unsigned char* Keys, 
                          GameMap& map,
                          float darkness,
-                         ItemDatabase& itemDb, 
+                         ItemDatabase& itemDb,
                          FindPath& path);
 
     void          drawInventory(PicsContainer& pics, ItemDatabase& itemDb, ItemInstance* selectedItem);

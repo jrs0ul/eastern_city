@@ -115,7 +115,9 @@ char* SoundSystem::LoadOGG(char *fileName,  ALsizei & size,
 //---------------------------------------------------
 bool SoundSystem::init(ALCchar* dev){
 
- int r;
+    alcdev=0; buffers=0; sources=0; 
+
+    int r;
 
     alGetError();
 

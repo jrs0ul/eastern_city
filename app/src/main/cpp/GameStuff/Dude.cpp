@@ -2,6 +2,7 @@
 #include "Statistics.h"
 #include "../TextureLoader.h"
 #include "../Useful.h"
+#include "../audio/SoundSystem.h"
 #include "../gui/Text.h"
 #include <cmath>
 
@@ -216,6 +217,11 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
     if (data->isConsumable)
     {
         printf("satiationUp:%d hpUp:%d\n", data->hungerDecrease, data->hpUp);
+
+        if (data->hungerDecrease > 0)
+        {
+            SoundSystem::getInstance()->playsound(0);
+        }
 
         satiation += data->hungerDecrease;
 
