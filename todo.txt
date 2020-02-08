@@ -13,19 +13,15 @@
 * Bigger light blob around the main character
 * wider beam for the flashlight
 * Doors with locks and with K+M+B 2020 graffity
-* Some sort of energy drink/food/pills
---> * benches outside
 * dead tree outside ??
 * A bear enemy
 * more than one room in apartaments
 * a sleep confirmation dialog
 * Fix the broken pathfinding outside and pathfinding in general
-* Consuming alcohol should increase your tiredness
 * lighter
 * candles. They can be lit when a lighter is equiped
 * ability too cook on the furnace
 * scale base game graphics(640x360) 2x, 4x times and so on
-* fix the memleak
 * draw the blanket's sprite on sleeping character.
 * Make a sprite for a wall carpet
 * Simple tutorial to teach doubleclicking on food if satiation is low or clothes if it's cold

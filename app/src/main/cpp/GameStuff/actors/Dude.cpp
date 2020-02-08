@@ -1,9 +1,9 @@
 #include "Dude.h"
-#include "Statistics.h"
-#include "../TextureLoader.h"
-#include "../Useful.h"
-#include "../audio/SoundSystem.h"
-#include "../gui/Text.h"
+#include "../Statistics.h"
+#include "../../TextureLoader.h"
+#include "../../MathTools.h"
+#include "../../audio/SoundSystem.h"
+#include "../../gui/Text.h"
 #include <cmath>
 
 void Dude::init(Vector3D& position, int ScreenWidth, int ScreenHeight)
@@ -235,6 +235,13 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
         if (health > 100)
         {
             health = 100;
+        }
+
+        wakefullness += data->sleepynessDecrease;
+
+        if (wakefullness > 100)
+        {
+            wakefullness = 100;
         }
 
         if (data->clothingQualityIncrease > 0.f)

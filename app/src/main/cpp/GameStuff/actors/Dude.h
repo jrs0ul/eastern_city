@@ -2,12 +2,12 @@
 #define DUDE_H
 
 #include "Actor.h"
-#include "../Vectors.h"
-#include "../TextureLoader.h"
-#include "../FindPath.h"
-#include "GameMap.h"
-#include "CraftingRecipes.h"
-#include "ItemInstance.h"
+#include "../../Vectors.h"
+#include "../../TextureLoader.h"
+#include "../../FindPath.h"
+#include "../map/GameMap.h"
+#include "../CraftingRecipes.h"
+#include "../ItemInstance.h"
 
 class Dude : public Actor
 {

@@ -1,7 +1,7 @@
 #ifndef ADDITIONAL_VERTICES_H
 #define ADDITIONAL_VERTICES_H
 
-#include "Polygon.h"
+#include "../Polygon.h"
 
 struct AdditionalVertices
 {

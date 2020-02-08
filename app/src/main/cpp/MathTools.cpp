@@ -1,4 +1,4 @@
-#include "Useful.h"
+#include "MathTools.h"
 #include "Matrix.h"
  
 #include <cmath>

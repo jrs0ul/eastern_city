@@ -84,6 +84,12 @@ void ItemDatabase::load(const char* filename)
                         sprintf(buffer, "%ls", at->getValue());
                         data.hungerDecrease = atoi(buffer);
                     }
+                    else  if (strcmp(buffer, "sleepynessDecrease") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        data.sleepynessDecrease = atoi(buffer);
+                    }
+
                     else  if (strcmp(buffer, "hpUp") == 0)
                     {
                         sprintf(buffer, "%ls", at->getValue());

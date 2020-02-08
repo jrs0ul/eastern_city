@@ -2,7 +2,7 @@
 #define ACTOR_CONTAINER_H
 
 #include "../DArray.h"
-#include "Actor.h"
+#include "actors/Actor.h"
 #include "Furniture.h"
 #include "../TextureLoader.h"
 

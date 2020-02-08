@@ -3,7 +3,7 @@
 
 #include "Actor.h"
 #include "Dude.h"
-#include "ActorContainer.h"
+#include "../ActorContainer.h"
 
 class Ghost : public Actor
 {

@@ -1,5 +1,5 @@
 #include "FindPath.h"
-#include "Useful.h"
+#include "MathTools.h"
 #include <cmath>
 #include <cstring>
 

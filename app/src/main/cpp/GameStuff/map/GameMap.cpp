@@ -1,7 +1,7 @@
 #include "GameMap.h"
-#include "Statistics.h"
-#include "../Xml.h"
-#include "../Useful.h"
+#include "../Statistics.h"
+#include "../../Xml.h"
+#include "../../MathTools.h"
 #include <cwchar>
 
 

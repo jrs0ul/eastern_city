@@ -1,9 +1,9 @@
 #ifndef ACTOR_H
 #define ACTOR_H
 
-#include "Drawable.h"
-#include "GameMap.h"
-#include "../Vectors.h"
+#include "../Drawable.h"
+#include "../map/GameMap.h"
+#include "../../Vectors.h"
 
 struct FrameSet
 {

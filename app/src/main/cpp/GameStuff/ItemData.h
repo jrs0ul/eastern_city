@@ -10,6 +10,7 @@ struct ItemData
     bool        isLoadable;
     int         loadCapacity;
     int         coldDecrease;
+    int         sleepynessDecrease;
     float       spoilageSpeed;
     float       clothingQualityIncrease;
     char        name[256];
@@ -25,6 +26,7 @@ struct ItemData
     , isLoadable(false)
     , loadCapacity(0)
     , coldDecrease(0)
+    , sleepynessDecrease(0)
     , spoilageSpeed(0.f)
     , clothingQualityIncrease(0.f)
     , ammoItemIndex(-1)

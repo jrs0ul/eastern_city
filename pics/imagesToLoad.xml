@@ -45,12 +45,13 @@
             <Sprite name="door_side" x="1" y="239" width="303" height="432"/>
             <Sprite name="grafity" x="345" y="15" width="154" height="89"/>
             <Sprite name="grating" x="370" y="137" width="97" height="49"/>
-            <Sprite name="tunel_side" x="308" y="187" width="234" height="534"/>
-            <Sprite name="tunel_back" x="548" y="3" width="247" height="330"/>
-            <Sprite name="rat_grafity" x="558" y="449" width="103" height="141"/>
+            <Sprite name="tunel_side" x="308" y="187" width="306" height="534"/>
+            <Sprite name="tunel_back" x="687" y="3" width="247" height="330"/>
+            <Sprite name="rat_grafity" x="917" y="449" width="103" height="141"/>
             <Sprite name="tunel_front" x="671" y="388" width="234" height="235"/>
             <Sprite name="dumpster" x="14" y="676" width="159" height="139"/>
             <Sprite name="bench" x="13" y="820" width="147" height="91"/>
+            <Sprite name="broken_car" x="179" y="732" width="412" height="199"/>
         </Sprites>
     </Img>
 </Images>

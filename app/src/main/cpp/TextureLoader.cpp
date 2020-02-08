@@ -15,7 +15,7 @@
 #endif
 #include "TextureLoader.h"
 #include "Vectors.h"
-#include "Utils.h"
+#include "OSTools.h"
 #include "Xml.h"
 
 #ifdef __ANDROID__

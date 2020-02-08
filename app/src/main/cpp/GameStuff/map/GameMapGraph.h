@@ -1,11 +1,11 @@
 #ifndef GAME_MAP_GRAPH_H
 #define GAME_MAP_GRAPH_H
 
-#include "Polygon.h"
+#include "../Polygon.h"
 #include "AdditionalVertices.h"
-#include "Furniture.h"
-#include "ItemContainer.h"
-#include "Asset.h"
+#include "../Furniture.h"
+#include "../ItemContainer.h"
+#include "../Asset.h"
 #include "Region.h"
 
 struct RoomAndEntry;
@@ -154,6 +154,7 @@ public:
 
     void addDumpster(Room* room, int x, int y);
     void addBench(Room* room, int x, int y, bool flipped);
+    void addCar(Room* room);
 
     void destroy();
 

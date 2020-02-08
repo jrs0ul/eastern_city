@@ -25,7 +25,7 @@
 #include "Game.h"
 #include "Threads.h"
 #include "SDLVideo.h"
-#include "Utils.h"
+#include "OSTools.h"
 #ifdef __APPLE__
 #include <limits.h>
 #include <unistd.h>

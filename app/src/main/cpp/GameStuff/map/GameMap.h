@@ -1,17 +1,17 @@
 #ifndef GAME_MAP_H
 #define GAME_MAP_H
 
-#include "../TextureLoader.h"
-#include "GlobalItemList.h"
-#include "ItemDatabase.h"
-#include "ItemInstance.h"
-#include "ItemContainer.h"
+#include "../../TextureLoader.h"
+#include "../GlobalItemList.h"
+#include "../ItemDatabase.h"
+#include "../ItemInstance.h"
+#include "../ItemContainer.h"
 #include "GameMapGraph.h"
-#include "Polygon.h"
-#include "Actor.h"
-#include "Asset.h"
+#include "../Polygon.h"
+#include "../actors/Actor.h"
+#include "../Asset.h"
 #include "Region.h"
-#include "Furniture.h"
+#include "../Furniture.h"
 
 class Actor;
 

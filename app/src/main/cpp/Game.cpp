@@ -2,7 +2,7 @@
 #include <cwchar>
 #include <cmath>
 #include "Game.h"
-#include "GameStuff/Ghost.h"
+#include "GameStuff/actors/Ghost.h"
 
 const int boardX = 16;
 const int boardY = 445;

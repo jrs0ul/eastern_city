@@ -628,6 +628,11 @@ void GameMapGraph::makeYard(Room* yard, Room* parent, int reachedFrom, iPos yard
         addBench(yard, 402, 197, false);
     }
 
+    if (rand() % 2 == 0 && reachedFrom != 0)
+    {
+        addCar(yard);
+    }
+
 }
 
 bool GameMapGraph::isYardPositionTaken(iPos pos)
@@ -868,6 +873,7 @@ void GameMapGraph::addBuilding(Room* outside, unsigned regionIndex)
     poly.points.add(Vector3D(144, 50, 0));
 
     lastFloor->addCollisionPolygon(poly);
+    poly.points.destroy();
     lastFloor->addDoorHole(546, 638.9f, 21.f);
     addDoorway(lastFloor, 288, 98, 2, 0, 2, 0, nullptr, 2);
     addDoorway(lastFloor, 40, 128, 3, 0, 3, 50, nullptr, 5, 64, 0, false);
@@ -1060,11 +1066,11 @@ void GameMapGraph::addTvCupboard(Room* room)
     ItemContainer container;
     container.init(3, 1);
 
-    int junkstuff[] = {4, 8, 5, 13};
+    int junkstuff[] = {4, 8, 5, 22, 13};
 
     for (int i = 0; i < 2; ++i)
     {
-        container.addItem(junkstuff[rand() % 4]);
+        container.addItem(junkstuff[rand() % 5]);
     }
 
     room->addItemContainer(room->getFurnitureCount() - 1, container);
@@ -1091,11 +1097,11 @@ void GameMapGraph::addCupboard(Room* room)
     ItemContainer container2;
     container2.init(4, 2);
     
-    int junkstuff[] = {3, 7, 13, 8};
+    int junkstuff[] = {3, 7, 13, 8, 22};
 
     for (int i = 0; i < 3; ++i)
     {
-        container2.addItem(junkstuff[rand() % 4]);
+        container2.addItem(junkstuff[rand() % 5]);
     }
 
     room->addItemContainer(room->getFurnitureCount() - 1, container2);
@@ -1175,6 +1181,36 @@ void GameMapGraph::addBench(Room* room, int x, int y, bool flipped)
 
     room->addFurniture(bench);
     bench.destroy();
+}
+
+void GameMapGraph::addCar(Room* room)
+{
+    Furniture car;
+    car.pos = Vector3D(313, 552, 0);
+    car.pictureIndex = 21;
+    car.spriteIndex = 10;
+    car.furnitureDbIndex = 7;
+    car.collisionBodySize = Vector3D(382, 171, 0);
+    
+    
+    car.collisionPolygon.points.add(Vector3D(33, 80, 0));
+    car.collisionPolygon.points.add(Vector3D(198, 72, 0));
+    car.collisionPolygon.points.add(Vector3D(384, 84, 0));
+    car.collisionPolygon.points.add(Vector3D(391, 121, 0));
+    car.collisionPolygon.points.add(Vector3D(368, 138, 0));
+    car.collisionPolygon.points.add(Vector3D(242, 147, 0));
+    car.collisionPolygon.points.add(Vector3D(122, 141, 0));
+    car.collisionPolygon.points.add(Vector3D(125, 168, 0));
+    car.collisionPolygon.points.add(Vector3D(106, 186, 0));
+    car.collisionPolygon.points.add(Vector3D(82, 180, 0));
+    car.collisionPolygon.points.add(Vector3D(72, 168, 0));
+    car.collisionPolygon.points.add(Vector3D(73, 148, 0));
+    car.collisionPolygon.points.add(Vector3D(18, 133, 0));
+    
+    car.collisionPolygon.points.add(Vector3D(33, 80, 0));
+
+    room->addFurniture(car);
+    car.destroy();
 }
 
 void GameMapGraph::destroy()

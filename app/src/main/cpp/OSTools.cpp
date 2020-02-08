@@ -14,7 +14,7 @@
     #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "native-activity", __VA_ARGS__))
 
 #endif
-#include "Utils.h"
+#include "OSTools.h"
 
 
 
@@ -101,6 +101,9 @@ void      UTF8toWchar(char* utftext, wchar_t * wchartext){
                         char * out = (char *)wchartext;
                         size_t result = 0;
                         result = iconv(cd, &in, (size_t*)&utftextLen, &out, (size_t*)&s2);
+                        if (result)
+                        {
+                        }
                         //if (s2 >= sizeof (wchar_t))
                         *((wchar_t *) out) = L'\0';
 

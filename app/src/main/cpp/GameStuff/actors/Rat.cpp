@@ -1,5 +1,5 @@
 #include "Rat.h"
-#include "../Useful.h"
+#include "../../MathTools.h"
 #include <cmath>
 
 void Rat::init(Vector3D& position)

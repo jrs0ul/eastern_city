@@ -10,7 +10,7 @@
     <Item name="Rubber band" imageIndex="7"/>
     <Item name="Junk" imageIndex="8"/>
     <Item name="Slingshot" imageIndex="9" isWeapon="1" ammoItemIndex="8"/>
-    <Item name="Alcohol" isConsumable="1" imageIndex="10" hungerDecrease="2" hpUp="5"/>
+    <Item name="Alcohol" isConsumable="1" imageIndex="10" hungerDecrease="2" hpUp="5" sleepynessDecrease="-10"/>
     <Item name="Dead plant" imageIndex="11"/>
     <Item name="Flashlight" imageIndex="12" isWeapon="1" ammoItemIndex="13"/>
     <Item name="Batteries" imageIndex="13" spoilageSpeed="0.7"/>
@@ -22,5 +22,6 @@
     <Item name="Makeshift Axe" imageIndex="19" isWeapon="1"/>
     <Item name="Metal scrap" imageIndex="20"/>
     <Item name="Blanket" imageIndex="21" coldDecrease="25"/>
+    <Item name="Caffeine pills" isConsumable="1" imageIndex="22" sleepynessDecrease="50"/>
 </Items>
 

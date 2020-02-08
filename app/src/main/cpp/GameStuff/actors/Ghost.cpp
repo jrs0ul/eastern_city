@@ -1,5 +1,5 @@
 #include "Ghost.h"
-#include "../Useful.h"
+#include "../../MathTools.h"
 #include <cmath>
 
 
