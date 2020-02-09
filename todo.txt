@@ -3,11 +3,9 @@
 * Ability to build a furnace
 * Ability to group items
 * Make a hero's attack animation and a flying projectile
-* Character's animation without a coat
 * Ability to build furniture/things in general
 * Ability to PAUSE the game
 * Saving
-* Batteries last too long
 * Flashlight preloaded with batteries?
 * light glow around windows
 * Bigger light blob around the main character
@@ -21,7 +19,8 @@
 * lighter
 * candles. They can be lit when a lighter is equiped
 * ability too cook on the furnace
-* scale base game graphics(640x360) 2x, 4x times and so on
 * draw the blanket's sprite on sleeping character.
 * Make a sprite for a wall carpet
 * Simple tutorial to teach doubleclicking on food if satiation is low or clothes if it's cold
+* fix CenterCamera
+* scale the UI

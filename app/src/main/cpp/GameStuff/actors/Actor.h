@@ -27,6 +27,7 @@ public:
     void            kill(){isDead = true;}
 
     void            draw(float offsetX, float offsetY,
+                         int scale,
                          PicsContainer& pics, 
                          bool debugInfo = false) override;
 
@@ -40,7 +41,7 @@ protected:
 
 public:
     DArray<FrameSet> animations;
-    char             spriteName[256];
+    unsigned         pictureIndex;
     float            collisionBodyRadius;
     float            health;
     float            animationProgress;

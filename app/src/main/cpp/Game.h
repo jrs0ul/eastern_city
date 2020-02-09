@@ -80,6 +80,7 @@ public:
     int ScreenWidth;
     int ScreenHeight;
     bool windowed;
+    int pixelArtScale;
 
     char DocumentPath[255];
 
@@ -152,8 +153,8 @@ public:
         ScreenWidth = 850;
         ScreenHeight = 480;
 #else
-        ScreenWidth = 800;
-        ScreenHeight = 450;
+        ScreenWidth = 1280;
+        ScreenHeight = 720;
         windowed = false;
 #endif
 
@@ -166,6 +167,7 @@ public:
 
         DebugMode = 0;
         sendStats = false;
+        pixelArtScale = 1;
     }
     
     void init();
@@ -193,7 +195,7 @@ private:
 
     void drawActiveContainer();
     void drawRecipes();
-    void drawDarkness();
+    void drawDarkness(int scale);
     void calcDarknessValue();
 
     static void doubleClickContainerItem(ItemInstance*, void**);
@@ -201,9 +203,9 @@ private:
 
     bool interactWithFurniture(float clickX, float clickY);
 
-    void centerCamera(float x, float y);
+    void centerCamera(float x, float y, int scale);
     void createEnemies();
-    void drawPolygon(SPolygon* poly, ShaderProgram& shader, int method = GL_LINE_STRIP, COLOR c = COLOR(0,0,1,1));
+    void drawPolygon(SPolygon* poly, int scale, ShaderProgram& shader, int method = GL_LINE_STRIP, COLOR c = COLOR(0,0,1,1));
 
     bool handleShooting(float x, float y);
     bool handleCrafting(float x, float y);

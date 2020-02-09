@@ -140,6 +140,11 @@ void Game::init(){
     }
 #endif
 
+    if (ScreenWidth / 2 >= 640)
+    {
+        pixelArtScale = 2;
+    }
+
 
 
 #ifndef __ANDROID__
@@ -305,12 +310,12 @@ void Game::onBack()
 
 void Game::renderGame()
 {
-    map.draw(mapPosX, mapPosY, ScreenWidth, ScreenHeight, pics, itemDB, DebugMode);
-    actors.draw(mapPosX, mapPosY, pics, map.getFurnitureData(), DebugMode);
-    map.drawFrontLayerAssets(mapPosX, mapPosY, *dude.getPos(), pics);
-    map.drawDarknessBorder(mapPosX, mapPosY, ScreenWidth, ScreenHeight, pics);
+    const int scale = pixelArtScale;
 
-
+    map.draw(mapPosX, mapPosY, scale, ScreenWidth, ScreenHeight, pics, itemDB, DebugMode);
+    actors.draw(mapPosX, mapPosY, scale, pics, map.getFurnitureData(), DebugMode);
+    map.drawFrontLayerAssets(mapPosX, mapPosY, scale, *dude.getPos(), pics);
+    map.drawDarknessBorder(mapPosX, mapPosY, scale, ScreenWidth, ScreenHeight, pics);
 
     if (DebugMode)
     {
@@ -324,7 +329,7 @@ void Game::renderGame()
         for (unsigned long i = 0; i < map.getPolygonCount(); ++i)
         {
             SPolygon* poly = map.getPolygon(i);
-            drawPolygon(poly, colorShader);
+            drawPolygon(poly, scale, colorShader);
         }
 
         SPolygon pp;
@@ -335,7 +340,7 @@ void Game::renderGame()
             pp.points.add(point);
         }
 
-        drawPolygon(&pp, colorShader, GL_LINE_STRIP, COLOR(1,0,0,1));
+        drawPolygon(&pp, scale, colorShader, GL_LINE_STRIP, COLOR(1,0,0,1));
         pp.points.destroy();
 
         #ifndef __ANDROID__
@@ -348,7 +353,7 @@ void Game::renderGame()
             pp.points.add(point);
         }
 
-        drawPolygon(&pp, colorShader, GL_POINTS, COLOR(1,0,1,1));
+        drawPolygon(&pp, scale, colorShader, GL_POINTS, COLOR(1,0,1,1));
         pp.points.destroy();
 
         for (unsigned i = 0; i < path.getDebugPointsCount(); ++i)
@@ -357,7 +362,7 @@ void Game::renderGame()
             pp.points.add(point);
         }
 
-        drawPolygon(&pp, colorShader, GL_POINTS, COLOR(1,1,0,1));
+        drawPolygon(&pp, scale, colorShader, GL_POINTS, COLOR(1,1,0,1));
         pp.points.destroy();
 
 
@@ -365,7 +370,7 @@ void Game::renderGame()
         glEnable(GL_TEXTURE_2D);
     }
 
-    drawDarkness();
+    drawDarkness(scale);
 
     if (stateInTheGame != GAMEPLAY)
     {
@@ -419,7 +424,7 @@ void Game::renderGame()
 
 void Game::renderEditing()
 {
-    map.draw(mapPosX, mapPosY, ScreenWidth, ScreenHeight, pics, itemDB, DebugMode);
+    map.draw(mapPosX, mapPosY, 2, ScreenWidth, ScreenHeight, pics, itemDB, DebugMode);
 }
 
 void Game::renderTitle()
@@ -456,7 +461,9 @@ void Game::renderDefeat()
 
 void Game::gameLogic()
 {
-    centerCamera(dude.pos.x, dude.pos.y);
+    int scale = pixelArtScale;
+
+    centerCamera(dude.pos.x, dude.pos.y, scale);
     calcDarknessValue();
 
     //---
@@ -572,7 +579,7 @@ void Game::gameLogic()
                 continue;
             }
 
-            if (CollisionCircleCircle(itm->getPosition()->x + mapPosX, itm->getPosition()->y + mapPosY, 16,
+            if (CollisionCircleCircle(itm->getPosition()->x * scale + mapPosX, itm->getPosition()->y * scale + mapPosY, 16,
                                       touches.down[0].x, touches.down[0].y, 4))
                     {
                         itemSelected = true;
@@ -591,7 +598,7 @@ void Game::gameLogic()
 
     if (touches.up.count())
     {
-        if (interactWithFurniture(touches.up[0].x, touches.up[1].y))
+        if (interactWithFurniture((touches.up[0].x - mapPosX) / scale, (touches.up[0].y - mapPosY)/ scale))
         {
             return;
         }
@@ -604,8 +611,8 @@ void Game::gameLogic()
         if (itemSelected)
         {
             printf("adding selected item to map\n");
-            const float newItemPosX = selectedItemPos.x - mapPosX;
-            const float newItemPosY = selectedItemPos.y - mapPosY;
+            const float newItemPosX = (selectedItemPos.x - mapPosX) / scale;
+            const float newItemPosY = (selectedItemPos.y - mapPosY) / scale;
 
             printf("%f %f\n", newItemPosX, newItemPosY);
 
@@ -649,13 +656,13 @@ void Game::gameLogic()
             return;
         }
 
-        if (handleShooting(touches.up[0].x - mapPosX, touches.up[0].y - mapPosY))
+        if (handleShooting((touches.up[0].x - mapPosX) / scale, (touches.up[0].y - mapPosY) / scale))
         {
             return;
         }
 
         Vector3D src = Vector3D(dude.getPos()->x, dude.getPos()->y + 39.0f, 0);
-        Vector3D destination = Vector3D(touches.up[0].x - mapPosX, touches.up[0].y - mapPosY, 0);
+        Vector3D destination = Vector3D((touches.up[0].x - mapPosX) / scale, (touches.up[0].y - mapPosY) / scale, 0);
         dude.resetPathIndex();
         path.find(src, 
                   destination, 
@@ -916,7 +923,7 @@ void Game::drawRecipes()
 
 }
 
-void Game::drawDarkness()
+void Game::drawDarkness(int scale)
 {
     if (darkness <= 0.f)
     {
@@ -935,11 +942,11 @@ void Game::drawDarkness()
     glViewport(0,0,256,256);
     glClear(GL_COLOR_BUFFER_BIT);
     pics.draw(11,
-              dude.pos.x + mapPosX,
-              dude.pos.y + mapPosY,
+              dude.pos.x * scale + mapPosX,
+              dude.pos.y * scale + mapPosY,
               0,
               true,
-              1.f, 1.f,
+              scale, scale,
               0.f,
               COLOR(1,1,1,0.6),
               COLOR(1,1,1,0.6f));
@@ -951,20 +958,20 @@ void Game::drawDarkness()
         if (dude.animationSubset == 0)
         {
             pics.draw(15,
-                    dude.pos.x + mapPosX + ((dude.isFlipedX) ? 89 : -89),
-                    dude.pos.y + mapPosY - 20,
+                    dude.pos.x * scale + mapPosX + ((dude.isFlipedX) ? 89 * scale : -89 * scale),
+                    dude.pos.y * scale + mapPosY - 20 * scale,
                     0,
-                    false, (dude.isFlipedX) ? -1.6 : 1.6, 1.3);
+                    false, (dude.isFlipedX) ? -1.6 * scale : 1.6 * scale, 1.3 * scale);
         }
         else if (dude.animationSubset == 1)
         {
 
             pics.draw(11,
-                    dude.pos.x + mapPosX,
-                    dude.pos.y + mapPosY - 60,
+                    dude.pos.x * scale + mapPosX,
+                    dude.pos.y * scale + mapPosY - 60,
                     0,
                     true,
-                    1.8f, 1.5f,
+                    1.8f * scale, 1.5f * scale,
                     0.f);
 
         }
@@ -972,10 +979,10 @@ void Game::drawDarkness()
         {
 
             pics.draw(13,
-                    dude.pos.x + mapPosX + ((dude.isFlipedX) ? 335 : -335),
-                    dude.pos.y + mapPosY - 68,
+                    dude.pos.x * scale + mapPosX + ((dude.isFlipedX) ? 335 * scale : -335 * scale),
+                    dude.pos.y * scale + mapPosY - 68 * scale,
                     0,
-                    false, (dude.isFlipedX) ? -1.3f : 1.3f, 1.3f );
+                    false, (dude.isFlipedX) ? -1.3f * scale : 1.3f * scale, 1.3f * scale );
         }
     }
 
@@ -1184,14 +1191,14 @@ bool Game::interactWithFurniture(float clickX, float clickY)
     return false;
 }
 
-void Game::centerCamera(float x, float y)
+void Game::centerCamera(float x, float y, int scale)
 {
-    const float mapWidth = map.getWidth() * 32.f;
-    const float mapHeight = map.getHeight() * 32.f;
+    const float mapWidth = map.getWidth() * 32.f * scale;
+    const float mapHeight = map.getHeight() * 32.f * scale;
 
     if (mapWidth > ScreenWidth)
     {
-        mapPosX = ScreenWidth / 2.f - dude.pos.x;
+        mapPosX = ScreenWidth / 2.f - dude.pos.x * scale;
 
         if (mapPosX > 0)
         {
@@ -1210,7 +1217,8 @@ void Game::centerCamera(float x, float y)
 //----
     if (mapHeight > ScreenHeight)
     {
-        mapPosY = ScreenHeight / 2.f - dude.pos.y;
+
+        mapPosY = ScreenHeight / 2.f - dude.pos.y * scale;
 
         if (mapPosY > 0)
         {
@@ -1258,7 +1266,7 @@ void Game::createEnemies()
 
 }
 
-void Game::drawPolygon(SPolygon* poly, ShaderProgram& shader, int method, COLOR c)
+void Game::drawPolygon(SPolygon* poly, int scale, ShaderProgram& shader, int method, COLOR c)
 {
     DArray<float> vertices;
     DArray<float> colors;
@@ -1266,13 +1274,12 @@ void Game::drawPolygon(SPolygon* poly, ShaderProgram& shader, int method, COLOR 
 
     for (unsigned long j = 0; j < poly->points.count(); ++j)
     {
-
         colors.add(c.r);
         colors.add(c.g);
         colors.add(c.b);
         colors.add(c.a);
-        vertices.add(poly->points[j].x + mapPosX);
-        vertices.add(poly->points[j].y + mapPosY);
+        vertices.add(poly->points[j].x * scale + mapPosX);
+        vertices.add(poly->points[j].y * scale + mapPosY);
         ++vertexCount;
     }
 

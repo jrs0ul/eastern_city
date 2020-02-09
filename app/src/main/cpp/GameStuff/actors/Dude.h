@@ -11,6 +11,17 @@
 
 class Dude : public Actor
 {
+    enum DudeImages
+    {
+        NAKED_IDLE = 22,
+        NAKED_FLASHLIGHT = 23,
+        NAKED_SLEEP = 24,
+        COAT_IDLE = 10,
+        COAT_FLASHLIGHT = 14,
+        COAT_SLEEP = 17
+    };
+
+
 public:
     void          init(Vector3D& position, int ScreenWidth, int ScreenHeight);
     void          destroy();

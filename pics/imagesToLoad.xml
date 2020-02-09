@@ -54,4 +54,7 @@
             <Sprite name="broken_car" x="179" y="732" width="412" height="199"/>
         </Sprites>
     </Img>
+    <Img src="pics/dude_naked.tga" width="64" height="110" filter="0" />
+    <Img src="pics/dude_naked_flashlight.tga" width="64" height="110" filter="0" />
+    <Img src="pics/dude_naked_sleep.tga" width="113" height="110" filter="0" />
 </Images>

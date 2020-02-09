@@ -7,6 +7,7 @@ void Furniture::destroy()
 }
 
 void Furniture::draw(float offsetX, float offsetY,
+                int scale,
               PicsContainer& pics,
               bool debugInfo)
 {
@@ -19,10 +20,10 @@ void Furniture::draw(float offsetX, float offsetY,
 
         COLOR furnitureColor = (colidedWithHero) ? COLOR(2.f, 2.f, 2.f, 1) : COLOR(1, 1, 1, 1);
         pics.draw(pictureIndex,
-                  pos.x + offsetX,
-                  pos.y + offsetY,
+                  pos.x * scale + offsetX,
+                  pos.y * scale + offsetY,
                   spriteIndex,
-                  false, 1,1, 0, furnitureColor, furnitureColor);
+                  false, scale, scale, 0, furnitureColor, furnitureColor);
 
 }
 

@@ -630,6 +630,7 @@ void GameMap::save(const char* file)
 
 void GameMap::draw(float posX, 
                    float posY,
+                   int scale,
                    unsigned screenWidth,
                    unsigned screenHeight,
                    PicsContainer& pics, 
@@ -649,12 +650,12 @@ void GameMap::draw(float posX,
         PicData* data = pics.getInfo(picIndex);
 
         pics.draw(picIndex, 
-                  assets[i].pos.x + posX + (assets[i].isFlipped ? data->htilew * 2 : 0), 
-                  assets[i].pos.y + posY,
+                  (assets[i].pos.x + (assets[i].isFlipped ? data->htilew * 2 : 0)) * scale + posX, 
+                  assets[i].pos.y * scale + posY,
                   assets[i].spriteIndex,
                   false,
-                  (assets[i].isFlipped ? -1.f: 1.f),
-                   1.f
+                  (assets[i].isFlipped ? -1.f * scale: 1.f * scale),
+                   1.f * scale
                   );
     }
  
@@ -666,7 +667,11 @@ void GameMap::draw(float posX,
         }
 
         ItemData* data = itemDb.get(items[i]->getIndex());
-        pics.draw(4, items[i]->getPosition()->x + posX, items[i]->getPosition()->y + posY, data->imageIndex, true);
+        pics.draw(4, 
+                  items[i]->getPosition()->x * scale + posX,
+                  items[i]->getPosition()->y * scale + posY,
+                  data->imageIndex, true,
+                  scale, scale);
     }
 
     if (isDebug)
@@ -674,15 +679,16 @@ void GameMap::draw(float posX,
         
         for (int i = 0; i < (int)regions.count(); ++i)
         {
-            pics.draw(-1, regions[i].pos.x + posX, regions[i].pos.y + posY, 0, false,
-                          regions[i].size.x, regions[i].size.y,
+            pics.draw(-1, regions[i].pos.x * scale + posX,
+                          regions[i].pos.y * scale + posY, 0, false,
+                          regions[i].size.x * scale, regions[i].size.y * scale,
                           0.f, COLOR(0.f, 1.f, 0.f, 0.5f), COLOR(0.f, 1.f, 0, 0.5f));
         }
 
         for (int i = 0; i < (int)entries.count(); ++i)
         {
-            pics.draw(-1,entries[i].x + posX, entries[i].y + posY, 0, true,
-                          8, 8,
+            pics.draw(-1,entries[i].x * scale + posX, entries[i].y * scale + posY, 0, true,
+                          8 * scale, 8 * scale,
                           0.f, COLOR(0.f, 0.f, 1.f, 0.5f), COLOR(0.f, 0.f, 1.f, 0.5f));
         }
 
@@ -745,8 +751,9 @@ void GameMap::updateFurniturePolygons(Room* currentRoom)
 }
 
 void GameMap::drawFrontLayerAssets(float offsetX, float offsetY,
-                                     Vector3D& characterPos,
-                                     PicsContainer& pics)
+                                   int scale,
+                                   Vector3D& characterPos,
+                                   PicsContainer& pics)
 {
     for (unsigned i = 0; i < assets.count(); ++i)
     {
@@ -773,12 +780,12 @@ void GameMap::drawFrontLayerAssets(float offsetX, float offsetY,
         }
 
         pics.draw(picIndex, 
-                  assets[i].pos.x + offsetX + (assets[i].isFlipped ? data->htilew * 2 : 0), 
-                  assets[i].pos.y + offsetY,
+                  assets[i].pos.x * scale + offsetX + (assets[i].isFlipped ? data->htilew * 2 * scale : 0), 
+                  assets[i].pos.y * scale + offsetY,
                   assets[i].spriteIndex,
                   false,
-                  (assets[i].isFlipped ? -1.f: 1.f),
-                   1.f,
+                  (assets[i].isFlipped ? -scale: scale),
+                   scale,
                    0.f,
                    COLOR(1.f, 1.f, 1.f, alpha),
                    COLOR(1.f, 1.f, 1.f, alpha)
@@ -792,18 +799,22 @@ void GameMap::drawFrontLayerAssets(float offsetX, float offsetY,
 
 
 void GameMap::drawDarknessBorder(float offsetX, float offsetY,
-                                   unsigned screenWidth, unsigned screenHeight,
-                                   PicsContainer& pics)
+                                 int scale,
+                                 unsigned screenWidth, unsigned screenHeight,
+                                 PicsContainer& pics)
 {
-    if (height * 32 < screenHeight)
+    if (height * 32 * scale < screenHeight)
     {
         int frame = 0;
         int frames[] = {0, 1, 1, 0, 0, 1};
         
         for (unsigned i = 0; i < width; ++i)
         {
-            pics.draw(16, offsetX + i * 32 + 16, offsetY + (height - 1) * 32 + 16, frames[frame], true, 1, 1);
-            pics.draw(16, offsetX + i * 32 + 16, offsetY + 16, frames[frame], true, 1, -1);
+            pics.draw(16, offsetX + i * 32 * scale + 16 * scale,
+                          offsetY + (height - 1) * 32 * scale + 16 * scale,
+                          frames[frame], true, scale, scale);
+            pics.draw(16, offsetX + i * 32 * scale + 16 * scale,
+                          offsetY + 16 * scale, frames[frame], true, scale, -scale);
         
             ++frame;
 
@@ -814,15 +825,18 @@ void GameMap::drawDarknessBorder(float offsetX, float offsetY,
         }
     }
 
-    if (width * 32 < screenWidth)
+    if (width * 32 * scale < screenWidth)
     {
         int frame = 0;
         int frames[] = {2, 3, 3, 2, 2, 3};
         
         for (unsigned i = 0; i < height; ++i)
         {
-            pics.draw(16, offsetX + 16, offsetY + i * 32 + 16, frames[frame], true);
-            pics.draw(16, offsetX + (width - 1) * 32 + 16, offsetY + i * 32 + 16, frames[frame], true, -1);
+            pics.draw(16, offsetX + 16 * scale, 
+                          offsetY + i * 32 * scale + 16 * scale, 
+                          frames[frame], true, scale, scale);
+            pics.draw(16, offsetX + (width - 1) * 32 * scale + 16 * scale,
+                          offsetY + i * 32 * scale + 16 * scale, frames[frame], true, -scale, scale);
             ++frame;
 
             if (frame > 5)
@@ -848,8 +862,8 @@ Furniture* GameMap::getClickedFurniture(float mapOffsetX, float mapOffsetY,
                                         bool returnIfColidesWithHero,
                                         float heroX, float heroY)
 {
-    const float currentX = x - mapOffsetX;
-    const float currentY = y - mapOffsetY;
+    const float currentX = x;
+    const float currentY = y;
 
     if (!furniture.count())
     {

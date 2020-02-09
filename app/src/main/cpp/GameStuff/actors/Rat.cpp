@@ -53,7 +53,7 @@ void Rat::init(Vector3D& position)
     animations.add(attackUp);
     animations.add(attackDown);
     animations.add(attackSide);
-    strcpy(spriteName, "pics/rat.tga");
+    pictureIndex = 1;
 }
 
 void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& actors)

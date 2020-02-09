@@ -18,7 +18,8 @@ void ActorContainer::addActor(Actor* actor)
     actors.add(actor);
 }
 
-void ActorContainer::draw(float offsetX, float offsetY, 
+void ActorContainer::draw(float offsetX, float offsetY,
+                          int scale,
                           PicsContainer& pics,
                           DArray<Furniture*>& furniture,
                           bool debug)
@@ -69,7 +70,7 @@ void ActorContainer::draw(float offsetX, float offsetY,
                                  renderUnits[smallestYIndex]->collisionBodyOffset.y,
                                  minY);*/
 
-        renderUnits[smallestYIndex]->draw(offsetX, offsetY, pics, debug);
+        renderUnits[smallestYIndex]->draw(offsetX, offsetY, scale, pics, debug);
         renderUnits.remove(smallestYIndex);
 
     }

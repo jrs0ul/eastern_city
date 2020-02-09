@@ -11,7 +11,9 @@ class ActorContainer
 public:
     void     destroy();
     void     addActor(Actor* actor);
-    void     draw(float offsetX, float offsetY, PicsContainer& pics, 
+    void     draw(float offsetX, float offsetY,
+                  int scale,
+                  PicsContainer& pics,
                   DArray<Furniture*>& furniture,
                   bool debug);
     unsigned getActorCount();

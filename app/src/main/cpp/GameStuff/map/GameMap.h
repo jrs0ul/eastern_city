@@ -30,6 +30,7 @@ public:
     void        save(const char* file);
 
     void        draw(float posX, float posY,
+                     int scale,
                      unsigned screenWidth, unsigned screenHeight,
                      PicsContainer& pics, 
                      ItemDatabase& itemDb, 
@@ -39,9 +40,11 @@ public:
     void        updateFurniturePolygons(Room* currentRoom);
 
     void        drawFrontLayerAssets(float offsetX, float offsetY,
+                                     int scale,
                                      Vector3D& characterPos,
                                      PicsContainer& pics);
     void        drawDarknessBorder(float offsetX, float offsetY,
+                                   int scale,
                                    unsigned screenWidth, unsigned screenHeight,
                                    PicsContainer& pics);
     void        addItem(ItemInstance* item);

@@ -18,17 +18,18 @@ void Actor::destroy()
 }
 
 void Actor::draw(float offsetX, float offsetY,
+                 int scale,
                  PicsContainer& pics, bool debugInfo)
 {
 
     int frame = animations[animationSubset].frames[animationFrame];
-    pics.draw(pics.findByName(spriteName), 
-              pos.x + offsetX + animations[animationSubset].offsetX, 
-              pos.y + offsetY + animations[animationSubset].offsetY,
+    pics.draw(pictureIndex, 
+              pos.x * scale + offsetX + animations[animationSubset].offsetX * scale, 
+              pos.y * scale + offsetY + animations[animationSubset].offsetY * scale,
               frame, 
               true, 
-              (isFlipedX)? -1.f: 1.f, 
-              1.f,
+              (isFlipedX)? -scale: scale, 
+              scale,
               0.f,
               (isDamaged) ? COLOR(1,0,0,1) : COLOR(1,1,1,1),
               (isDamaged) ? COLOR(1,0,0,1) : COLOR(1,1,1,1)
@@ -37,12 +38,12 @@ void Actor::draw(float offsetX, float offsetY,
     if (debugInfo)
     {
         pics.draw(-1, 
-                  pos.x + offsetX + collisionBodyOffset.x,
-                  pos.y + offsetY + collisionBodyOffset.y,
+                  pos.x * scale + offsetX + collisionBodyOffset.x * scale,
+                  pos.y * scale + offsetY + collisionBodyOffset.y * scale,
                   0,
                   true,
-                  collisionBodyRadius * 2,
-                  collisionBodyRadius * 2,
+                  collisionBodyRadius * 2 * scale,
+                  collisionBodyRadius * 2 * scale,
                   0.f,
                   COLOR(1,0,0,0.5f), 
                   COLOR(1,0,0,0.5f));

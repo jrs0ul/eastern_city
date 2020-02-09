@@ -9,6 +9,7 @@ class Drawable
 public:
     virtual ~Drawable(){}
     virtual void draw(float offsetX, float offsetY,
+                      int scale,
                       PicsContainer& pics,
                       bool debugInfo = false) = 0;
 

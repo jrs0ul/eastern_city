@@ -25,7 +25,7 @@ void Ghost::init(Vector3D& position)
     animations.add(side);
     animations.add(down);
     animations.add(up);
-    strcpy(spriteName, "pics/baubas.tga");
+    pictureIndex = 18;
 }
 
 void Ghost::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& actors)

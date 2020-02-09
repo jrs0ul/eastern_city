@@ -34,7 +34,7 @@ void Dude::init(Vector3D& position, int ScreenWidth, int ScreenHeight)
     timeAwake = 0.f;
     collisionBodyOffset = Vector3D(0.f, 39.f, 0.f);
     collisionBodyRadius = 16.f;
-    strcpy(spriteName, "pics/dude.tga");
+    pictureIndex = NAKED_IDLE;
 
     FrameSet up;
     up.frames.add(0);
@@ -90,18 +90,20 @@ void Dude::update(float deltaTime,
         }
     }
 
-    //Y U DO THIS???
+    int equipedItemIndex = isClothesEquiped();
+    bool coatEquiped = (equipedItemIndex == 2 || equipedItemIndex == 16);
+    
     if (isWeaponEquiped() == 12 && !sleeping)
     {
-        strcpy(spriteName, "pics/dude_flashlight.tga");
+        pictureIndex = (coatEquiped) ? COAT_FLASHLIGHT : NAKED_FLASHLIGHT;
     }
     else if (sleeping)
     {
-        strcpy(spriteName,"pics/dude_sleep.tga");
+        pictureIndex = (coatEquiped) ? COAT_SLEEP : NAKED_SLEEP;
     }
     else
     {
-        strcpy(spriteName, "pics/dude.tga");
+        pictureIndex = (coatEquiped) ? COAT_IDLE : NAKED_IDLE;
     }
     //-----------
 

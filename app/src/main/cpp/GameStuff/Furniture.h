@@ -19,6 +19,7 @@ public:
 
     void destroy();
     void draw(float offsetX, float offsetY,
+              int scale,
               PicsContainer& pics,
               bool debugInfo = false);
     //void test(){}
