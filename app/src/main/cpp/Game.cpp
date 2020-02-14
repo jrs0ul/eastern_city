@@ -255,7 +255,7 @@ void Game::logic(){
 //-------------------------
 void Game::destroy(){
 
-    Statistics::getInstance()->send(days * 240.f + worldTime - 100, time(0) - sessionStarted, true, statsPostRequest);
+    Statistics::getInstance()->send(days * dayLength + worldTime - ((dayLength / 24) * 10), time(0) - sessionStarted, true, statsPostRequest);
     sendStats = true;
 
     glDeleteFramebuffers(1, &fbo);
@@ -417,7 +417,7 @@ void Game::renderGame()
 
     sprintf(buf, "Temperature:%d", map.getTemperature());
     WriteText(ScreenWidth - 150, 2, pics, 0, buf, 0.8f, 0.8f);
-    sprintf(buf, "Day %d %dh", days, (int)(worldTime / 10));
+    sprintf(buf, "Day %d %dh", days, (int)(worldTime / (dayLength / 24)));
     WriteText(ScreenWidth - 150, 20, pics, 0, buf, 0.8f, 0.8f);
 
 }
@@ -444,11 +444,11 @@ void Game::renderDefeat()
     
     char buf[255];
 
-    float totalTime = days * 240 + worldTime - 100;
+    float totalTime = days * dayLength + worldTime - ((dayLength / 24) * 10);
 
-    int survivedDays = totalTime / 240;
+    int survivedDays = totalTime / dayLength;
 
-    sprintf(buf, "You have survived for %d days %d hours", survivedDays, (int)((totalTime - (survivedDays * 240)) / 10));
+    sprintf(buf, "You have survived for %d days %d hours", survivedDays, (int)((totalTime - (survivedDays * dayLength)) / (dayLength / 24)));
     WriteText(ScreenWidth/2.f - 120, 100, pics, 0, buf);
 
 #ifndef __ANDROID__
@@ -506,7 +506,7 @@ void Game::gameLogic()
                 {
                     stateInTheGame = FADEIN;
                     printf("WELCOME TO THE WORLD OF TOMOROW!\n");
-                    updateWorld(60);
+                    updateWorld(dayLength/24 * 6);
                     calcDarknessValue();
                     dude.stopSleep();
 
@@ -656,7 +656,7 @@ void Game::gameLogic()
             return;
         }
 
-        if (handleShooting((touches.up[0].x - mapPosX) / scale, (touches.up[0].y - mapPosY) / scale))
+        if (handleAttack((touches.up[0].x - mapPosX) / scale, (touches.up[0].y - mapPosY) / scale))
         {
             return;
         }
@@ -704,7 +704,8 @@ void Game::gameLogic()
     if (dude.getHealth() <= 0)
     {
         gameMode = DEFEAT;
-        Statistics::getInstance()->send(days * 240.f + worldTime - 100, time(0) - sessionStarted, false, statsPostRequest);
+        Statistics::getInstance()->send(days * dayLength + worldTime - (dayLength / 24) * 10,
+                                        time(0) - sessionStarted, false, statsPostRequest);
         sendStats = true;
         Statistics::getInstance()->reset();
     }
@@ -715,14 +716,14 @@ void Game::updateWorld(float deltaT)
 {
     worldTime += deltaT;
 
-    if (worldTime >= 240.f)
+    if (worldTime >= dayLength)
     {
-        int daysPassed = worldTime / 240;
+        int daysPassed = worldTime / dayLength;
         days += daysPassed;
-        worldTime = (worldTime - daysPassed * 240);
+        worldTime = (worldTime - daysPassed * dayLength);
     }
     
-    dude.update(deltaT, Keys, map, darkness, itemDB, path);
+    dude.update(deltaT, Keys, map, currentRoom, actors, darkness, itemDB, recipes, furnitureDB, path);
     
     for (unsigned i = 0; i < actors.getActorCount(); ++i)
     {
@@ -822,7 +823,7 @@ void Game::titleLogic()
         itemSelected = false;
         selectedItemPos = Vector3D(0,0,0);
         activeContainer = nullptr;
-        worldTime = 100;
+        worldTime = dayLength/24 * 10;
         days = 0;
         clickOnItem = -1;
         stateInTheGame = FADEIN;
@@ -1052,7 +1053,10 @@ void Game::drawDarkness(int scale)
 
 void Game::calcDarknessValue()
 {
-    darkness = (worldTime >= 60 && worldTime < 200) ? 1.f - sinf(((worldTime - 60) / 140.f) * M_PI) : 1.f;
+    float sixOClock = dayLength/24 * 6;
+    float eightOClock = dayLength/24 * 20;
+    float daylightDuration = dayLength/24 * 14;
+    darkness = (worldTime >= sixOClock && worldTime < eightOClock) ? 1.f - sinf(((worldTime - sixOClock) / daylightDuration) * M_PI) : 1.f;
 }
 
 void Game::doubleClickContainerItem(ItemInstance* item, void** dud)
@@ -1098,76 +1102,13 @@ void Game::useItem(ItemInstance* item, void** data)
 
 bool Game::interactWithFurniture(float clickX, float clickY)
 {
-    Furniture * fur = map.getClickedFurniture(mapPosX, mapPosY, 
-            pics, 
-            clickX, clickY,
-            true,
-            dude.pos.x, dude.pos.y + 39);
+    Furniture * fur = map.getClickedFurniture(clickX, clickY, true);
 
     if (fur)
     {
         if (dude.isWeaponEquiped() == 19) //destroying furniture whith an axe
         {
-            printf("YOU ATEMPTED TO DESTROY!!!ĄĄ\n");
-            printf("Furniture db index %d\n", fur->furnitureDbIndex);
-
-            Recipe* r = recipes.getRecipeByFurnitureIndex(fur->furnitureDbIndex);
-            FurnitureData* fd = furnitureDB.getFurniture(fur->furnitureDbIndex);
-
-            if (fd)
-            {
-                printf("Axe dmg: %u\n", fd->damageToAxe);
-            }
-
-            if (r)
-            {
-                for (unsigned i = 0; i < r->ingredients.count(); ++i)
-                {
-                    printf("items: %d\n", r->ingredients[i].itemIndex);
-
-                    for (int j = 0; j < r->ingredients[i].count; ++j)
-                    {
-                        currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
-                                    fur->pos.y + fur->collisionBodySize.y, 
-                                    0),
-                                r->ingredients[i].itemIndex);
-                        map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
-                    } 
-                }
-
-                if (fur->itemContainerIndex != -1)
-                {
-                    printf("Has some items inside\n");
-                    ItemContainer* ic = map.getItemContainer(fur->itemContainerIndex);
-                    for (unsigned j = 0; j < ic->getItemCount(); ++j)
-                    {
-                        ItemInstance* item = ic->getItem(j);
-                        printf("items: %d\n", item->getIndex());
-
-                        if (!item->isRemoved())
-                        {
-                            currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
-                                        fur->pos.y + fur->collisionBodySize.y, 
-                                        0),
-                                    item);
-                            map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
-                        }
-                    }
-
-                }
-
-
-                if (fd)
-                {
-                    dude.wearWeapon(fd->damageToAxe * -1.f);
-                }
-
-                fur->removed = true;
-
-            }
-
-            map.updateFurniturePolygons(currentRoom);
-
+            dude.activateMeleeAttack();
             return true;
         }
 
@@ -1300,13 +1241,13 @@ void Game::drawPolygon(SPolygon* poly, int scale, ShaderProgram& shader, int met
     colors.destroy();
 }
 
-bool Game::handleShooting(float x, float y)
+bool Game::handleAttack(float x, float y)
 {
     for (unsigned i = 0; i < actors.getActorCount(); ++i)
     {
         Actor* actor = actors.getActor(i);
 
-        if (actor->getType() != 1)
+        if (actor->getType() != 1 || actor->isDead)
         {
             continue;
         }
@@ -1320,24 +1261,40 @@ bool Game::handleShooting(float x, float y)
             {
                 ItemData* weaponInfo = itemDB.get(weaponEquiped);
 
-                if (weaponInfo->imageIndex != 9)
+                if (weaponInfo->imageIndex != 9 && weaponInfo->imageIndex != 19)
                 {
+                    printf("nope\n");
                     return false;
                 }
 
-                int ammoSlot = dude.hasItem(weaponInfo->ammoItemIndex);
+                if (weaponInfo->imageIndex == 9) //slingshot - ranged
+                {
 
-                if (ammoSlot != -1)
-                { 
-                    if (actor->isDead)
-                    {
-                        return false;
+                    int ammoSlot = dude.hasItem(weaponInfo->ammoItemIndex);
+
+                    if (ammoSlot != -1)
+                    { 
+                        dude.removeItem(ammoSlot);
+                        actor->kill();
+                        currentRoom->addItem(Vector3D(actor->pos.x, actor->pos.y, 0), 1);
+                        map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+                        dude.wearWeapon(-8.f);
                     }
-            
-                    dude.removeItem(ammoSlot);
-                    actor->kill();
-                    currentRoom->addItem(Vector3D(actor->pos.x, actor->pos.y, 0), 1);
-                    map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+                }
+                else if (weaponInfo->imageIndex == 19) //axe - mellee
+                {
+                    Vector3D dudePos = *dude.getPos();
+                    dudePos.y += 39.f;
+
+                    printf("SWING!\n");
+
+                    if (CollisionCircleCircle(dudePos.x, dudePos.y, 37,
+                                actor->pos.x + actor->collisionBodyOffset.x,
+                                actor->pos.y + actor->collisionBodyOffset.y,
+                                actor->collisionBodyRadius))
+                    {
+                        dude.activateMeleeAttack();
+                    }
                 }
             }
 

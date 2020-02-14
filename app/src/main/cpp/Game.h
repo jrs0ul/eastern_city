@@ -48,6 +48,7 @@ const float scale = 100.f;
 const float TouchScreenJoystickRadius = 45.f;
 const float TouchScreenJoystickX = 90;
 const float TouchScreenJoystickY = 400;
+const float dayLength = 480.f;
 
 
 enum GameModes
@@ -207,7 +208,7 @@ private:
     void createEnemies();
     void drawPolygon(SPolygon* poly, int scale, ShaderProgram& shader, int method = GL_LINE_STRIP, COLOR c = COLOR(0,0,1,1));
 
-    bool handleShooting(float x, float y);
+    bool handleAttack(float x, float y);
     bool handleCrafting(float x, float y);
     
 

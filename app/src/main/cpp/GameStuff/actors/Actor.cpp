@@ -21,8 +21,14 @@ void Actor::draw(float offsetX, float offsetY,
                  int scale,
                  PicsContainer& pics, bool debugInfo)
 {
+    if (animationSubset >= (int)animations.count())
+    {
+        printf("ERROR: animation subset %d is out of bounds\n", animationSubset);
+    }
 
+    //printf("frame count in subset %d : %lu, current frame %d\n", animationSubset, animations[animationSubset].frames.count(), animationFrame);
     int frame = animations[animationSubset].frames[animationFrame];
+    
     pics.draw(pictureIndex, 
               pos.x * scale + offsetX + animations[animationSubset].offsetX * scale, 
               pos.y * scale + offsetY + animations[animationSubset].offsetY * scale,

@@ -209,6 +209,7 @@ bool ItemContainer::checkInput(float deltaTime,
                 if (addItem(**selectedItem, itemIndex))
                 {
                     (**selectedItem).setAsRemoved();
+                    printf("REMOVED\n");
                 }
 
                 itemSelected = false;

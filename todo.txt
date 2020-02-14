@@ -22,5 +22,8 @@
 * draw the blanket's sprite on sleeping character.
 * Make a sprite for a wall carpet
 * Simple tutorial to teach doubleclicking on food if satiation is low or clothes if it's cold
-* fix CenterCamera
+* fix CenterCamera(black borders)
 * scale the UI
+* Axe animation for the bald guy
+* When you start dragging an item from a container, you should set item as removed in the container
+--> * Axe damage on swing, gradual damage to furniture

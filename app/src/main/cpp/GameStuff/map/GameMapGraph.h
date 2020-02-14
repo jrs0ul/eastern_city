@@ -155,6 +155,7 @@ public:
     void addDumpster(Room* room, int x, int y);
     void addBench(Room* room, int x, int y, bool flipped);
     void addCar(Room* room);
+    void addApartamentDoorFront(int x, int y, Room* room);
 
     void destroy();
 

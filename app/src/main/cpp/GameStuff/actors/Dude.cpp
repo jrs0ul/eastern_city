@@ -1,5 +1,6 @@
 #include "Dude.h"
 #include "../Statistics.h"
+#include "../FurnitureData.h"
 #include "../../TextureLoader.h"
 #include "../../MathTools.h"
 #include "../../audio/SoundSystem.h"
@@ -35,17 +36,21 @@ void Dude::init(Vector3D& position, int ScreenWidth, int ScreenHeight)
     collisionBodyOffset = Vector3D(0.f, 39.f, 0.f);
     collisionBodyRadius = 16.f;
     pictureIndex = NAKED_IDLE;
+    equipedWeaponInLastFrame = -1;
+    doAttack = false;
 
     FrameSet up;
     up.frames.add(0);
     up.frames.add(1);
     up.frames.add(2);
     up.frames.add(1);
+
     FrameSet down;
     down.frames.add(3);
     down.frames.add(4);
     down.frames.add(5);
     down.frames.add(4);
+
     FrameSet side;
     side.frames.add(6);
     side.frames.add(7);
@@ -59,10 +64,59 @@ void Dude::init(Vector3D& position, int ScreenWidth, int ScreenHeight)
     sleep.frames.add(2);
     sleep.frames.add(3);
 
+
+    const float axeOffsetY = -10;
+
+    FrameSet axe_up;
+    axe_up.offsetY = axeOffsetY;
+    axe_up.frames.add(0);
+    axe_up.frames.add(1);
+    axe_up.frames.add(2);
+    axe_up.frames.add(1);
+
+    FrameSet axe_down;
+    axe_down.offsetY = axeOffsetY;
+    axe_down.frames.add(5);
+    axe_down.frames.add(6);
+    axe_down.frames.add(7);
+    axe_down.frames.add(6);
+
+    FrameSet axe_side;
+    axe_side.offsetY = axeOffsetY;
+    axe_side.frames.add(10);
+    axe_side.frames.add(11);
+    axe_side.frames.add(12);
+    axe_side.frames.add(11);
+
+    FrameSet axe_attack_up;
+    axe_attack_up.offsetY = axeOffsetY;
+    axe_attack_up.frames.add(1);
+    axe_attack_up.frames.add(3);
+    axe_attack_up.frames.add(4);
+
+    FrameSet axe_attack_down;
+    axe_attack_down.offsetY = axeOffsetY;
+    axe_attack_down.frames.add(6);
+    axe_attack_down.frames.add(8);
+    axe_attack_down.frames.add(9);
+
+    FrameSet axe_attack_side;
+    axe_attack_side.offsetY = axeOffsetY;
+    axe_attack_side.frames.add(11);
+    axe_attack_side.frames.add(13);
+    axe_attack_side.frames.add(14);
+
+
     animations.add(up);
     animations.add(down);
     animations.add(side);
     animations.add(sleep);
+    animations.add(axe_up);
+    animations.add(axe_down);
+    animations.add(axe_side);
+    animations.add(axe_attack_up);
+    animations.add(axe_attack_down);
+    animations.add(axe_attack_side);
 }
 
 void Dude::destroy()
@@ -75,10 +129,22 @@ void Dude::destroy()
 void Dude::update(float deltaTime, 
                   unsigned char* Keys,
                   GameMap& map,
+                  Room* currentRoom,
+                  ActorContainer& actors,
                   float darkness,
                   ItemDatabase& itemdb,
+                  CraftingRecipes& recipes,
+                  FurnitureDatabase& furnitureDb,
                   FindPath& path)
 {
+
+    if (equipedWeaponInLastFrame != isWeaponEquiped() && isWeaponEquiped() == -1)
+    {
+        onWeaponUnequip();
+    }
+
+    const bool axeEquiped = (isWeaponEquiped() == 19 && !sleeping);
+    equipedWeaponInLastFrame = isWeaponEquiped();
 
     if (isDamaged)
     {
@@ -96,6 +162,10 @@ void Dude::update(float deltaTime,
     if (isWeaponEquiped() == 12 && !sleeping)
     {
         pictureIndex = (coatEquiped) ? COAT_FLASHLIGHT : NAKED_FLASHLIGHT;
+    }
+    else if (axeEquiped)
+    {
+        pictureIndex = 25;
     }
     else if (sleeping)
     {
@@ -129,6 +199,7 @@ void Dude::update(float deltaTime,
     if (!sleeping)
     {
         walkingLogic(deltaTime, useKeys, Keys, map, path);
+        melleeAttacks(actors, map, currentRoom, itemdb, recipes, furnitureDb, Keys, deltaTime);
     }
 
     
@@ -299,6 +370,8 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
         {
             item->setAsRemoved();
             Statistics::getInstance()->increaseEquipedTimes();
+
+            onWeaponEquip();
         }
     }
     else if (data->imageIndex == 13) // batteries
@@ -406,8 +479,23 @@ bool Dude::checkInventoryInput(float deltaTime,
 
     equipedItems.setActive(true);
     itemsBefore = equipedItems.getActualItemCount();
+    bool isWeaponEquipedBefore = (isWeaponEquiped() != -1);
+     
+
     res = equipedItems.checkInput(deltaTime, touches, selectedItem, itemSelected, clickedOnEquipedItems, itemPos, nullptr);
     itemsAfter = equipedItems.getActualItemCount();
+    bool isWeaponEquipedNow = (isWeaponEquiped() != -1);
+
+        
+    if (isWeaponEquipedBefore && !isWeaponEquipedNow)
+    {
+        onWeaponUnequip();
+    }
+
+    if (!isWeaponEquipedBefore && isWeaponEquipedNow)
+    {
+        onWeaponEquip();
+    }
     
     if (itemsBefore < itemsAfter)
     {
@@ -445,6 +533,24 @@ bool Dude::colidesWithRegion(GameMap& map, unsigned* regionIndex, unsigned* entr
     return false;
 }
 
+void Dude::activateMeleeAttack()
+{
+    if (isWeaponEquiped() == 19 && !sleeping && !doAttack)
+    {
+        doAttack = true;
+        animationFrame = 0;
+        animationProgress = 0.f;
+
+        switch(animationSubset)
+        {
+            case 6: animationSubset = 9; break;
+            case 5: animationSubset = 8; break;
+            case 4: animationSubset = 7; break;
+        }
+
+    }
+}
+
 void Dude::goToSleep()
 {
     sleeping = true; 
@@ -460,9 +566,16 @@ void Dude::wearWeapon(float damage)
 
     if (wep && !wep->isRemoved())
     {
-        wep->setQuality(wep->getQuality() + damage);
+        auto currentQuality = wep->getQuality();
+        wep->setQuality(currentQuality + damage);
+
+        if (currentQuality + damage <= 0)
+        {
+            wep->setAsRemoved();
+        }
     }
 }
+
 
 void Dude::setPosition(Vector3D& position)
 {
@@ -621,7 +734,7 @@ void Dude::doDarknessEffect(float deltaTime, float darkness)
 
     if (sleeping)
     {
-        wakefullness += deltaTime * 1.3f;
+        wakefullness += deltaTime * 0.6f;
 
         if (wakefullness > 100)
         {
@@ -633,8 +746,10 @@ void Dude::doDarknessEffect(float deltaTime, float darkness)
 
 
     timeAwake += deltaTime;
+    //TODO: use const file
+    const float dayLength = 480.f;
     
-    if (timeAwake > 40)
+    if (timeAwake > (dayLength / 24) * 4)
     {
         darknessProgress += deltaTime;
 
@@ -667,7 +782,7 @@ void Dude::doDarknessEffect(float deltaTime, float darkness)
 
 void Dude::doTemperatureDamage(float deltaTime, int temperature, ItemDatabase& itemdb)
 {
-    freezingProgress += deltaTime * 1.2f;
+    freezingProgress += deltaTime * 1.0f;
 
     if (freezingProgress >= 1.f)
     {
@@ -718,7 +833,7 @@ void Dude::doTemperatureDamage(float deltaTime, int temperature, ItemDatabase& i
 
 void Dude::doHungerDamage(float deltaTime)
 {
-    satiationProgress += deltaTime;
+    satiationProgress += deltaTime * 0.5f;
 
     if (satiationProgress >= 1.f)
     {
@@ -748,76 +863,91 @@ void Dude::doHungerDamage(float deltaTime)
 
 void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, GameMap& map, FindPath& path)
 {
+    if (doAttack)
+    {
+        return;
+    }
+
+    const bool axeEquiped = (isWeaponEquiped() == 19 && !sleeping);
+    
     float dudeSpeed = 1.8f;
 
     const bool followPath = pathIndex < path.getPathLength();
 
-    if ((useKeys || followPath) && walkAnimationDone)
+    if (!doAttack)
     {
-        playWalkAnimation = true;
-        walkAnimationDone = false;
-    }
-    else if (walkAnimationDone)
-    {
-        animationFrame = 1;
+        if ((useKeys || followPath) && walkAnimationDone)
+        {
+            playWalkAnimation = true;
+            walkAnimationDone = false;
+        }
+        else if (walkAnimationDone)
+        {
+            animationFrame = 1;
+        }
     }
 
     Vector3D shift(0, 0, 0);
 
-    if (!useKeys)
+    if (!doAttack)
     {
-        if (followPath)
+        if (!useKeys)
         {
-            Vector3D* destination = path.getPathStep(pathIndex);
-
-            if (destination)
+            if (followPath)
             {
-                Vector3D shiftedPos = pos + Vector3D(0, 39, 0);
-                Vector3D direction = (*destination) - shiftedPos;
-                direction.normalize();
-                shift = Vector3D(direction.x * dudeSpeed, direction.y * dudeSpeed, 0);
+                Vector3D* destination = path.getPathStep(pathIndex);
 
-                Vector3D tmp = shiftedPos + shift;
-
-
-                if (CollisionCircleCircle(tmp.x, tmp.y, 1.f, destination->x, destination->y, 1.f))
+                if (destination)
                 {
-                    ++pathIndex;
+                    Vector3D shiftedPos = pos + Vector3D(0, 39, 0);
+                    Vector3D direction = (*destination) - shiftedPos;
+                    direction.normalize();
+                    shift = Vector3D(direction.x * dudeSpeed, direction.y * dudeSpeed, 0);
+
+                    Vector3D tmp = shiftedPos + shift;
+
+
+                    if (CollisionCircleCircle(tmp.x, tmp.y, 1.f, destination->x, destination->y, 1.f))
+                    {
+                        ++pathIndex;
+                    }
                 }
             }
         }
-    }
-    else
-    {
+        else
+        {
+            if (Keys[0])
+            {
+                shift.y = -dudeSpeed;
+            }
+            else if (Keys[1])
+            {
+                shift.y = dudeSpeed;
+            }
 
-        if (Keys[0])
-        {
-            shift.y = -dudeSpeed;
-        }
-        else if (Keys[1])
-        {
-            shift.y = dudeSpeed;
-        }
-
-        if (Keys[2])
-        {
-            shift.x = -dudeSpeed;
-        }
-        else if (Keys[3])
-        {
-            shift.x = dudeSpeed;
+            if (Keys[2])
+            {
+                shift.x = -dudeSpeed;
+            }
+            else if (Keys[3])
+            {
+                shift.x = dudeSpeed;
+            }
         }
     }
+
+    
 
     if (fabsf(shift.y) > fabsf(shift.x))
     {
         if (shift.y < 0.f)
         {
-            animationSubset = 1;
+            animationSubset = (axeEquiped) ? 5 : 1;
         }
         else if (shift.y > 0.f)
         {
-            animationSubset = 0;
+            
+            animationSubset = (axeEquiped) ? 4 : 0;
         }
 
     }
@@ -826,12 +956,12 @@ void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, Game
     {
         if (shift.x < 0.f)
         {
-            animationSubset = 2;
+            animationSubset = (axeEquiped) ? 6 : 2;;
             isFlipedX = false;
         }
         else if (shift.x > 0.f)
         {
-            animationSubset = 2;
+            animationSubset = (axeEquiped) ? 6 : 2;
             isFlipedX = true;
         }
 
@@ -848,21 +978,54 @@ void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, Game
     {
         newPos = pos + shift;
 
-        //printf("%f %f\n", shift.x, shift.y);
 
         if (!Actor::isColiding(newPos, nullptr, map))
         {
             pos = newPos;
         }
-        else
-        {
-            //printf("%f %f\n", shift.x, shift.y);
-        }
     }
 
     //---
 
-    if (playWalkAnimation && walkAnimationDone == false)
+    if (!doAttack)
+    {
+        if (playWalkAnimation && walkAnimationDone == false)
+        {
+            animationProgress += deltaTime * 5.f;
+
+            if (animationProgress >= 1.f)
+            {
+                ++animationFrame;
+                animationProgress = 0.f;
+                playWalkAnimation = false;
+                walkAnimationDone = true;
+
+                if (animationFrame > 3)
+                {
+                    animationFrame = 0;
+                }
+            }
+        }
+    }
+}
+
+void Dude::melleeAttacks(ActorContainer& actors,
+        GameMap& map,
+        Room* currentRoom,
+        ItemDatabase& itemdb,
+        CraftingRecipes& recipes,
+        FurnitureDatabase& furnitureDb,
+        unsigned char* Keys,
+        float deltaTime
+        )
+{
+
+    if (Keys[4])
+    {
+        activateMeleeAttack();
+    }
+
+    if (doAttack)
     {
         animationProgress += deltaTime * 5.f;
 
@@ -870,14 +1033,145 @@ void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, Game
         {
             ++animationFrame;
             animationProgress = 0.f;
-            playWalkAnimation = false;
-            walkAnimationDone = true;
 
-            if (animationFrame > 3)
+            if (animationFrame > 2)
             {
                 animationFrame = 0;
+                doAttack = false;
+
+                //----------hit rats
+                for (unsigned i = 0; i < actors.getActorCount(); ++i)
+                {
+                    Actor* actor = actors.getActor(i);
+                    if (actor != this 
+                            && !actor->isDead 
+                            && CollisionCircleCircle(pos.x, pos.y + 39, 37,
+                                actor->pos.x + actor->collisionBodyOffset.x, 
+                                actor->pos.y + actor->collisionBodyOffset.y, 
+                                actor->collisionBodyRadius)
+                            && actor->getType() == 1)
+                    {
+                        actor->kill();
+                        currentRoom->addItem(Vector3D(actor->pos.x, actor->pos.y, 0), 1);
+                        map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+                        wearWeapon(-8.f);
+                    }
+                }
+                //-----------------
+                DArray<Furniture*> furniture;
+                if (map.getFurnitureInRadius(furniture, pos.x, pos.y, 37))
+                {
+                    for (unsigned i = 0; i < furniture.count(); ++i)
+                    {
+                        Furniture* fur = furniture[i];
+                        printf("YOU ATEMPTED TO DESTROY!!!ĄĄ\n");
+                        printf("Furniture db index %d\n", fur->furnitureDbIndex);
+
+                        Recipe* r = recipes.getRecipeByFurnitureIndex(fur->furnitureDbIndex);
+                        FurnitureData* fd = furnitureDb.getFurniture(fur->furnitureDbIndex);
+
+                        if (fd)
+                        {
+                            printf("Axe dmg: %u\n", fd->damageToAxe);
+                        }
+
+                        if (r)
+                        {
+                            for (unsigned i = 0; i < r->ingredients.count(); ++i)
+                            {
+                                printf("items: %d\n", r->ingredients[i].itemIndex);
+
+                                for (int j = 0; j < r->ingredients[i].count; ++j)
+                                {
+                                    currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
+                                                fur->pos.y + fur->collisionBodySize.y, 
+                                                0),
+                                            r->ingredients[i].itemIndex);
+                                    map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+                                } 
+                            }
+
+                            if (fur->itemContainerIndex != -1)
+                            {
+                                printf("Has some items inside\n");
+                                ItemContainer* ic = map.getItemContainer(fur->itemContainerIndex);
+                                for (unsigned j = 0; j < ic->getItemCount(); ++j)
+                                {
+                                    ItemInstance* item = ic->getItem(j);
+                                    printf("items: %d\n", item->getIndex());
+
+                                    if (!item->isRemoved())
+                                    {
+                                        currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
+                                                    fur->pos.y + fur->collisionBodySize.y, 
+                                                    0),
+                                                item);
+                                        map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+                                    }
+                                }
+
+                            }
+
+
+                            if (fd)
+                            {
+                                wearWeapon(fd->damageToAxe * -1.f);
+                            }
+
+                            fur->removed = true;
+
+                        }
+
+                        map.updateFurniturePolygons(currentRoom);
+
+
+
+                    }
+                }
+
+                furniture.destroy();
+                //------------------
+
+                switch(animationSubset)
+                {
+                    case 9: animationSubset = 6; break;
+                    case 8: animationSubset = 5; break;
+                    case 7: animationSubset = 4; break;
+                }
+
             }
         }
     }
 
+}
+
+
+
+void Dude::onWeaponEquip()
+{
+   // printf("EQUIP\n");
+    if (isWeaponEquiped() == 19)
+    {
+        switch(animationSubset)
+        {
+            case 0 : animationSubset = 4; break;
+            case 1 : animationSubset = 5; break;
+            case 2 : animationSubset = 6; break;
+        }
+    }
+}
+
+void Dude::onWeaponUnequip()
+{
+   // printf("UNEQUIP\n");
+    switch(animationSubset)
+    {
+        case 4 : animationSubset = 0; break;
+        case 5 : animationSubset = 1; break;
+        case 6 : animationSubset = 2; break;
+        case 7 : animationSubset = 0; break;
+        case 8 : animationSubset = 1; break;
+        case 9 : animationSubset = 2; break;
+        default :{}
+    }
 }

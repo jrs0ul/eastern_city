@@ -35,4 +35,9 @@
         <SpriteIndex>9</SpriteIndex>
         <PictureIndex>21</PictureIndex>
     </Object>
+    <Object name="Door" index="7">
+        <AxeDamage>10</AxeDamage>
+        <SpriteIndex>13</SpriteIndex>
+        <PictureIndex>5</PictureIndex>
+    </Object>
 </Furniture>

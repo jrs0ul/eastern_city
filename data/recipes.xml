@@ -61,5 +61,8 @@
         <Ingredient itemIndex="6" count="4"/>
         <Ingredient itemIndex="20" count="1"/>
     </Recipe>
+    <Recipe resultFurnitureIndex="7" craftable="0">
+    </Recipe>
+
 
 </Recipes>

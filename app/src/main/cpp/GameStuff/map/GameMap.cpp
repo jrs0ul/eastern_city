@@ -518,7 +518,7 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
         {
             Furniture* fur = room->getFurniture(i);
 
-            if (fur)
+            if (fur && !fur->removed)
             {
                 furniture.add(fur);
                 SPolygon poly;
@@ -855,12 +855,43 @@ void GameMap::addItem(ItemInstance* item)
     items.add(item);
 }
 
+bool GameMap::getFurnitureInRadius(DArray<Furniture*>& result, int x, int y, int radius)
+{
+    bool res = false;
 
-Furniture* GameMap::getClickedFurniture(float mapOffsetX, float mapOffsetY,
-                                        PicsContainer& pics,
+    if (!furniture.count())
+    {
+        return res;
+    }
+
+    for (int i = (int)furniture.count() - 1; i >= 0; --i)
+    {
+        Furniture* fur = furniture[i];
+
+        if (fur->removed)
+        {
+            continue;
+        }
+
+        const float collisionBodyX = fur->pos.x + fur->collisionBodyPos.x;
+        const float collisionBodyY = fur->pos.y + fur->collisionBodyPos.y;
+
+        if (CollisionCircleRectangle(x, y, radius, 
+                                     collisionBodyX, collisionBodyY,
+                                     fur->collisionBodySize.x,
+                                     fur->collisionBodySize.y))
+        {
+            res = true;
+            result.add(fur);
+        }
+    }
+
+    return res;
+}
+
+Furniture* GameMap::getClickedFurniture(
                                         int x, int y,
-                                        bool returnIfColidesWithHero,
-                                        float heroX, float heroY)
+                                        bool returnIfColidesWithHero)
 {
     const float currentX = x;
     const float currentY = y;

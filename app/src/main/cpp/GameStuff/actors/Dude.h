@@ -4,8 +4,10 @@
 #include "Actor.h"
 #include "../../Vectors.h"
 #include "../../TextureLoader.h"
+#include "../ActorContainer.h"
 #include "../../FindPath.h"
 #include "../map/GameMap.h"
+#include "../FurnitureData.h"
 #include "../CraftingRecipes.h"
 #include "../ItemInstance.h"
 
@@ -28,8 +30,12 @@ public:
     void          update(float deltaTime, 
                          unsigned char* Keys, 
                          GameMap& map,
+                         Room* currentRoom,
+                         ActorContainer& actors,
                          float darkness,
                          ItemDatabase& itemDb,
+                         CraftingRecipes& recipes,
+                         FurnitureDatabase& furnitureDb,
                          FindPath& path);
 
     void          drawInventory(PicsContainer& pics, ItemDatabase& itemDb, ItemInstance* selectedItem);
@@ -46,12 +52,13 @@ public:
                                       void** doubleClickCallbackData);
 
     bool          colidesWithRegion(GameMap& map, unsigned* regionIndex, unsigned* entryIndex);
-    void          setPosition(Vector3D& position);
     void          resetPathIndex(){pathIndex = 0;}
+    void          activateMeleeAttack();
     void          goToSleep();
     void          stopSleep(){sleeping = false;}
 
     void          wearWeapon(float damage);
+    void          setPosition(Vector3D& position);
 
     int           isClothesEquiped();
     int           isWeaponEquiped();
@@ -92,6 +99,19 @@ private:
                       GameMap& map,
                       FindPath& path);
 
+    void melleeAttacks(ActorContainer& actors,
+                       GameMap& map,
+                       Room* currentRoom,
+                       ItemDatabase& itemdb,
+                       CraftingRecipes& recipes,
+                       FurnitureDatabase& furnitureDb,
+                       unsigned char* Keys,
+                       float deltaTime
+                       );
+
+    void onWeaponEquip();
+    void onWeaponUnequip();
+
 private:
     ItemContainer        itemBag;
     unsigned             pathIndex;
@@ -99,6 +119,7 @@ private:
     bool                 walkAnimationDone;
     bool                 sleeping;
     bool                 sleepAnimationDone;
+    bool                 doAttack;
     float                satiationProgress;
     float                freezingProgress;
     float                darknessProgress;
@@ -109,6 +130,8 @@ private:
     int                  satiation;
     float                wakefullness;
     float                warmth;
+
+    int equipedWeaponInLastFrame;
 };
 
 

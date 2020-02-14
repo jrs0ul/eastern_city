@@ -21,6 +21,7 @@
             <Sprite name="cupboard1" x="619" y="0" width="101" height="118"/>
             <Sprite name="cupboard2" x="722" y="0" width="92" height="118"/>
             <Sprite name="bigcarpet" x="563" y="385" width="460" height="127"/>
+            <Sprite name="doorFront" x="815" y="3" width="58" height="110"/>
         </Sprites>
     </Img>
     <Img src="pics/room.tga" width="600" height="374" filter="0" />
@@ -57,4 +58,5 @@
     <Img src="pics/dude_naked.tga" width="64" height="110" filter="0" />
     <Img src="pics/dude_naked_flashlight.tga" width="64" height="110" filter="0" />
     <Img src="pics/dude_naked_sleep.tga" width="113" height="110" filter="0" />
+    <Img src="pics/dude_axe.tga" width="116" height="132" filter="0" />
 </Images>

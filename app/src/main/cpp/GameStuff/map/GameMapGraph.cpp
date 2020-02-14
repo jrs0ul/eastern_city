@@ -738,6 +738,7 @@ Room* GameMapGraph::addFloors(Room* mainfloor, unsigned entranceIndex)
 
         currentFloor->addDoorHole(546, 638.9f, 21.f);
         addDoorway(currentFloor, 288, 98, 2, 0, 2, 0, nullptr, 2, 70, 5);
+        addApartamentDoorFront(298, 107, currentFloor);
         addDoorway(currentFloor, 672, 115, 3, 0, 3, 20, nullptr, 4);
         addDoorway(currentFloor, 40, 128, 4, 0, 4, 15, nullptr, 5, 65, 5, false);
 
@@ -1189,7 +1190,7 @@ void GameMapGraph::addCar(Room* room)
     car.pos = Vector3D(313, 552, 0);
     car.pictureIndex = 21;
     car.spriteIndex = 10;
-    car.furnitureDbIndex = 7;
+    car.furnitureDbIndex = 666;
     car.collisionBodySize = Vector3D(382, 171, 0);
     
     
@@ -1211,6 +1212,24 @@ void GameMapGraph::addCar(Room* room)
 
     room->addFurniture(car);
     car.destroy();
+}
+
+void GameMapGraph::addApartamentDoorFront(int x, int y, Room* room)
+{
+    Furniture doorFront;
+    doorFront.pos = Vector3D(x, y, 0);
+    doorFront.pictureIndex = 5;
+    doorFront.spriteIndex = 13;
+    doorFront.furnitureDbIndex = 7;
+    doorFront.collisionBodySize = Vector3D(58, 110, 0);
+    doorFront.collisionPolygon.points.add(Vector3D(0, 0, 0));
+    doorFront.collisionPolygon.points.add(Vector3D(57, 0, 0));
+    doorFront.collisionPolygon.points.add(Vector3D(57, 109, 0));
+    doorFront.collisionPolygon.points.add(Vector3D(0, 109, 0));
+    doorFront.collisionPolygon.points.add(Vector3D(0, 0, 0));
+    room->addFurniture(doorFront);
+    doorFront.destroy();
+    
 }
 
 void GameMapGraph::destroy()

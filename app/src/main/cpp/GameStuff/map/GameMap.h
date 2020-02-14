@@ -48,11 +48,9 @@ public:
                                    unsigned screenWidth, unsigned screenHeight,
                                    PicsContainer& pics);
     void        addItem(ItemInstance* item);
-    Furniture*  getClickedFurniture(float mapOffsetX, float mapOffsetY,
-                                PicsContainer& pics,
-                                int x, int y,
-                                bool returnIfColidesWithHero,
-                                float heroX = 0.f, float heroY = 0.f);
+    bool        getFurnitureInRadius(DArray<Furniture*>& result, int x, int y, int radius);
+    Furniture*  getClickedFurniture(int x, int y,
+                                    bool returnIfColidesWithHero);
 
     unsigned    getPolygonCount(){return polygons.count();}
     SPolygon*    getPolygon(unsigned index){
