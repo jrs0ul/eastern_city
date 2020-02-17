@@ -219,6 +219,12 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
                         sprintf(buffer, "%ls", at->getValue());
                         ass.isInFrontLayer = atoi(buffer);
                     }
+                    else if (strcmp(buffer, "light") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        ass.isLight = atoi(buffer);
+                    }
+
 
 
 
@@ -640,7 +646,7 @@ void GameMap::draw(float posX,
 
     for (unsigned i = 0; i < assets.count(); ++i)
     {
-        if (assets[i].isInFrontLayer)
+        if (assets[i].isInFrontLayer || assets[i].isLight)
         {
             continue;
         }
@@ -796,7 +802,30 @@ void GameMap::drawFrontLayerAssets(float offsetX, float offsetY,
 
 }
 
+void GameMap::drawLights(float offsetX, float offsetY, int scale, PicsContainer& pics)
+{
+    for (unsigned i = 0; i < assets.count(); ++i)
+    {
+        if (!assets[i].isLight)
+        {
+            continue;
+        }
 
+        unsigned long picIndex = pics.findByName(assets[i].name);
+
+        PicData* data = pics.getInfo(picIndex);
+
+        pics.draw(picIndex, 
+                  (assets[i].pos.x + (assets[i].isFlipped ? data->htilew * 2 : 0)) * scale + offsetX, 
+                  assets[i].pos.y * scale + offsetY,
+                  assets[i].spriteIndex,
+                  false,
+                  (assets[i].isFlipped ? -1.f * scale: 1.f * scale),
+                   1.f * scale
+                  );
+
+    }
+}
 
 void GameMap::drawDarknessBorder(float offsetX, float offsetY,
                                  int scale,
@@ -855,7 +884,7 @@ void GameMap::addItem(ItemInstance* item)
     items.add(item);
 }
 
-bool GameMap::getFurnitureInRadius(DArray<Furniture*>& result, int x, int y, int radius)
+bool GameMap::getFurnitureInBBox(DArray<Furniture*>& result, Vector3D bboxPos, Vector3D bboxSize)
 {
     bool res = false;
 
@@ -876,10 +905,11 @@ bool GameMap::getFurnitureInRadius(DArray<Furniture*>& result, int x, int y, int
         const float collisionBodyX = fur->pos.x + fur->collisionBodyPos.x;
         const float collisionBodyY = fur->pos.y + fur->collisionBodyPos.y;
 
-        if (CollisionCircleRectangle(x, y, radius, 
-                                     collisionBodyX, collisionBodyY,
-                                     fur->collisionBodySize.x,
-                                     fur->collisionBodySize.y))
+        if (CollisionRectangleRectangle(bboxPos.x, bboxPos.y,
+                                        bboxSize.x, bboxSize.y,
+                                        collisionBodyX, collisionBodyY,
+                                        fur->collisionBodySize.x,
+                                        fur->collisionBodySize.y))
         {
             res = true;
             result.add(fur);

@@ -74,6 +74,7 @@ void ItemContainer::addItem(unsigned itemIndex)
 void ItemContainer::draw(PicsContainer& pics, 
                          ItemDatabase& itemDB, 
                          ItemInstance* selectedItem,
+                         int scale,
                          bool showQuality)
 {
 
@@ -82,8 +83,17 @@ void ItemContainer::draw(PicsContainer& pics,
 
     for (unsigned i = 0; i < slotCount; ++i)
     {
-        pics.draw(2, pos.x + col * 34, pos.y + row * 34, 0, false, 0.25f, 0.5);
-        pics.draw(2, pos.x + col * 34 + 16, pos.y + row * 34, 1, false, 0.25f, 0.5);
+        pics.draw(2, 
+                  pos.x + (col * 34) * scale,
+                  pos.y + (row * 34) * scale, 
+                   0, 
+                   false, 
+                   0.25f * scale,
+                   0.5 * scale);
+        pics.draw(2, 
+                  pos.x + (col * 34 + 16) * scale,
+                  pos.y + (row * 34) * scale,
+                  1, false, 0.25f * scale, 0.5 * scale);
         ++col;
 
         if (col >= width)
@@ -104,12 +114,17 @@ void ItemContainer::draw(PicsContainer& pics,
         if (!items[i].isRemoved() && selectedItem != &items[i])
         {
             ItemData* data = itemDB.get(items[i].getIndex());
-            pics.draw(4, pos.x + col * 34, pos.y + row * 34, data->imageIndex);
+            pics.draw(4, pos.x + (col * 34) * scale,
+                         pos.y + (row * 34) * scale, 
+                         data->imageIndex,
+                         false,
+                         scale, scale);
 
             if (showQuality)
             {
                 sprintf(buf, "%.1f", items[i].getQuality());
-                WriteShadedText(pos.x + col * 34, pos.y + row * 34 + 20, pics, 0, buf, 0.6f, 0.6f);
+                WriteShadedText(pos.x + (col * 34) * scale,
+                                pos.y + (row * 34 + 20) * scale, pics, 0, buf, 0.6f * scale, 0.6f * scale);
             }
         }
 
@@ -124,7 +139,8 @@ void ItemContainer::draw(PicsContainer& pics,
 
 }
 
-bool ItemContainer::checkInput(float deltaTime,
+bool ItemContainer::checkInput(int scale,
+                               float deltaTime,
                                TouchData& touches,
                                ItemInstance** selectedItem, 
                                bool& itemSelected,
@@ -150,11 +166,11 @@ bool ItemContainer::checkInput(float deltaTime,
     const int height = ceil(slotCount / (width * 1.f));
 
 
-    if (touches.down.count() && touches.down[0].x > pos.x && touches.down[0].x < pos.x + 34 * width
-                    && touches.down[0].y > pos.y && touches.down[0].y < height * 34 + pos.y)
+    if (touches.down.count() && touches.down[0].x > pos.x && touches.down[0].x < pos.x + (34 * width) * scale
+                    && touches.down[0].y > pos.y && touches.down[0].y < (height * 34) * scale + pos.y)
     {
-        unsigned row = (touches.down[0].y - pos.y) / 34;
-        unsigned col = (touches.down[0].x - pos.x) / 34;
+        unsigned row = (touches.down[0].y - pos.y) / (34 * scale);
+        unsigned col = (touches.down[0].x - pos.x) / (34 * scale);
 
         unsigned itemIndex = row * width + col;
 
@@ -183,8 +199,8 @@ bool ItemContainer::checkInput(float deltaTime,
     if (touches.up.count())
     {
         if (active 
-                && (touches.up[0].x < pos.x || touches.up[0].x > pos.x + 34 * width
-                    || touches.up[0].y < pos.y || touches.up[0].y > height * 34 + pos.y))
+                && (touches.up[0].x < pos.x || touches.up[0].x > pos.x + (34 * width) * scale
+                    || touches.up[0].y < pos.y || touches.up[0].y > (height * 34) * scale + pos.y))
         {
             if (!itemSelected)
             {
@@ -193,16 +209,16 @@ bool ItemContainer::checkInput(float deltaTime,
 
             return !itemSelected;
         }
-        else if (touches.up[0].x > pos.x && touches.up[0].x < pos.x + 34 * width
-                    && touches.up[0].y > pos.y && touches.up[0].y < height * 34 + pos.y)
+        else if (touches.up[0].x > pos.x && touches.up[0].x < pos.x + (34 * width) * scale
+                    && touches.up[0].y > pos.y && touches.up[0].y < (height * 34) * scale + pos.y)
         {
             clickedOnInventory = true;
 
             if (itemSelected && active)
             {
 
-                unsigned row = (touches.up[0].y - pos.y) / 34;
-                unsigned col = (touches.up[0].x - pos.x) / 34;
+                unsigned row = (touches.up[0].y - pos.y) / (34 * scale);
+                unsigned col = (touches.up[0].x - pos.x) / (34 * scale);
 
                 unsigned itemIndex = row * width + col;
 

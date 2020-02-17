@@ -24,6 +24,7 @@ void FurnitureDatabase::load(const char* path)
                 for (unsigned j = 0; j < object->attributeCount(); ++j)
                 {
                     XmlAttribute* at = object->getAttribute(j);
+                    sprintf(buffer, "%ls", at->getName());
 
                     if (strcmp(buffer, "name") == 0)
                     {
@@ -44,6 +45,15 @@ void FurnitureDatabase::load(const char* path)
                     sprintf(buffer, "%ls", axeDmg->getValue());
                     fd.damageToAxe = atoi(buffer);
                 }
+
+                XmlNode* hp = object->getNode(L"Hp");
+
+                if (hp)
+                {
+                    sprintf(buffer, "%ls", hp->getValue());
+                    fd.hp = atoi(buffer);
+                }
+
 
                 XmlNode* spriteIndex = object->getNode(L"SpriteIndex");
 

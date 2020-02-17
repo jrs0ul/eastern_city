@@ -1,5 +1,14 @@
 #include "Furniture.h"
+#include "FurnitureData.h"
 
+
+void Furniture::initFromData(FurnitureData* fd)
+{
+    pictureIndex = fd->pictureIndex;
+    spriteIndex = fd->spriteIndex;
+    furnitureDbIndex = fd->index;
+    hp = fd->hp;
+}
 
 void Furniture::destroy()
 {

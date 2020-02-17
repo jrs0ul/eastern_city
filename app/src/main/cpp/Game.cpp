@@ -384,19 +384,19 @@ void Game::renderGame()
                          64,
                          pics, currentRoom);
     
-    dude.drawInventory(pics, itemDB, selectedItem);
+    dude.drawInventory(pics, itemDB, selectedItem, pixelArtScale);
 
     drawActiveContainer();
 
     if (itemSelected)
     {
-        pics.draw(4, selectedItemPos.x, selectedItemPos.y, selectedItem->getIndex(), true);
+        pics.draw(4, selectedItemPos.x, selectedItemPos.y, selectedItem->getIndex(), true, pixelArtScale, pixelArtScale);
     }
 
 
     char buf[256];
   
-    drawRecipes();
+    drawRecipes(pixelArtScale);
 
     if (DebugMode)
     {
@@ -405,20 +405,20 @@ void Game::renderGame()
     
     int stats[] = {dude.getHealth(), dude.getSatiation(), dude.getWarmth(), dude.getWakefullness()};
 
-    const float hudStartX = (ScreenWidth / 2) - (2 * 68) - 16;
+    const float hudStartX = (ScreenWidth / 2) - ((2 * 68 + 16) * scale);
 
     for (int i = 0; i < 4; ++i)
     {
-        pics.draw(19, hudStartX + i * 68, 2, i);
+        pics.draw(19, hudStartX + (i * 68) * scale, 2 * scale, i, false, scale, scale);
         sprintf(buf, "%d", stats[i]);
         COLOR statColor = (stats[i] < 20) ? COLOR(1,0,0,1) : COLOR(1,1,1,1);
-        WriteText(hudStartX + i * 68 + 32, 16, pics, 0, buf, 0.8f, 0.8f, statColor, statColor);
+        WriteText(hudStartX + (i * 68 + 32) * scale, 16 * scale, pics, 0, buf, 0.8f * scale, 0.8f * scale, statColor, statColor);
     }
 
     sprintf(buf, "Temperature:%d", map.getTemperature());
-    WriteText(ScreenWidth - 150, 2, pics, 0, buf, 0.8f, 0.8f);
+    WriteText(ScreenWidth - (scale * 150), 2 * scale, pics, 0, buf, 0.8f * scale, 0.8f * scale);
     sprintf(buf, "Day %d %dh", days, (int)(worldTime / (dayLength / 24)));
-    WriteText(ScreenWidth - 150, 20, pics, 0, buf, 0.8f, 0.8f);
+    WriteText(ScreenWidth - (150 * scale), 20 * scale, pics, 0, buf, 0.8f * scale, 0.8f * scale);
 
 }
 
@@ -430,11 +430,14 @@ void Game::renderEditing()
 void Game::renderTitle()
 {
     glClearColor(0.5f, 0.5f, 0.6f, 1.0f);
-    pics.draw(3, ScreenWidth/2.f, ScreenHeight/2.f, 0, true);
+    pics.draw(3, ScreenWidth/2.f, ScreenHeight/2.f, 0, true, pixelArtScale, pixelArtScale);
 #ifndef __ANDROID__
-    WriteText(ScreenWidth/2.f - 120, ScreenHeight/2.f + 120, pics, 0, "click anywhere to continue...");
+    WriteText(ScreenWidth/2.f - 120 * pixelArtScale,
+              ScreenHeight/2.f + 120 * pixelArtScale, pics, 0, "click anywhere to continue...", pixelArtScale, pixelArtScale);
 #else
-    WriteText(ScreenWidth/2.f - 110, ScreenHeight/2.f + 120, pics, 0, "tap anywhere to continue...");
+    WriteText(ScreenWidth/2.f - 110 * pixelArtScale,
+              ScreenHeight/2.f + 120 * pixelArtScale,
+              pics, 0, "tap anywhere to continue...", pixelArtScale, pixelArtScale);
 #endif
 }
 
@@ -449,12 +452,12 @@ void Game::renderDefeat()
     int survivedDays = totalTime / dayLength;
 
     sprintf(buf, "You have survived for %d days %d hours", survivedDays, (int)((totalTime - (survivedDays * dayLength)) / (dayLength / 24)));
-    WriteText(ScreenWidth/2.f - 120, 100, pics, 0, buf);
+    WriteText(ScreenWidth/2.f - 120 * pixelArtScale, 100 * pixelArtScale, pics, 0, buf, pixelArtScale, pixelArtScale);
 
 #ifndef __ANDROID__
-    WriteText(ScreenWidth/2.f - 120, ScreenHeight/2.f + 120, pics, 0, "click anywhere to continue...");
+    WriteText(ScreenWidth/2.f - 120 * pixelArtScale, ScreenHeight/2.f + 120 * pixelArtScale, pics, 0, "click anywhere to continue...", pixelArtScale, pixelArtScale);
 #else
-    WriteText(ScreenWidth/2.f - 110, ScreenHeight/2.f + 120, pics, 0, "tap anywhere to continue...");
+    WriteText(ScreenWidth/2.f - 110 * pixelArtScale, ScreenHeight/2.f + 120 * pixelArtScale, pics, 0, "tap anywhere to continue...", pixelArtScale, pixelArtScale);
 #endif
 
 }
@@ -544,7 +547,7 @@ void Game::gameLogic()
 
         bool clickedOn = false;
 
-        if (activeContainer->checkInput(DeltaTime, touches, &selectedItem, itemSelected, clickedOn, selectedItemPos, data))
+        if (activeContainer->checkInput(pixelArtScale, DeltaTime, touches, &selectedItem, itemSelected, clickedOn, selectedItemPos, data))
         {
             return;
         }
@@ -553,7 +556,8 @@ void Game::gameLogic()
     void* data[] = {&dude, &itemDB}; 
 
     bool clickedInventory = false;
-    dude.checkInventoryInput(DeltaTime,
+    dude.checkInventoryInput(pixelArtScale,
+                             DeltaTime,
                              touches,
                              &selectedItem,
                              itemSelected,
@@ -651,7 +655,7 @@ void Game::gameLogic()
         }
 
         
-        if (handleCrafting(touches.up[0].x, touches.up[0].y))
+        if (handleCrafting(touches.up[0].x, touches.up[0].y, pixelArtScale))
         {
             return;
         }
@@ -794,7 +798,7 @@ void Game::titleLogic()
         //mapGraph.init();
         path.destroy();
         mapGraph.destroy();
-        mapGraph.init();
+        mapGraph.init(furnitureDB);
         mapGraph.findYardMapWidthHeight(yardMapWidth, yardMapHeight);
         printf("yard map size: %d %d\n", yardMapWidth, yardMapHeight);
         currentRoom = mapGraph.root;
@@ -811,7 +815,7 @@ void Game::titleLogic()
 #else
         map.load(currentRoom->getMapName(), &itemsInWorld, currentRoom);
 #endif
-        dude.init(*map.getPlayerPos(0), ScreenWidth, ScreenHeight);
+        dude.init(*map.getPlayerPos(0), ScreenWidth, ScreenHeight, pixelArtScale);
         dude.addDoubleClickCallbackForItems(&useItem);
 
         createEnemies();
@@ -853,15 +857,17 @@ void Game::drawActiveContainer()
         return;
     }
 
-    activeContainer->draw(pics, itemDB, selectedItem);
+    activeContainer->draw(pics, itemDB, selectedItem, pixelArtScale, false);
 
 }
 
-void Game::drawRecipes()
+void Game::drawRecipes(int scale)
 {
     char buf[128];
-    WriteText(10, 10, pics, 0, "Craft:", 0.8f, 0.8f);
+    WriteText(10 * scale, 10 * scale, pics, 0, "Craft:", 0.8f * scale, 0.8f * scale);
 
+    const float tileSize = 32.f;
+    const float halfTileSize = tileSize / 2.f;
 
     int recipeIndex = 0;
 
@@ -875,44 +881,57 @@ void Game::drawRecipes()
             continue;
         }
 
-        pics.draw(2, 10, 32 + recipeIndex * 34, 0, false, 0.25f, 0.5);
-        pics.draw(2, 10 + 16, 32 + recipeIndex * 34, 1, false, 0.25f, 0.5);
+        pics.draw(2, 
+                  10 * scale, 
+                  (tileSize + recipeIndex * (tileSize + 2)) * scale, 0, false, 0.25f * scale, 0.5 * scale);
+        pics.draw(2, 
+                  (10 + halfTileSize) * scale, 
+                  (tileSize + recipeIndex * (tileSize + 2)) * scale, 1, false, 0.25f * scale, 0.5 * scale);
 
-        pics.draw(4, 10, 32 + recipeIndex * 34, recipe->indexOfItemToMake);
+        pics.draw(4, 
+                  10 * scale, 
+                  (tileSize + recipeIndex * 34) * scale, 
+                  recipe->indexOfItemToMake,
+                  false,
+                  scale,
+                  scale);
 
 
         if (recipeClicked != -1 && recipeIndex == recipeClicked)
         {
-            const float panelWidth = recipe->ingredients.count() * 34 + 64;
+            const float panelWidth = (recipe->ingredients.count() * 34 + 64) ;
             const float halfPanelWidth = panelWidth / 2.f;
 
             pics.draw(2, 
-                      42,
-                      32 + recipeIndex * 34 - 17,
-                      0, false, halfPanelWidth / 64.f , 1.f, 0, COLOR(1,1,1, 0.5));
+                      42 * scale,
+                      (tileSize + recipeIndex * 34 - 17) * scale,
+                      0, false, (halfPanelWidth / 64.f) * scale , 1.f * scale, 0, COLOR(1,1,1, 0.5));
             pics.draw(2, 
-                      42 + halfPanelWidth,
-                      32 + recipeIndex * 34 - 17,
+                      (42 + halfPanelWidth) * scale,
+                      (32 + recipeIndex * 34 - 17) * scale,
                       1,
                       false, 
-                      halfPanelWidth / 64.f, 
-                      1.f, 0, COLOR(1,1,1, 0.5));
+                      (halfPanelWidth / 64.f) * scale, 
+                      1.f * scale, 0, COLOR(1,1,1, 0.5));
 
             for (unsigned j = 0; j < recipe->ingredients.count(); ++j)
             {
                 pics.draw(4,
-                          10 + 34 + j * 32,
-                          32 + recipeIndex * 34 + 8 - 17,
-                          recipe->ingredients[j].itemIndex);
+                          (10 + 34 + j * 32) * scale,
+                          (32 + recipeIndex * 34 + 8 - 17) * scale,
+                          recipe->ingredients[j].itemIndex,
+                          false,
+                          scale,
+                          scale);
                 sprintf(buf, "%d", recipe->ingredients[j].count);
 
                 bool haveEnough = (dude.getItemCountByTypeIndex(recipe->ingredients[j].itemIndex) >= recipe->ingredients[j].count);
 
                 COLOR countColor = (haveEnough) ? COLOR(1, 1, 1, 1) : COLOR(1, 0, 0, 1);
 
-                WriteShadedText(10 + 34 + j * 32 + 8,
-                          32 + recipeIndex * 34 + 32 + 8 - 17,
-                          pics, 0, buf, 0.8f, 0.8f, countColor, countColor);
+                WriteShadedText((10 + 34 + j * 32 + 8) * scale,
+                          (32 + recipeIndex * 34 + 32 + 8 - 17) * scale,
+                          pics, 0, buf, 0.8f * scale, 0.8f * scale, countColor, countColor);
             }
 
             craftRecipeButton.drawTextnPicture(pics, 20, 0, 0, "Make");
@@ -940,11 +959,15 @@ void Game::drawDarkness(int scale)
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     //GLenum res = glCheckFramebufferStatus(fbo);
-    glViewport(0,0,256,256);
+    glViewport(0, 0, 256, 256);
     glClear(GL_COLOR_BUFFER_BIT);
+
+
+    map.drawLights(mapPosX, mapPosY, scale, pics);
+
     pics.draw(11,
               dude.pos.x * scale + mapPosX,
-              dude.pos.y * scale + mapPosY,
+              (dude.pos.y - 20) * scale + mapPosY,
               0,
               true,
               scale, scale,
@@ -953,7 +976,7 @@ void Game::drawDarkness(int scale)
               COLOR(1,1,1,0.6f));
 
 
-    if (dude.isWeaponEquiped() == 12 && dude.getAmmoInWeaponCount())
+    if (dude.isWeaponEquiped() == 12 && dude.getAmmoInWeaponCount()) //flashlight equiped
     {
 
         if (dude.animationSubset == 0)
@@ -967,7 +990,7 @@ void Game::drawDarkness(int scale)
         else if (dude.animationSubset == 1)
         {
 
-            pics.draw(11,
+            pics.draw(28,
                     dude.pos.x * scale + mapPosX,
                     dude.pos.y * scale + mapPosY - 60,
                     0,
@@ -1306,16 +1329,16 @@ bool Game::handleAttack(float x, float y)
 
 }
 
-bool Game::handleCrafting(float x, float y)
+bool Game::handleCrafting(float x, float y, int scale)
 {
     for (unsigned i = 0; i < recipes.getRecipeCount(); ++i)
     {
-        if (x > 10 && x < 42 &&
-                y > 32 + i * 34 && y < 64 + i * 34)
+        if (x > 10 * scale && x < 42 * scale &&
+                y > (32 + i * 34) * scale && y < (64 + i * 34) * scale)
         {
             recipeClicked = i;
-            craftRecipeButton.init(recipes.getRecipe(i)->ingredients.count() * 32 + 10 + 4 + 32,
-                                   i * 34 + 32 + 7 - 17 , 50, 50);
+            craftRecipeButton.init((recipes.getRecipe(i)->ingredients.count() * 32 + 10 + 4 + 32) * scale,
+                                   (i * 34 + 32 + 7 - 17) * scale , 50 * scale, 50 * scale);
             return true;
         }
     }

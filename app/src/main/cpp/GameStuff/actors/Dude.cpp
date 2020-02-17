@@ -7,7 +7,31 @@
 #include "../../gui/Text.h"
 #include <cmath>
 
-void Dude::init(Vector3D& position, int ScreenWidth, int ScreenHeight)
+void Dude::draw(float offsetX, float offsetY,
+                         int scale,
+                         PicsContainer& pics, 
+                         bool debugInfo)
+{
+    Actor::draw(offsetX, offsetY, scale, pics, debugInfo);
+
+    if (debugInfo && doAttack)
+    {
+        pics.draw(-1, 
+                  attackBoxPos.x * scale + offsetX,
+                  attackBoxPos.y * scale + offsetY,
+                  0,
+                  false,
+                  attackBoxSize.x * scale,
+                  attackBoxSize.y * scale,
+                  0.f,
+                  COLOR(0.5, 0, 0, 0.8f),
+                  COLOR(0.5, 0, 0, 0.8f));
+    }
+}
+
+
+
+void Dude::init(Vector3D& position, int ScreenWidth, int ScreenHeight, int scale)
 {
     pathIndex = 0;
     animationFrame = 0;
@@ -23,9 +47,9 @@ void Dude::init(Vector3D& position, int ScreenWidth, int ScreenHeight)
     sleeping = false;
     sleepAnimationDone = true;
     itemBag.init(10, 10);
-    itemBag.setPosition(Vector3D(100, ScreenHeight - (32 + 3), 0));
+    itemBag.setPosition(Vector3D(100 * scale, ScreenHeight - (32 + 3) * scale, 0));
     equipedItems.init(2, 2);
-    equipedItems.setPosition(Vector3D(ScreenWidth - 3 * 32, ScreenHeight - (32 + 3), 0));
+    equipedItems.setPosition(Vector3D(ScreenWidth - (3 * 32) * scale, ScreenHeight - (32 + 3) * scale, 0));
     satiationProgress = 0.f;
     freezingProgress = 0.f;
     satiation = 100;
@@ -165,7 +189,7 @@ void Dude::update(float deltaTime,
     }
     else if (axeEquiped)
     {
-        pictureIndex = 25;
+        pictureIndex = (coatEquiped) ? COAT_AXE : NAKED_AXE;
     }
     else if (sleeping)
     {
@@ -254,10 +278,11 @@ void Dude::update(float deltaTime,
 
 void Dude::drawInventory(PicsContainer& pics,
                          ItemDatabase& itemDb,
-                         ItemInstance* selectedItem)
+                         ItemInstance* selectedItem,
+                         int scale)
 {
-    itemBag.draw(pics, itemDb, selectedItem);
-    equipedItems.draw(pics, itemDb, selectedItem, true);
+    itemBag.draw(pics, itemDb, selectedItem, scale, false);
+    equipedItems.draw(pics, itemDb, selectedItem, scale, true);
 }
 
 
@@ -364,6 +389,7 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
             addItemToInventory(equipedItems.getItem(1), freedSlot);
 
             equipedItems.getItem(1)->setAsRemoved();
+            onWeaponUnequip();
         }
 
         if (equipedItems.addItem(*item, 1))
@@ -453,7 +479,8 @@ void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
     Statistics::getInstance()->increaseCraftedItems();
 }
 
-bool Dude::checkInventoryInput(float deltaTime,
+bool Dude::checkInventoryInput(int scale,
+                               float deltaTime,
                                TouchData& touches, 
                                ItemInstance** selectedItem, 
                                bool& itemSelected,
@@ -467,7 +494,7 @@ bool Dude::checkInventoryInput(float deltaTime,
     bool clickedOnInventoryItems = false;
     bool clickedOnEquipedItems = false;
 
-    bool res = itemBag.checkInput(deltaTime, touches, selectedItem, itemSelected, clickedOnInventoryItems, itemPos, doubleClickCallbackData);
+    bool res = itemBag.checkInput(scale, deltaTime, touches, selectedItem, itemSelected, clickedOnInventoryItems, itemPos, doubleClickCallbackData);
 
    
     unsigned itemsAfter = itemBag.getActualItemCount();
@@ -482,7 +509,7 @@ bool Dude::checkInventoryInput(float deltaTime,
     bool isWeaponEquipedBefore = (isWeaponEquiped() != -1);
      
 
-    res = equipedItems.checkInput(deltaTime, touches, selectedItem, itemSelected, clickedOnEquipedItems, itemPos, nullptr);
+    res = equipedItems.checkInput(scale, deltaTime, touches, selectedItem, itemSelected, clickedOnEquipedItems, itemPos, nullptr);
     itemsAfter = equipedItems.getActualItemCount();
     bool isWeaponEquipedNow = (isWeaponEquiped() != -1);
 
@@ -541,11 +568,36 @@ void Dude::activateMeleeAttack()
         animationFrame = 0;
         animationProgress = 0.f;
 
+        const float attackBoxWidth = 48.f;
+
         switch(animationSubset)
         {
-            case 6: animationSubset = 9; break;
-            case 5: animationSubset = 8; break;
-            case 4: animationSubset = 7; break;
+            case 6: {
+                animationSubset = 9;
+                
+                if (isFlipedX)
+                {
+                    attackBoxPos = Vector3D(pos.x + 8, pos.y - 16, 0);
+                    attackBoxSize = Vector3D(attackBoxWidth, 64, 0);
+                }
+                else
+                {
+                    attackBoxPos = Vector3D(pos.x - attackBoxWidth - 8, pos.y - 16, 0);
+                    attackBoxSize = Vector3D(attackBoxWidth, 64, 0);
+                }
+
+            } break;
+            case 5: 
+            {
+                animationSubset = 8;
+                attackBoxPos = Vector3D(pos.x - 24, pos.y - 48, 0);
+                attackBoxSize = Vector3D(attackBoxWidth, 64, 0);
+            } break;
+            case 4:{
+                animationSubset = 7;
+                attackBoxPos = Vector3D(pos.x - 24, pos.y + 8, 0);
+                attackBoxSize = Vector3D(attackBoxWidth, 60, 0);
+            }break;
         }
 
     }
@@ -1038,17 +1090,19 @@ void Dude::melleeAttacks(ActorContainer& actors,
             {
                 animationFrame = 0;
                 doAttack = false;
-
                 //----------hit rats
                 for (unsigned i = 0; i < actors.getActorCount(); ++i)
                 {
                     Actor* actor = actors.getActor(i);
+
                     if (actor != this 
                             && !actor->isDead 
-                            && CollisionCircleCircle(pos.x, pos.y + 39, 37,
+                            && CollisionCircleRectangle(
                                 actor->pos.x + actor->collisionBodyOffset.x, 
                                 actor->pos.y + actor->collisionBodyOffset.y, 
-                                actor->collisionBodyRadius)
+                                actor->collisionBodyRadius,
+                                attackBoxPos.x, attackBoxPos.y,
+                                attackBoxSize.x, attackBoxSize.y)
                             && actor->getType() == 1)
                     {
                         actor->kill();
@@ -1059,73 +1113,23 @@ void Dude::melleeAttacks(ActorContainer& actors,
                 }
                 //-----------------
                 DArray<Furniture*> furniture;
-                if (map.getFurnitureInRadius(furniture, pos.x, pos.y, 37))
+                if (map.getFurnitureInBBox(furniture, attackBoxPos, attackBoxSize))
                 {
                     for (unsigned i = 0; i < furniture.count(); ++i)
                     {
                         Furniture* fur = furniture[i];
-                        printf("YOU ATEMPTED TO DESTROY!!!ĄĄ\n");
-                        printf("Furniture db index %d\n", fur->furnitureDbIndex);
-
-                        Recipe* r = recipes.getRecipeByFurnitureIndex(fur->furnitureDbIndex);
+                        fur->hp -= 10;
                         FurnitureData* fd = furnitureDb.getFurniture(fur->furnitureDbIndex);
-
+                        
                         if (fd)
                         {
-                            printf("Axe dmg: %u\n", fd->damageToAxe);
+                            wearWeapon(fd->damageToAxe * -1.f);
                         }
 
-                        if (r)
+                        if (fur->hp <= 0)
                         {
-                            for (unsigned i = 0; i < r->ingredients.count(); ++i)
-                            {
-                                printf("items: %d\n", r->ingredients[i].itemIndex);
-
-                                for (int j = 0; j < r->ingredients[i].count; ++j)
-                                {
-                                    currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
-                                                fur->pos.y + fur->collisionBodySize.y, 
-                                                0),
-                                            r->ingredients[i].itemIndex);
-                                    map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
-                                } 
-                            }
-
-                            if (fur->itemContainerIndex != -1)
-                            {
-                                printf("Has some items inside\n");
-                                ItemContainer* ic = map.getItemContainer(fur->itemContainerIndex);
-                                for (unsigned j = 0; j < ic->getItemCount(); ++j)
-                                {
-                                    ItemInstance* item = ic->getItem(j);
-                                    printf("items: %d\n", item->getIndex());
-
-                                    if (!item->isRemoved())
-                                    {
-                                        currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
-                                                    fur->pos.y + fur->collisionBodySize.y, 
-                                                    0),
-                                                item);
-                                        map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
-                                    }
-                                }
-
-                            }
-
-
-                            if (fd)
-                            {
-                                wearWeapon(fd->damageToAxe * -1.f);
-                            }
-
-                            fur->removed = true;
-
+                            destroyFurniture(fur, currentRoom, map, recipes);
                         }
-
-                        map.updateFurniturePolygons(currentRoom);
-
-
-
                     }
                 }
 
@@ -1145,7 +1149,59 @@ void Dude::melleeAttacks(ActorContainer& actors,
 
 }
 
+void Dude::destroyFurniture(Furniture* fur,
+                            Room* currentRoom,
+                            GameMap& map,
+                            CraftingRecipes& recipes)
+{
+    printf("YOU ATEMPTED TO DESTROY!!!ĄĄ\n");
+    printf("Furniture db index %d\n", fur->furnitureDbIndex);
 
+    Recipe* r = recipes.getRecipeByFurnitureIndex(fur->furnitureDbIndex);
+
+    if (r)
+    {
+        for (unsigned i = 0; i < r->ingredients.count(); ++i)
+        {
+            printf("items: %d\n", r->ingredients[i].itemIndex);
+
+            for (int j = 0; j < r->ingredients[i].count; ++j)
+            {
+                currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
+                            fur->pos.y + fur->collisionBodySize.y, 
+                            0),
+                        r->ingredients[i].itemIndex);
+                map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+            } 
+        }
+
+        if (fur->itemContainerIndex != -1)
+        {
+            printf("Has some items inside\n");
+            ItemContainer* ic = map.getItemContainer(fur->itemContainerIndex);
+            for (unsigned j = 0; j < ic->getItemCount(); ++j)
+            {
+                ItemInstance* item = ic->getItem(j);
+                printf("items: %d\n", item->getIndex());
+
+                if (!item->isRemoved())
+                {
+                    currentRoom->addItem(Vector3D(fur->pos.x + rand() % 30 + (fur->collisionBodySize.x / 2),
+                                fur->pos.y + fur->collisionBodySize.y, 
+                                0),
+                            item);
+                    map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+                }
+            }
+
+        }
+
+        fur->removed = true;
+
+    }
+
+    map.updateFurniturePolygons(currentRoom);
+}
 
 void Dude::onWeaponEquip()
 {

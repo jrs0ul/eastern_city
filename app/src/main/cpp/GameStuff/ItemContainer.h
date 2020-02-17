@@ -16,8 +16,10 @@ public:
     void          draw(PicsContainer& pics,
                        ItemDatabase& itemDB,
                        ItemInstance* selectedItem,
-                       bool showQuality = false);
-    bool          checkInput(float deltaTime,
+                       int scale,
+                       bool showQuality);
+    bool          checkInput(int scale,
+                             float deltaTime,
                              TouchData& touches, 
                              ItemInstance** selectedItem, 
                              bool& itemSelected,

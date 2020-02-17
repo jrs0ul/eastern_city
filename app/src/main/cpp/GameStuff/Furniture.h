@@ -4,6 +4,8 @@
 #include "Drawable.h"
 #include "Polygon.h"
 
+struct FurnitureData;
+
 class Furniture : public Drawable
 {
 public:
@@ -11,18 +13,19 @@ public:
     : Drawable()
     , collisionBodyPos(0, 0, 0)
     , itemContainerIndex(-1)
+    , hp(0)
     , colidedWithHero(false)
     , isBed(false)
     , removed(false)
     {
     }
 
+    void initFromData(FurnitureData* fd);
     void destroy();
     void draw(float offsetX, float offsetY,
               int scale,
               PicsContainer& pics,
               bool debugInfo = false);
-    //void test(){}
 
 
     SPolygon collisionPolygon;
@@ -31,6 +34,7 @@ public:
     int      spriteIndex;
     int      pictureIndex;
     int      itemContainerIndex;
+    int      hp;
     int      furnitureDbIndex;
     bool     colidedWithHero;
     bool     isBed;

@@ -64,6 +64,12 @@ void ItemDatabase::load(const char* filename)
                         sprintf(buffer, "%ls", at->getValue());
                         data.spoilageSpeed = atof(buffer);
                     }
+                    else  if (strcmp(buffer, "attack") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        data.attack = atof(buffer);
+                    }
+
                     else  if (strcmp(buffer, "clothingQualityIncrease") == 0)
                     {
                         sprintf(buffer, "%ls", at->getValue());

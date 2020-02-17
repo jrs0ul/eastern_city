@@ -7,11 +7,13 @@ struct Asset
     Vector3D pos;
     unsigned spriteIndex;
     bool isFlipped;
+    bool isLight;
     bool isInFrontLayer;
 
     Asset()
     : spriteIndex(0)
     , isFlipped(false)
+    , isLight(false)
     , isInFrontLayer(false)
     {
     }

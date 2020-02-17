@@ -8,6 +8,7 @@ struct FurnitureData
     char     name[128];
     unsigned index;
     unsigned damageToAxe;
+    int      hp;
     unsigned spriteIndex;
     unsigned pictureIndex;
 };

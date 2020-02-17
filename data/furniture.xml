@@ -1,43 +1,52 @@
 <?xml version="1.0"?>
 <Furniture>
-    <Object name="Couch" index="0">
-        <AxeDamage>30</AxeDamage>
+    <Object name="Couch" index="0" >
+        <AxeDamage>10</AxeDamage>
+        <Hp>40</Hp>
         <SpriteIndex>0</SpriteIndex>
         <PictureIndex>5</PictureIndex>
     </Object>
-    <Object name="Wardrobe" index="1">
-        <AxeDamage>20</AxeDamage>
+    <Object name="Wardrobe" index="1" >
+        <AxeDamage>5</AxeDamage>
+        <Hp>40</Hp>
         <SpriteIndex>1</SpriteIndex>
         <PictureIndex>5</PictureIndex>
     </Object>
-    <Object name="Fridge" index="2">
-        <AxeDamage>40</AxeDamage>
+    <Object name="Fridge" index="2" >
+        <AxeDamage>10</AxeDamage>
+        <Hp>40</Hp>
         <SpriteIndex>9</SpriteIndex>
         <PictureIndex>5</PictureIndex>
     </Object>
-    <Object name="Cupboard1" index="3">
-        <AxeDamage>20</AxeDamage>
+    <Object name="Cupboard1" index="3" >
+        <AxeDamage>5</AxeDamage>
+        <Hp>30</Hp>
         <SpriteIndex>10</SpriteIndex>
         <PictureIndex>5</PictureIndex>
     </Object>
-    <Object name="Cupboard2" index="4">
-        <AxeDamage>20</AxeDamage>
+    <Object name="Cupboard2" index="4" >
+        <AxeDamage>5</AxeDamage>
+        <Hp>30</Hp>
         <SpriteIndex>11</SpriteIndex>
         <PictureIndex>5</PictureIndex>
     </Object>
-    <Object name="Dumpster" index="5">
-        <AxeDamage>60</AxeDamage>
+    <Object name="Dumpster" index="5" >
+        <AxeDamage>10</AxeDamage>
+        <Hp>60</Hp>
         <SpriteIndex>8</SpriteIndex>
         <PictureIndex>21</PictureIndex>
     </Object>
-    <Object name="Bench" index="6">
-        <AxeDamage>20</AxeDamage>
+    <Object name="Bench" index="6" >
+        <AxeDamage>10</AxeDamage>
+        <Hp>30</Hp>
         <SpriteIndex>9</SpriteIndex>
         <PictureIndex>21</PictureIndex>
     </Object>
-    <Object name="Door" index="7">
+    <Object name="Door" index="7" >
         <AxeDamage>10</AxeDamage>
+        <Hp>20</Hp>
         <SpriteIndex>13</SpriteIndex>
         <PictureIndex>5</PictureIndex>
     </Object>
+
 </Furniture>

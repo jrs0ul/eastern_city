@@ -7,12 +7,9 @@
 * Ability to PAUSE the game
 * Saving
 * Flashlight preloaded with batteries?
-* light glow around windows
-* Bigger light blob around the main character
 * wider beam for the flashlight
-* Doors with locks and with K+M+B 2020 graffity
 * dead tree outside ??
-* A bear enemy
+* A bear enemy deeper in the map.
 * more than one room in apartaments
 * a sleep confirmation dialog
 * Fix the broken pathfinding outside and pathfinding in general
@@ -23,7 +20,8 @@
 * Make a sprite for a wall carpet
 * Simple tutorial to teach doubleclicking on food if satiation is low or clothes if it's cold
 * fix CenterCamera(black borders)
-* scale the UI
-* Axe animation for the bald guy
 * When you start dragging an item from a container, you should set item as removed in the container
---> * Axe damage on swing, gradual damage to furniture
+* Some sort of a trap that can be missed if the player is not using a light source in the dark: syringe needles
+* BUG: Destroyed furniture clones items that were inside of it.
+* make a electricity generator powered by rats or mice
+* mark visited building entrances on the mini map

@@ -10,6 +10,8 @@ bool CollisionCircleCircle(float x1, float y1, float radius1,
 
 bool CollisionCircleRectangle(float cirleCenterX, float circleCenterY, float circleRadius,
                               float rectX, float rectY, float rectWidth, float rectHeight);
+bool CollisionRectangleRectangle(float rect1X, float rect1Y, float rect1Width, float rect1Height,
+                                 float rect2X, float rect2Y, float rect2Width, float rect2Height);
 
 bool CollisionCircleLineSegment(float lineX1, float lineY1, float lineX2, float lineY2,
                                 float circleCenterX, float circleCenterY, float circleRadius);

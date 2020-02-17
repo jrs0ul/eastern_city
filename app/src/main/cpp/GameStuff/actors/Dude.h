@@ -18,14 +18,23 @@ class Dude : public Actor
         NAKED_IDLE = 22,
         NAKED_FLASHLIGHT = 23,
         NAKED_SLEEP = 24,
+        NAKED_AXE = 26,
         COAT_IDLE = 10,
         COAT_FLASHLIGHT = 14,
-        COAT_SLEEP = 17
+        COAT_SLEEP = 17,
+        COAT_AXE = 25
     };
 
 
 public:
-    void          init(Vector3D& position, int ScreenWidth, int ScreenHeight);
+
+    void          draw(float offsetX, float offsetY,
+                         int scale,
+                         PicsContainer& pics, 
+                         bool debugInfo = false) override;
+
+
+    void          init(Vector3D& position, int ScreenWidth, int ScreenHeight, int scale);
     void          destroy();
     void          update(float deltaTime, 
                          unsigned char* Keys, 
@@ -38,12 +47,16 @@ public:
                          FurnitureDatabase& furnitureDb,
                          FindPath& path);
 
-    void          drawInventory(PicsContainer& pics, ItemDatabase& itemDb, ItemInstance* selectedItem);
+    void          drawInventory(PicsContainer& pics,
+                                ItemDatabase& itemDb,
+                                ItemInstance* selectedItem,
+                                int scale);
     int           hasItem(unsigned itemId);
     void          removeItem(unsigned index);
     void          useItem(ItemInstance*, ItemDatabase* itemDb);
     void          craftItem(Recipe* recipe, ItemDatabase& itemDb);
-    bool          checkInventoryInput(float deltaTime,
+    bool          checkInventoryInput(int scale,
+                                      float deltaTime,
                                       TouchData& touches, 
                                       ItemInstance** selectedItem, 
                                       bool& itemSelected,
@@ -109,11 +122,18 @@ private:
                        float deltaTime
                        );
 
+    void destroyFurniture(Furniture* fur,
+                          Room* currentRoom,
+                          GameMap& map,
+                          CraftingRecipes& recipes);
+
     void onWeaponEquip();
     void onWeaponUnequip();
 
 private:
     ItemContainer        itemBag;
+    Vector3D             attackBoxPos;
+    Vector3D             attackBoxSize;
     unsigned             pathIndex;
     bool                 playWalkAnimation;
     bool                 walkAnimationDone;

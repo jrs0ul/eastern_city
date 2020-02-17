@@ -43,12 +43,13 @@ public:
                                      int scale,
                                      Vector3D& characterPos,
                                      PicsContainer& pics);
+    void        drawLights(float offsetX, float offsetY, int scale, PicsContainer& pics);
     void        drawDarknessBorder(float offsetX, float offsetY,
                                    int scale,
                                    unsigned screenWidth, unsigned screenHeight,
                                    PicsContainer& pics);
     void        addItem(ItemInstance* item);
-    bool        getFurnitureInRadius(DArray<Furniture*>& result, int x, int y, int radius);
+    bool        getFurnitureInBBox(DArray<Furniture*>& result, Vector3D bboxPos, Vector3D bboxSize);
     Furniture*  getClickedFurniture(int x, int y,
                                     bool returnIfColidesWithHero);
 

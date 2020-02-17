@@ -14,6 +14,7 @@ code = [
         "app/src/main/cpp/GameStuff/ItemContainer.cpp",
         "app/src/main/cpp/GameStuff/CraftingRecipes.cpp",
         "app/src/main/cpp/GameStuff/map/GameMap.cpp",
+        "app/src/main/cpp/GameStuff/map/Room.cpp",
         "app/src/main/cpp/GameStuff/map/GameMapGraph.cpp",
         "app/src/main/cpp/GameStuff/ItemInstance.cpp",
         "app/src/main/cpp/GameStuff/GlobalItemList.cpp",

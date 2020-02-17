@@ -195,7 +195,7 @@ private:
     //------------------
 
     void drawActiveContainer();
-    void drawRecipes();
+    void drawRecipes(int scale);
     void drawDarkness(int scale);
     void calcDarknessValue();
 
@@ -209,7 +209,7 @@ private:
     void drawPolygon(SPolygon* poly, int scale, ShaderProgram& shader, int method = GL_LINE_STRIP, COLOR c = COLOR(0,0,1,1));
 
     bool handleAttack(float x, float y);
-    bool handleCrafting(float x, float y);
+    bool handleCrafting(float x, float y, int scale);
     
 
     void LoadShader(ShaderProgram* shader, const char* name);

@@ -11,6 +11,7 @@ struct ItemData
     int         loadCapacity;
     int         coldDecrease;
     int         sleepynessDecrease;
+    int         attack;
     float       spoilageSpeed;
     float       clothingQualityIncrease;
     char        name[256];
@@ -27,6 +28,7 @@ struct ItemData
     , loadCapacity(0)
     , coldDecrease(0)
     , sleepynessDecrease(0)
+    , attack(0)
     , spoilageSpeed(0.f)
     , clothingQualityIncrease(0.f)
     , ammoItemIndex(-1)

@@ -43,6 +43,22 @@ bool CollisionCircleRectangle(float circleCenterX, float circleCenterY, float ci
     return false; 
 }
 
+bool CollisionRectangleRectangle(float rect1X, float rect1Y, float rect1Width, float rect1Height,
+                                 float rect2X, float rect2Y, float rect2Width, float rect2Height)
+{
+    if (rect1X + rect1Width >= rect2X &&     
+        rect1X <= rect2X + rect2Width &&       
+        rect1Y + rect1Height >= rect2Y &&       
+        rect1Y <= rect2Y + rect2Height) 
+    {       
+        return true;
+    }
+
+    return false;
+}
+
+
+
 bool CollisionCircleLineSegment(float lineX1, float lineY1, float lineX2, float lineY2,
                                 float circleCenterX, float circleCenterY, float circleRadius)
 {
