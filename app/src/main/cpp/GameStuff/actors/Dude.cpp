@@ -255,19 +255,26 @@ void Dude::update(float deltaTime,
         int replacableItemIndex = findFreedInventorySlot();
         bool noMorePlaceInBag = isNoMorePlaceInBag(replacableItemIndex);
 
-        if (noMorePlaceInBag)
-        {
-            return;
-        }
-        
         if (itm->isRemoved())
         {
             continue;
         }
 
+                
+       
         if (CollisionCircleCircle(shiftedPos.x, shiftedPos.y, 16, itm->getPosition()->x, itm->getPosition()->y, 8))
         {
-            printf("adding to slot %d\n", replacableItemIndex);
+            if (itm->getIndex() == 23)
+            {
+                health -= 3;
+                isDamaged = true;
+            }
+
+            if (noMorePlaceInBag)
+            {
+                return;
+            }
+
             addItemToInventory(itm, replacableItemIndex);
             Statistics::getInstance()->increaseItemAddition();
             itm->setAsRemoved();

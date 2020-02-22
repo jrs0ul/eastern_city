@@ -30,7 +30,7 @@ public:
     : root(nullptr)
     , furnitureDB(nullptr){}
 
-    void init(FurnitureDatabase& furDB);
+    void generate(FurnitureDatabase& furDB);
 
     void buildCity(Room* firstYard, Room* firstBuilding);
     void makeYard(Room* yard, Room* parent, int reachedFrom, iPos yardPos);
@@ -38,7 +38,8 @@ public:
     void drawYardMap(float x, float y, PicsContainer& pics, Room* currentRoom);
     void findYardMapWidthHeight(int& w, int& h);
 
-    Room* addFloors(Room* mainfloor, unsigned entranceIndex);
+    void addFloors(Room* mainfloor, unsigned entranceIndex);
+    void buildLastFloor(Room* floor);
 
     void addTunnelLeft(Room* room);
     void addTunnelRight(Room* room);
@@ -49,6 +50,9 @@ public:
     void addRightBuildingDoor(Room* room);
 
     void addBuilding(Room* outside, unsigned regionIndex);
+
+    void addStairsUp(Room* stairwell);
+    void addStairsOutside(Room* stairwell);
 
     void addDoorway(Room* floor,
                     unsigned x,
@@ -85,12 +89,17 @@ public:
 
     void destroy();
 
+    Room* getRoot(){return root;}
+
+private:
 
     Room* root;
     FurnitureDatabase* furnitureDB;
     DArray<iPos> yardPositions;
     int firstPointX;
     int firstPointY;
+
+    int roomCount;
 };
 
 #endif //GAME_MAP_GRAPH_H

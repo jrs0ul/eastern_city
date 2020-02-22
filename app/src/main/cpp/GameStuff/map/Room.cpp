@@ -1,5 +1,23 @@
 #include "Room.h"
 
+static int roomCount = 0;
+
+Room::Room()
+{
+    ++roomCount;
+}
+
+Room::~Room()
+{
+    --roomCount;
+}
+
+int Room::getExistingRooms()
+{
+    return roomCount;
+}
+
+
 void Room::addChildRoom(const char* name, unsigned entry, unsigned region)
 {
     RoomAndEntry entr;
@@ -112,9 +130,12 @@ void Room::addCollisionPolygon(SPolygon& p)
 
 }
 
-void Room::addDoorHole(float x1, float x2, float height)
+void Room::addDoorHole(float x1, float x2, float height, float topX1Offset)
 {
-    doorHoles.add(Vector3D(x1, x2, height));
+    DoorHole dh;
+    dh.hole = Vector3D(x1, x2, height);
+    dh.topX1Offset = topX1Offset;
+    doorHoles.add(dh);
 }
 
 void Room::addRegion(Vector3D pos, Vector3D size)
@@ -321,7 +342,7 @@ AdditionalVertices* Room::getAdditionalVertices(unsigned index)
     return nullptr;
 }
 
-Vector3D* Room::getDoorHole(unsigned index)
+DoorHole* Room::getDoorHole(unsigned index)
 {
     if (index < doorHoles.count())
     {

@@ -17,6 +17,7 @@ struct ItemData
     char        name[256];
     int         ammoItemIndex;
     int         imageIndex;
+    int         secondImageIndex;
     int         hpUp;
 
     ItemData()
@@ -33,6 +34,7 @@ struct ItemData
     , clothingQualityIncrease(0.f)
     , ammoItemIndex(-1)
     , imageIndex(0)
+    , secondImageIndex(-1)
     , hpUp(0)
     {
     }

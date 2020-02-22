@@ -16,11 +16,21 @@ struct RoomAndEntry
     unsigned region;
 };
 
+struct DoorHole
+{
+    Vector3D hole;
+    float    topX1Offset;
+};
 
 
 class Room
 {
 public:
+    
+                      Room();
+                      ~Room();
+    static int        getExistingRooms();
+
     void              addChildRoom(const char* name, unsigned entry, unsigned region);
     void              addChildRoom(Room* node, unsigned entry, unsigned region);
     void              addItem(Vector3D pos, int index);
@@ -34,7 +44,7 @@ public:
                                bool frontLayer = false);
     void              addFurniture(Furniture& f);
     void              addCollisionPolygon(SPolygon& p);
-    void              addDoorHole(float x1, float x2, float height = 50.f);
+    void              addDoorHole(float x1, float x2, float height = 50.f, float topX1Offset = 0.f);
     void              addRegion(Vector3D pos, Vector3D size);
     void              addEntry(Vector3D pos);
     void              addVerticesAfter(SPolygon& p, unsigned indexToPutVerticesAfter);
@@ -61,7 +71,7 @@ public:
     Vector3D*         getAdditionalEntry(unsigned index);
     SPolygon*          getCollisionPolygon(unsigned index);
     AdditionalVertices* getAdditionalVertices(unsigned index);
-    Vector3D*         getDoorHole(unsigned index);
+    DoorHole*         getDoorHole(unsigned index);
     const char*       getMapName();
     void              setMapName(const char* name);
     void              destroy(Room* parent, int level = 0);
@@ -76,7 +86,7 @@ private:
     DArray<Asset>               assets;
     DArray<Furniture*>          furniture;
     DArray<SPolygon>            collisionPolygons;
-    DArray<Vector3D>            doorHoles;
+    DArray<DoorHole>            doorHoles;
     DArray<Region>              additionalRegions;
     DArray<Vector3D>            additionalEntries;
     DArray<AdditionalVertices>  additionalVertices;

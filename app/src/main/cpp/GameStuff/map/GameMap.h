@@ -36,7 +36,7 @@ public:
                      ItemDatabase& itemDb, 
                      bool debugInfo = false);
 
-    void        update(Actor* mainguy, PicsContainer& pics);
+    void        update(float deltaTime, Actor* mainguy, PicsContainer& pics);
     void        updateFurniturePolygons(Room* currentRoom);
 
     void        drawFrontLayerAssets(float offsetX, float offsetY,
@@ -74,7 +74,7 @@ public:
     DArray<Furniture*>&   getFurnitureData(){return furniture;}
 
 private:
-    void        createDoorHole(float x1, float x2, float height);
+    void        createDoorHole(float x1, float x2, float height, float shiftOfTopX1 = 0);
 
 
 private:
@@ -94,6 +94,8 @@ private:
 
     unsigned               width;
     unsigned               height;
+    float                  itemFrameProgress;
+    unsigned               itemFrame;
 
 };
 

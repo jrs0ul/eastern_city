@@ -480,8 +480,8 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
 
         for (unsigned i = 0; i < room->getDoorHoleCount(); ++i)
         {
-            Vector3D* dh = room->getDoorHole(i);
-            createDoorHole(dh->x, dh->y, dh->z);
+            DoorHole* dh = room->getDoorHole(i);
+            createDoorHole(dh->hole.x, dh->hole.y, dh->hole.z, dh->topX1Offset);
         }
 
         for (unsigned i = 0; i < room->getAdditionalRegionsCount(); ++i)
@@ -542,6 +542,8 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
     mapfile.destroy();
 
     Statistics::getInstance()->increaseVisitedRooms();
+
+    itemFrameProgress = 0.f;
 
     printf("done.\n");
 }
@@ -673,10 +675,16 @@ void GameMap::draw(float posX,
         }
 
         ItemData* data = itemDb.get(items[i]->getIndex());
+
+        unsigned frame = (data->secondImageIndex != -1) ? 
+                          (itemFrame ? data->secondImageIndex : data->imageIndex) :
+                          data->imageIndex;
+
+        
         pics.draw(4, 
                   items[i]->getPosition()->x * scale + posX,
                   items[i]->getPosition()->y * scale + posY,
-                  data->imageIndex, true,
+                  frame, true,
                   scale, scale);
     }
 
@@ -702,8 +710,23 @@ void GameMap::draw(float posX,
 
 }
 
-void GameMap::update(Actor* mainguy, PicsContainer& pics)
+void GameMap::update(float deltaTime, Actor* mainguy, PicsContainer& pics)
 {
+
+    itemFrameProgress += deltaTime;
+
+    if (itemFrameProgress >= 1.f)
+    {
+        itemFrameProgress = 0.f;
+        ++itemFrame;
+        if (itemFrame > 1)
+        {
+            itemFrame = 0;
+        }
+
+        //printf("itemFrame %d\n", itemFrame);
+    }
+
     for (unsigned i = 0; i < furniture.count(); ++i)
     {
         Furniture* fur = furniture[i];
@@ -991,7 +1014,7 @@ ItemContainer* GameMap::getItemContainer(unsigned index)
     return nullptr;
 }
 
-void GameMap::createDoorHole(float x1, float x2, float height)
+void GameMap::createDoorHole(float x1, float x2, float height, float shiftOfTopX1)
 {
     if (polygons.count())
     {
@@ -1021,7 +1044,6 @@ void GameMap::createDoorHole(float x1, float x2, float height)
 
         if (insertDoorAferIndex != -1)
         {
-            printf("add door after point:%d\n", insertDoorAferIndex);
             DArray<Vector3D> copyPoints;
             
             for (unsigned i = 0; i < polygons[0].points.count(); ++i)
@@ -1039,7 +1061,7 @@ void GameMap::createDoorHole(float x1, float x2, float height)
             float smallestY = (y1 < y2) ? y1 : y2;
 
             polygons[0].points.add(Vector3D(x1, y1, 0));
-            polygons[0].points.add(Vector3D(x1, smallestY - height, 0));
+            polygons[0].points.add(Vector3D(x1 + shiftOfTopX1, smallestY - height, 0));
             polygons[0].points.add(Vector3D(x2, smallestY - height, 0));
             polygons[0].points.add(Vector3D(x2, y2, 0));
 

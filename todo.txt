@@ -21,7 +21,7 @@
 * Simple tutorial to teach doubleclicking on food if satiation is low or clothes if it's cold
 * fix CenterCamera(black borders)
 * When you start dragging an item from a container, you should set item as removed in the container
-* Some sort of a trap that can be missed if the player is not using a light source in the dark: syringe needles
 * BUG: Destroyed furniture clones items that were inside of it.
 * make a electricity generator powered by rats or mice
 * mark visited building entrances on the mini map
+* Remove editing mode

@@ -3,52 +3,46 @@
 
 static int yards = 0;
 
-void GameMapGraph::init(FurnitureDatabase& furDB)
+void GameMapGraph::generate(FurnitureDatabase& furDB)
 {
     yards = 10;
 
     furnitureDB = &furDB;
 
+    
     root = new Room();
     root->setMapName("data/genericroom.xml");
     root->addEntry(Vector3D(350, 278, 0));
     addDoorway(root, 25, 158, 0, 0, 0, 30, nullptr, 6, 78, 5, 0, false);
 
-    root->addChildRoom("data/stairwell.xml", 2, 0);
+    root->addChildRoom("data/stairwell2.xml", 2, 0);
     root->addItem(Vector3D(300, 260, 0), rand() % 2);
 
     addCupboard(root);
     addWardrobe(root);
     addCouch(root, 110, 168);
-    
 
     Room* stairwell = root->getChildRoom(0)->room;
-    stairwell->addChildRoom("data/out.xml", 0, 0);
+    //exit outside
     
-    addDoorway(stairwell, 672, 120, 2, 1, 2, 19, root, 4);
+    addStairsOutside(stairwell);
+    stairwell->addAsset(Vector3D(330, 5, 0), "pics/test.tga", 17);
+    stairwell->addAsset(Vector3D(462, 104, 0), "pics/test.tga", 18);
 
-    Room* lastFloor = addFloors(stairwell, 2);
+    addStairsUp(stairwell);
 
-    lastFloor->addDoorHole(546, 638.9f, 21.f);
-   
-    addDoorway(lastFloor, 288, 98, 2, 0, 2, 0, nullptr, 2, 72, 3);
-    lastFloor->addItem(Vector3D(300, 300, 0), 8);
-    lastFloor->addItem(Vector3D(360, 320, 0), 8);
-    lastFloor->addItem(Vector3D(320, 340, 0), 8);
-    lastFloor->addItem(Vector3D(360, 305, 0), 8);
-    SPolygon poly;
-    poly.points.add(Vector3D(144, 50, 0));
-    poly.points.add(Vector3D(261, 50, 0));
-    poly.points.add(Vector3D(262, 205, 0));
-    poly.points.add(Vector3D(141, 204, 0));
-    poly.points.add(Vector3D(144, 50, 0));
-    lastFloor->addCollisionPolygon(poly);
+    stairwell->addChildRoom("data/out.xml", 0, 0);
+
+    addDoorway(stairwell, 672, 115, 2, 1, 2, 20, root, 4);
+
+
+    addFloors(stairwell, 2);
+
     addDoorway(stairwell, 288, 98, 3, 0, 3, 0, nullptr, 2, 72, 5, 2);
     addDoorway(stairwell, 544, 96, 4, 0, 4, 0,  nullptr, 2, 72, 5, 2);
 
     buildCity(stairwell->getChildRoom(0)->room, stairwell);
 
-    poly.points.destroy();
     printf("done generating\n");
 }
 
@@ -59,8 +53,6 @@ void GameMapGraph::buildCity(Room* firstYard, Room* firstBuilding)
 
     firstYard->addAsset(Vector3D(421, 132, 0), "pics/outside_sprites.tga", 2);//maroz
 
-    
-
     yardPositions.destroy();
     makeYard(firstYard, nullptr, -1, iPos(0, 0));
 }
@@ -69,7 +61,7 @@ void GameMapGraph::buildCity(Room* firstYard, Room* firstBuilding)
 void GameMapGraph::makeYard(Room* yard, Room* parent, int reachedFrom, iPos yardPos)
 {
     --yards;
-    printf("YARD %d, located at (%d %d)\n", yards, yardPos.x, yardPos.y);
+    //printf("YARD %d, located at (%d %d)\n", yards, yardPos.x, yardPos.y);
     yardPos.room = yard;
     yardPositions.add(yardPos);
 
@@ -227,6 +219,12 @@ void GameMapGraph::makeYard(Room* yard, Room* parent, int reachedFrom, iPos yard
         addCar(yard);
     }
 
+    int itemArray[] = {8, 23};
+    yard->addItem(Vector3D(350 + rand() % 100, 348 + rand() % 100, 0), itemArray[rand() % 2]);
+    yard->addItem(Vector3D(550 + rand() % 100, 348 + rand() % 100, 0), itemArray[rand() % 2]);
+    yard->addItem(Vector3D(700 + rand() % 100, 448 + rand() % 100, 0), itemArray[rand() % 2]);
+
+
 }
 
 bool GameMapGraph::isYardPositionTaken(iPos pos)
@@ -303,15 +301,17 @@ void GameMapGraph::findYardMapWidthHeight(int& w, int& h)
     printf("%d %d\n", firstPointX, firstPointY);
 }
 
-Room* GameMapGraph::addFloors(Room* mainfloor, unsigned entranceIndex)
+void GameMapGraph::addFloors(Room* mainfloor, unsigned entranceIndex)
 {
     mainfloor->addChildRoom("data/stairwell2.xml", 0, 1);
+
 
     int additionalFloors = rand() % 3 + 1;
     //printf("BUILDING FLOORS: %d\n", additionalFloors + 2);
 
     Room* previousFloor = mainfloor;
-    Room* currentFloor = mainfloor->getChildRoom(entranceIndex)->room;;
+    Room* currentFloor = mainfloor->getChildRoom(entranceIndex)->room;
+
 
     for (int i = 0; i < additionalFloors; ++i)
     {
@@ -326,27 +326,47 @@ Room* GameMapGraph::addFloors(Room* mainfloor, unsigned entranceIndex)
             currentFloor->addChildRoom(previousFloor, 1, 0);
         }
 
+        currentFloor->addAsset(Vector3D(462, 104, 0), "pics/test.tga", 18 + i + 1);
+
+        currentFloor->addEntry(Vector3D(580, 160, 0));
+        currentFloor->addRegion(Vector3D(560, 132,0), Vector3D(64, 64, 0));
+
         currentFloor->addChildRoom("data/stairwell2.xml", 0, 1);
-        currentFloor->addAsset(Vector3D(0, 0, 0), "pics/test.tga", 3); //stairs
 
-
+        addStairsUp(currentFloor);
+        
+        currentFloor->addAsset(Vector3D(537, 0, 0), "pics/test.tga", 15); //stairs down
         currentFloor->addDoorHole(546, 638.9f, 21.f);
+
         addDoorway(currentFloor, 288, 98, 2, 0, 2, 0, nullptr, 2, 70, 5, 2);
         addApartamentDoorFront(298, 107, currentFloor);
         addDoorway(currentFloor, 672, 115, 3, 0, 3, 20, nullptr, 4);
         addDoorway(currentFloor, 40, 128, 4, 0, 4, 15, nullptr, 5, 65, 5, 1);
 
-
         previousFloor = currentFloor;
         currentFloor = currentFloor->getChildRoom(1)->room;
-
     }
 
     Room* lastFloor = currentFloor;
     lastFloor->addChildRoom(previousFloor, 1, 0);
 
-    return lastFloor;
+
+    lastFloor->addEntry(Vector3D(580, 160, 0));
+    lastFloor->addRegion(Vector3D(560, 132,0), Vector3D(64, 64, 0));
+    lastFloor->addAsset(Vector3D(537, 0, 0), "pics/test.tga", 15); //stairs down
+    lastFloor->addAsset(Vector3D(462, 104, 0), "pics/test.tga", 18 + additionalFloors + 1);
+    lastFloor->addItem(Vector3D(360, 280, 0), 8);
+    lastFloor->addItem(Vector3D(320, 250, 0), 8);
+    lastFloor->addItem(Vector3D(360, 275, 0), 20);
+    lastFloor->addDoorHole(546, 638.9f, 21.f);
+    addDoorway(lastFloor, 288, 98, 1, 0, 1, 0, nullptr, 2, 64, 0, 2);
+    addDoorway(lastFloor, 40, 128, 2, 0, 2, 50, nullptr, 5, 64, 1, 1);
+    addDoorway(lastFloor, 672, 115, 3, 0, 3, 20, nullptr, 4);
 }
+
+void GameMapGraph::buildLastFloor(Room* floor)
+{
+    }
 
 void GameMapGraph::addTunnelLeft(Room* room)
 {
@@ -455,25 +475,32 @@ void GameMapGraph::addRightBuildingDoor(Room* room)
 
 void GameMapGraph::addBuilding(Room* outside, unsigned regionIndex)
 {
-    outside->addChildRoom("data/stairwell.xml", 0, regionIndex);
+    outside->addChildRoom("data/stairwell2.xml", 0, regionIndex);
+
     Room* building = outside->getChildRoom(outside->getChildRoomCount() - 1)->room;
     building->addChildRoom(outside, regionIndex, 0);
-    
-    Room* lastFloor = addFloors(building, 1);
-    SPolygon poly;
-    poly.points.add(Vector3D(144, 50, 0));
-    poly.points.add(Vector3D(261, 50, 0));
-    poly.points.add(Vector3D(262, 205, 0));
-    poly.points.add(Vector3D(141, 204, 0));
-    poly.points.add(Vector3D(144, 50, 0));
-
-    lastFloor->addCollisionPolygon(poly);
-    poly.points.destroy();
-    lastFloor->addDoorHole(546, 638.9f, 21.f);
-    addDoorway(lastFloor, 288, 98, 2, 0, 2, 0, nullptr, 2);
-    addDoorway(lastFloor, 40, 128, 3, 0, 3, 50, nullptr, 5, 64, 1, false);
+   
+    addStairsOutside(building);
+    addStairsUp(building);
+    building->addAsset(Vector3D(462, 104, 0), "pics/test.tga", 18);
+    addFloors(building, 1);
+    addDoorway(building, 672, 115, 2, 0, 2, 20, nullptr, 4);
 }
 
+void GameMapGraph::addStairsUp(Room* stairwell)
+{
+    stairwell->addAsset(Vector3D(0, 0, 0), "pics/test.tga", 3); //stairs
+    stairwell->addDoorHole(140, 252, 100, 25);
+    stairwell->addEntry(Vector3D(220, 75, 0));
+    stairwell->addRegion(Vector3D(180, 70, 0), Vector3D(74, 48, 0));
+}
+
+void GameMapGraph::addStairsOutside(Room* stairwell)
+{
+    stairwell->addEntry(Vector3D(680, 280, 0));
+    stairwell->addRegion(Vector3D(580, 330, 0), Vector3D(164, 64, 0));
+    stairwell->addAsset(Vector3D(537, 288, 0), "pics/test.tga", 16);
+}
 
 void GameMapGraph::addDoorway(Room* floor,
                               unsigned rx,
@@ -817,8 +844,8 @@ void GameMapGraph::addApartamentDoorFront(int x, int y, Room* room)
     doorFront.collisionBodySize = Vector3D(58, 110, 0);
     doorFront.collisionPolygon.points.add(Vector3D(0, 0, 0));
     doorFront.collisionPolygon.points.add(Vector3D(57, 0, 0));
-    doorFront.collisionPolygon.points.add(Vector3D(57, 109, 0));
-    doorFront.collisionPolygon.points.add(Vector3D(0, 109, 0));
+    doorFront.collisionPolygon.points.add(Vector3D(57, 90, 0));
+    doorFront.collisionPolygon.points.add(Vector3D(0, 90, 0));
     doorFront.collisionPolygon.points.add(Vector3D(0, 0, 0));
     room->addFurniture(doorFront);
     doorFront.destroy();

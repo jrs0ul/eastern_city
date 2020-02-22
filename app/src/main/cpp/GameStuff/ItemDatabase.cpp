@@ -80,6 +80,12 @@ void ItemDatabase::load(const char* filename)
                         sprintf(buffer, "%ls", at->getValue());
                         data.imageIndex = atoi(buffer);
                     }
+                    else  if (strcmp(buffer, "imageIndexSecond") == 0)
+                    {
+                        sprintf(buffer, "%ls", at->getValue());
+                        data.secondImageIndex = atoi(buffer);
+                    }
+
                     else  if (strcmp(buffer, "ammoItemIndex") == 0)
                     {
                         sprintf(buffer, "%ls", at->getValue());

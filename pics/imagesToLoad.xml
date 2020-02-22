@@ -1,6 +1,6 @@
 <xml>
 <Images>
-    <Img src="pics/chars.tga" width="16" height="16" filter="1" /> 
+    <Img src="pics/chars.tga" width="16" height="16" filter="0" /> 
     <Img src="pics/rat.tga" width="69" height="41" filter="0" />
     <Img src="pics/guistuff.tga" width="64" height="64" filter="0" />
     <Img src="pics/title.tga" width="256" height="256" filter="0" />
@@ -23,10 +23,19 @@
             <Sprite name="bigcarpet" x="563" y="385" width="460" height="127"/>
             <Sprite name="doorFront" x="815" y="3" width="58" height="110"/>
             <Sprite name="doorway_bottom" x="868" y="116" width="120" height="159"/>
+            <Sprite name="stairs_down" x="8" y="428" width="223" height="225" />
+            <Sprite name="stairs_outside" x="635" y="124" width="223" height="64" />
+            <Sprite name="pipe" x="609" y="197" width="250" height="56" />
+            <Sprite name="1" x="510" y="152" width="15" height="21"/>
+            <Sprite name="2" x="525" y="152" width="15" height="21"/>
+            <Sprite name="3" x="540" y="152" width="15" height="21"/>
+            <Sprite name="4" x="555" y="152" width="15" height="21"/>
+            <Sprite name="5" x="570" y="152" width="15" height="21"/>
+            <Sprite name="6" x="585" y="152" width="15" height="21"/>
         </Sprites>
     </Img>
     <Img src="pics/room.tga" width="600" height="374" filter="0" />
-    <Img src="pics/stairwell.tga" width="760" height="352" filter="0" />
+    <Img src="pics/flashlight_front.tga" width="137" height="189" filter="1" />
     <Img src="pics/stairwell2.tga" width="760" height="352" filter="0" />
     <Img src="pics/outside.tga" width="688" height="800" filter="0" />
     <Img src="pics/dude.tga" width="64" height="110" filter="0" />
@@ -62,5 +71,4 @@
     <Img src="pics/dude_axe.tga" width="116" height="132" filter="0" />
     <Img src="pics/dude_naked_axe.tga" width="116" height="132" filter="0" />
     <Img src="pics/window_glow.tga" width="300" height="200" filter="1" />
-    <Img src="pics/flashlight_front.tga" width="137" height="189" filter="1" />
 </Images>

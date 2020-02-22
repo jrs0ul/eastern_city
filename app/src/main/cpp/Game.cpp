@@ -513,11 +513,11 @@ void Game::gameLogic()
                     calcDarknessValue();
                     dude.stopSleep();
 
-                    if (darkness > 0.5f)
+                    if (darkness > 0.6f)
                     {
                         Ghost* ghost;
                         ghost = new Ghost();
-                        Vector3D pos = Vector3D((map.getWidth() * 32 / 2), 240, 0);
+                        Vector3D pos = Vector3D(371, 170, 0);
                         ghost->init(pos);
                         actors.addActor(ghost);
                     }
@@ -748,7 +748,7 @@ void Game::updateWorld(float deltaT)
         }
     }
 
-    map.update(&dude, pics);
+    map.update(DeltaTime, &dude, pics);
 
 }
 
@@ -798,10 +798,10 @@ void Game::titleLogic()
         //mapGraph.init();
         path.destroy();
         mapGraph.destroy();
-        mapGraph.init(furnitureDB);
+        mapGraph.generate(furnitureDB);
         mapGraph.findYardMapWidthHeight(yardMapWidth, yardMapHeight);
         printf("yard map size: %d %d\n", yardMapWidth, yardMapHeight);
-        currentRoom = mapGraph.root;
+        currentRoom = mapGraph.getRoot();
 #ifdef __ANDROID__
         itemsInWorld.load("data/itemLocations.xml", AssetManager);
 #else
@@ -990,7 +990,7 @@ void Game::drawDarkness(int scale)
         else if (dude.animationSubset == 1)
         {
 
-            pics.draw(28,
+            pics.draw(7,
                     dude.pos.x * scale + mapPosX,
                     dude.pos.y * scale + mapPosY - 60,
                     0,
