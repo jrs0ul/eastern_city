@@ -38,7 +38,7 @@
 //   #define _DEBUG_ 1
 #endif
 
-static const char* GameVersion = "0.01";
+static const char* GameVersion = "0.02";
 
 const float posX = 45;
 const float posY = 5;

@@ -22,7 +22,8 @@ class Dude : public Actor
         COAT_IDLE = 10,
         COAT_FLASHLIGHT = 14,
         COAT_SLEEP = 17,
-        COAT_AXE = 25
+        COAT_AXE = 25,
+        COAT_SLINGSHOT = 28
     };
 
 

@@ -167,7 +167,10 @@ void Dude::update(float deltaTime,
         onWeaponUnequip();
     }
 
-    const bool axeEquiped = (isWeaponEquiped() == 19 && !sleeping);
+    const bool axeEquiped        = (isWeaponEquiped() == 19 && !sleeping);
+    const bool flashlightEquiped = (isWeaponEquiped() == 12 && !sleeping);
+    const bool slingshotEquiped  = (isWeaponEquiped() == 9 && !sleeping);
+
     equipedWeaponInLastFrame = isWeaponEquiped();
 
     if (isDamaged)
@@ -183,9 +186,13 @@ void Dude::update(float deltaTime,
     int equipedItemIndex = isClothesEquiped();
     bool coatEquiped = (equipedItemIndex == 2 || equipedItemIndex == 16);
     
-    if (isWeaponEquiped() == 12 && !sleeping)
+    if (flashlightEquiped)
     {
         pictureIndex = (coatEquiped) ? COAT_FLASHLIGHT : NAKED_FLASHLIGHT;
+    }
+    else if (slingshotEquiped)
+    {
+        pictureIndex = COAT_SLINGSHOT;
     }
     else if (axeEquiped)
     {

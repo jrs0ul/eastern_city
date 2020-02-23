@@ -643,6 +643,7 @@ void GameMapGraph::addWardrobe(Room* room)
     wardrobe.addItem(13);
     wardrobe.addItem(2);
     wardrobe.addItem(19);
+    wardrobe.addItem(9);
    
     room->addItemContainer(1, wardrobe);
 
