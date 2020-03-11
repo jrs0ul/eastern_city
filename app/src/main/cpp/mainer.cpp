@@ -274,7 +274,8 @@ int main( int   argc, char *argv[] ){
     ConfGL();
 
     Game.TimeTicks = SDL_GetTicks();
-
+    
+    SDL_ShowCursor(false);
 
    
     while (Game.Works){

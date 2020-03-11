@@ -34,7 +34,7 @@ void ActorContainer::draw(float offsetX, float offsetY,
     {
         Drawable* dude = static_cast<Drawable*>(actors[i]);
         
-        if (actors[i]->isDead)
+        if (actors[i]->isDead())
         {
             continue;
         }
@@ -104,17 +104,17 @@ bool ActorContainer::isColidingWithOthers(Actor* actor, Vector3D& offset)
     {
         Actor* pActor = actors[i];
 
-        if (pActor == actor || pActor->isDead)
+        if (pActor == actor || pActor->isDead())
         {
             continue;
         }
 
         if (CollisionCircleCircle(newPosition.x,
                                   newPosition.y,
-                                  actor->collisionBodyRadius,
+                                  actor->getCollisionBodyRadius(),
                                   actors[i]->pos.x + actors[i]->collisionBodyOffset.x, 
                                   actors[i]->pos.y + actors[i]->collisionBodyOffset.y, 
-                                  actors[i]->collisionBodyRadius))
+                                  actors[i]->getCollisionBodyRadius()))
         {
             return true;
         }

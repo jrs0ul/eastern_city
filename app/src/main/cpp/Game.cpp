@@ -3,6 +3,7 @@
 #include <cmath>
 #include "Game.h"
 #include "GameStuff/actors/Ghost.h"
+#include "GameStuff/actors/Bear.h"
 
 const int boardX = 16;
 const int boardY = 445;
@@ -314,6 +315,7 @@ void Game::renderGame()
 
     map.draw(mapPosX, mapPosY, scale, ScreenWidth, ScreenHeight, pics, itemDB, DebugMode);
     actors.draw(mapPosX, mapPosY, scale, pics, map.getFurnitureData(), DebugMode);
+    projectiles.draw(mapPosX, mapPosY, scale, pics);
     map.drawFrontLayerAssets(mapPosX, mapPosY, scale, *dude.getPos(), pics);
     map.drawDarknessBorder(mapPosX, mapPosY, scale, ScreenWidth, ScreenHeight, pics);
 
@@ -419,6 +421,14 @@ void Game::renderGame()
     WriteText(ScreenWidth - (scale * 150), 2 * scale, pics, 0, buf, 0.8f * scale, 0.8f * scale);
     sprintf(buf, "Day %d %dh", days, (int)(worldTime / (dayLength / 24)));
     WriteText(ScreenWidth - (150 * scale), 20 * scale, pics, 0, buf, 0.8f * scale, 0.8f * scale);
+
+    int weaponEquiped = dude.isWeaponEquiped();
+    ItemData* weaponInfo = itemDB.get(weaponEquiped);
+    
+    bool isSlingShot = (weaponInfo && weaponInfo->imageIndex == 9);
+
+
+    pics.draw(31, MouseX, MouseY, (isSlingShot) ? 1 : 0, isSlingShot, scale, scale); 
 
 }
 
@@ -728,6 +738,7 @@ void Game::updateWorld(float deltaT)
     }
     
     dude.update(deltaT, Keys, map, currentRoom, actors, darkness, itemDB, recipes, furnitureDB, path);
+    projectiles.update(deltaT, actors, currentRoom, &map);
     
     for (unsigned i = 0; i < actors.getActorCount(); ++i)
     {
@@ -744,6 +755,12 @@ void Game::updateWorld(float deltaT)
             {
                 Ghost* ghost = static_cast<Ghost*>(actr);
                 ghost->update(deltaT, map, dude, actors);
+            }
+            else if (actr->getType() == 3)
+            {
+                Bear* bear = static_cast<Bear*>(actr);
+                bear->update(deltaT, map, dude, actors);
+
             }
         }
     }
@@ -979,15 +996,15 @@ void Game::drawDarkness(int scale)
     if (dude.isWeaponEquiped() == 12 && dude.getAmmoInWeaponCount()) //flashlight equiped
     {
 
-        if (dude.animationSubset == 0)
+        if (dude.getAnimationSubset() == 0)
         {
             pics.draw(15,
-                    dude.pos.x * scale + mapPosX + ((dude.isFlipedX) ? 89 * scale : -89 * scale),
+                    dude.pos.x * scale + mapPosX + ((dude.isFlipedX()) ? 89 * scale : -89 * scale),
                     dude.pos.y * scale + mapPosY - 20 * scale,
                     0,
-                    false, (dude.isFlipedX) ? -1.6 * scale : 1.6 * scale, 1.3 * scale);
+                    false, (dude.isFlipedX()) ? -1.6 * scale : 1.6 * scale, 1.3 * scale);
         }
-        else if (dude.animationSubset == 1)
+        else if (dude.getAnimationSubset() == 1)
         {
 
             pics.draw(7,
@@ -1003,10 +1020,10 @@ void Game::drawDarkness(int scale)
         {
 
             pics.draw(13,
-                    dude.pos.x * scale + mapPosX + ((dude.isFlipedX) ? 335 * scale : -335 * scale),
+                    dude.pos.x * scale + mapPosX + ((dude.isFlipedX()) ? 335 * scale : -335 * scale),
                     dude.pos.y * scale + mapPosY - 68 * scale,
                     0,
-                    false, (dude.isFlipedX) ? -1.3f * scale : 1.3f * scale, 1.3f * scale );
+                    false, (dude.isFlipedX()) ? -1.3f * scale : 1.3f * scale, 1.3f * scale );
         }
     }
 
@@ -1147,7 +1164,7 @@ bool Game::interactWithFurniture(float clickX, float clickY)
         {
             dude.pos.x = fur->pos.x + 113.f;
             dude.pos.y = fur->pos.y + 67.f;
-            dude.isFlipedX = false;
+            dude.flipX(false);
             dude.goToSleep();
         }
     }
@@ -1208,22 +1225,23 @@ void Game::createEnemies()
 
     for (unsigned i = 0; i < currentRoom->getEnemyCount(); ++i)
     {
-        Rat* rat;
-        Vector3D* ratPos = currentRoom->getEnemyPosition(i);
+        EnemyPos* enemy = currentRoom->getEnemyPosition(i);
 
-        //if (i < currentRoom->getEnemyCount() - 1)
+        switch (enemy->type)
         {
-            rat = new Rat();
-            rat->init(*ratPos);
-            actors.addActor(rat);
+            case 1: {
+                Rat* rat = new Rat();
+                rat->init(enemy->position);
+                actors.addActor(rat);
+            } break;
+            case 3: {
+                Bear* bear = new Bear();
+                bear->init(enemy->position);
+                actors.addActor(bear);
+            } break;
+            default: break;
         }
-        /*else
-        {
-            Ghost* ghost;
-            ghost = new Ghost();
-            ghost->init(*ratPos);
-            actors.addActor(ghost);
-        }*/
+
     }
 
     actors.addActor(&dude);
@@ -1266,11 +1284,27 @@ void Game::drawPolygon(SPolygon* poly, int scale, ShaderProgram& shader, int met
 
 bool Game::handleAttack(float x, float y)
 {
+    int weaponEquiped = dude.isWeaponEquiped();
+    
+    if (weaponEquiped == -1)
+    {
+        return false;
+    }
+
+    ItemData* weaponInfo = itemDB.get(weaponEquiped);
+
+    if (weaponInfo->imageIndex != 9 && weaponInfo->imageIndex != 19)
+    {
+        printf("nope\n");
+        return false;
+    }
+
+
     for (unsigned i = 0; i < actors.getActorCount(); ++i)
     {
         Actor* actor = actors.getActor(i);
 
-        if (actor->getType() != 1 || actor->isDead)
+        if (actor->getType() != 1 || actor->isDead())
         {
             continue;
         }
@@ -1278,55 +1312,48 @@ bool Game::handleAttack(float x, float y)
 
         if (CollisionCircleCircle(x, y, 1.f, actor->pos.x, actor->pos.y, 30))
         {
-            int weaponEquiped = dude.isWeaponEquiped();
-
-            if (weaponEquiped != -1)
+            if (weaponInfo->imageIndex == 19) //axe - mellee
             {
-                ItemData* weaponInfo = itemDB.get(weaponEquiped);
+                Vector3D dudePos = *dude.getPos();
+                dudePos.y += 39.f;
 
-                if (weaponInfo->imageIndex != 9 && weaponInfo->imageIndex != 19)
+                printf("SWING!\n");
+
+                if (CollisionCircleCircle(dudePos.x, dudePos.y, 37,
+                            actor->pos.x + actor->collisionBodyOffset.x,
+                            actor->pos.y + actor->collisionBodyOffset.y,
+                            actor->getCollisionBodyRadius()))
                 {
-                    printf("nope\n");
-                    return false;
-                }
-
-                if (weaponInfo->imageIndex == 9) //slingshot - ranged
-                {
-
-                    int ammoSlot = dude.hasItem(weaponInfo->ammoItemIndex);
-
-                    if (ammoSlot != -1)
-                    { 
-                        dude.removeItem(ammoSlot);
-                        actor->kill();
-                        currentRoom->addItem(Vector3D(actor->pos.x, actor->pos.y, 0), 1);
-                        map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
-                        dude.wearWeapon(-8.f);
-                    }
-                }
-                else if (weaponInfo->imageIndex == 19) //axe - mellee
-                {
-                    Vector3D dudePos = *dude.getPos();
-                    dudePos.y += 39.f;
-
-                    printf("SWING!\n");
-
-                    if (CollisionCircleCircle(dudePos.x, dudePos.y, 37,
-                                actor->pos.x + actor->collisionBodyOffset.x,
-                                actor->pos.y + actor->collisionBodyOffset.y,
-                                actor->collisionBodyRadius))
-                    {
-                        dude.activateMeleeAttack();
-                    }
+                    dude.activateMeleeAttack();
+                    return true;
                 }
             }
+
+        }
+    }
+
+    if (weaponInfo->imageIndex == 9) //slingshot - ranged
+    {
+
+        int ammoSlot = dude.hasItem(weaponInfo->ammoItemIndex);
+
+        if (ammoSlot != -1)
+        {
+            Vector3D destination = Vector3D(x, y, 0);
+
+            Vector3D diff = destination - dude.pos;
+            diff.normalize();
+            dude.setAnimationSubsetByDirectionVector(diff, false); 
+            projectiles.addProjectile(dude.pos, destination);
+            dude.removeItem(ammoSlot);
+            dude.wearWeapon(-8.f);
 
             return true;
         }
     }
+    
 
-    return false;
-
+    return false;   
 }
 
 bool Game::handleCrafting(float x, float y, int scale)

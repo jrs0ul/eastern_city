@@ -72,4 +72,8 @@
     <Img src="pics/dude_naked_axe.tga" width="116" height="132" filter="0" />
     <Img src="pics/window_glow.tga" width="300" height="200" filter="1" />
     <Img src="pics/dude_slingshot.tga" width="64" height="110" filter="0" />
+    <Img src="pics/projectile.tga" width="8" height="8" filter="0" />
+    <Img src="pics/dude_naked_slingshot.tga" width="64" height="110" filter="0" />
+    <Img src="pics/pointers.tga" width="16" height="16" filter="0" />
+    <Img src="pics/bear.tga" width="228" height="119" filter="0" />
 </Images>

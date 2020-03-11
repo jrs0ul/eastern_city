@@ -23,6 +23,7 @@
 #include "Matrix.h"
 #include "FindPath.h"
 #include "GameStuff/actors/Dude.h"
+#include "GameStuff/ProjectileContainer.h"
 #include "GameStuff/ItemDatabase.h"
 #include "GameStuff/FurnitureData.h"
 #include "GameStuff/CraftingRecipes.h"
@@ -236,6 +237,7 @@ private:
 
     Dude dude;
     ActorContainer actors;
+    ProjectileContainer projectiles;
     GameMap map;
     float mapPosX;
     float mapPosY;

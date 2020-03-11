@@ -4,7 +4,6 @@
 #include "Actor.h"
 #include "Dude.h"
 #include "../ActorContainer.h"
-#include "../../TextureLoader.h"
 
 class Rat : public Actor
 {

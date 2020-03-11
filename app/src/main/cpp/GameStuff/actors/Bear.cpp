@@ -1,47 +1,50 @@
-#include "Rat.h"
+#include "Bear.h"
 #include "../../MathTools.h"
-#include <cmath>
 
-void Rat::init(Vector3D& position)
+void Bear::init(Vector3D& position)
 {
     Actor::init();
-
     pos = position;
+    pictureIndex = 32;
     animationSubset = 1;
-    animationProgress = 0.f;
     animationFrame = 0.f;
-    collisionBodyRadius = 10;
-    collisionBodyOffset = Vector3D(0, 0, 0);
+    collisionBodyRadius = 32;
+    collisionBodyOffset = Vector3D(0, 28, 0);
+    animationProgress = 0.f;
+    health = 100;
 
-    loot.add(1);
+    loot.add(0);
+    loot.add(0);
+    loot.add(0);
+    loot.add(0);
 
-    FrameSet up;
-    up.frames.add(0);
-    up.frames.add(1);
-    up.frames.add(2);
-    up.frames.add(1);
-    FrameSet down;
-    down.frames.add(5);
-    down.frames.add(6);
-    down.frames.add(7);
-    down.frames.add(6);
-    FrameSet side;
-    side.frames.add(10);
-    side.frames.add(11);
-    side.frames.add(12);
-    side.frames.add(11);
+    FrameSet walkUp;
+    walkUp.frames.add(5);
+    walkUp.frames.add(6);
+    walkUp.frames.add(7);
+    walkUp.frames.add(6);
+    FrameSet walkDown;
+    walkDown.frames.add(0);
+    walkDown.frames.add(1);
+    walkDown.frames.add(2);
+    walkDown.frames.add(1);
+    FrameSet walkSide;
+    walkSide.frames.add(10);
+    walkSide.frames.add(11);
+    walkSide.frames.add(12);
+    walkSide.frames.add(11);
 
     FrameSet attackUp;
-    attackUp.frames.add(1);
-    attackUp.frames.add(3);
-    attackUp.frames.add(4);
-    attackUp.frames.add(1);
+    attackUp.frames.add(6);
+    attackUp.frames.add(8);
+    attackUp.frames.add(9);
+    attackUp.frames.add(6);
 
     FrameSet attackDown;
-    attackDown.frames.add(6);
-    attackDown.frames.add(8);
-    attackDown.frames.add(9);
-    attackDown.frames.add(6);
+    attackDown.frames.add(1);
+    attackDown.frames.add(3);
+    attackDown.frames.add(4);
+    attackDown.frames.add(1);
 
     FrameSet attackSide;
     attackSide.frames.add(11);
@@ -49,31 +52,20 @@ void Rat::init(Vector3D& position)
     attackSide.frames.add(14);
     attackSide.frames.add(11);
 
-    animations.add(up);
-    animations.add(down);
-    animations.add(side);
+
+    animations.add(walkUp);
+    animations.add(walkDown);
+    animations.add(walkSide);
     animations.add(attackUp);
     animations.add(attackDown);
     animations.add(attackSide);
-    pictureIndex = 1;
 }
 
-void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& actors)
+void Bear::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& actors)
 {
     if (isDead())
     {
         return;
-    }
-
-    if (isDamaged)
-    {
-        damageProgress -= deltaTime;
-        
-        if (damageProgress <= 0.f)
-        {
-            isDamaged = false;
-        }
-
     }
 
 
@@ -91,7 +83,7 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
             flipX(true);
             animationSubset = 2;
         }
-        
+
         if (direction.x < 0.f)
         {
             flipX(false);
@@ -102,17 +94,17 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
     {
         if (direction.y > 0.f)
         {
-            animationSubset = 0;
+            animationSubset = 1;
         }
         else
         {
-            animationSubset = 1;
+            animationSubset = 0;
         }
     }
 
     bool colidesWithHero = false;
 
-    if (CollisionCircleCircle(pos.x, pos.y, 8, dudPos.x, dudPos.y, 30))
+    if (CollisionCircleCircle(pos.x, pos.y, 64, dudPos.x, dudPos.y, 30))
     {
         switch(animationSubset)
         {
@@ -126,14 +118,14 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
     }
 
     Vector3D newPos = pos + direction;
-
-    if (!Actor::isColiding(newPos, nullptr, map) && !actors.isColidingWithOthers(this, direction) && !colidesWithHero)
+    
+     if (!Actor::isColiding(newPos, nullptr, map) && !actors.isColidingWithOthers(this, direction) && !colidesWithHero)
     {
         pos = newPos;
     }
 
 
-    animationProgress += deltaTime * 6.f;
+    animationProgress += deltaTime * 4.f;
 
     if (animationProgress >= 1.f)
     {
@@ -144,12 +136,13 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
         {
             if (animationSubset >= 3 
                 && animationSubset <= 5 
-                && CollisionCircleCircle(pos.x, pos.y, 8, dudPos.x, dudPos.y, 30))
+                && CollisionCircleCircle(pos.x, pos.y, 64, dudPos.x, dudPos.y, 30))
             {
-                dude.setHealth(dude.getHealth() - 1);
+                dude.setHealth(dude.getHealth() - 20);
             }
             animationFrame = 0;
         }
     }
+
 
 }

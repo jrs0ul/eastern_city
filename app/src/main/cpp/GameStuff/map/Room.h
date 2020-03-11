@@ -16,6 +16,12 @@ struct RoomAndEntry
     unsigned region;
 };
 
+struct EnemyPos
+{
+    Vector3D position;
+    unsigned type;
+};
+
 struct DoorHole
 {
     Vector3D hole;
@@ -36,7 +42,7 @@ public:
     void              addItem(Vector3D pos, int index);
     void              addItem(Vector3D pos, ItemInstance* item);
     void              addItemContainer(unsigned furnitureIndex, ItemContainer& container);
-    void              addEnemyPosition(Vector3D pos);
+    void              addEnemy(Vector3D pos, unsigned type);
     void              addAsset(Vector3D pos, 
                                const char* name,
                                unsigned spriteIndex,
@@ -62,7 +68,7 @@ public:
     unsigned          getDoorHoleCount();
     ItemInstance*     getItem(unsigned index);
     ItemContainer*    getItemContainer(unsigned index);
-    Vector3D*         getEnemyPosition(unsigned index);
+    EnemyPos*         getEnemyPosition(unsigned index);
     RoomAndEntry*     getChildRoom(unsigned index);
     RoomAndEntry*     findChildRoomByRegionIndex(unsigned regionIndex);
     Asset*            getAsset(unsigned index);
@@ -82,7 +88,7 @@ private:
     //data
     DArray<ItemContainer>       itemContainers;
     DArray<ItemInstance>        items;
-    DArray<Vector3D>            enemies;
+    DArray<EnemyPos>            enemies;
     DArray<Asset>               assets;
     DArray<Furniture*>          furniture;
     DArray<SPolygon>            collisionPolygons;

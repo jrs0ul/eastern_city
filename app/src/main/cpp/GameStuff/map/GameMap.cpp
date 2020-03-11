@@ -740,7 +740,7 @@ void GameMap::update(float deltaTime, Actor* mainguy, PicsContainer& pics)
 
         if (CollisionCircleRectangle(mainguy->pos.x + mainguy->collisionBodyOffset.x,
                                  mainguy->pos.y + mainguy->collisionBodyOffset.y,
-                                 mainguy->collisionBodyRadius * 2.f,
+                                 mainguy->getCollisionBodyRadius() * 2.f,
                                  fur->pos.x + fur->collisionBodyPos.x,
                                  fur->pos.y + fur->collisionBodyPos.y,
                                  fur->collisionBodySize.x,

@@ -7,6 +7,13 @@ Actor::~Actor()
     destroy();
 }
 
+void Actor::init()
+{
+    dead = false;
+    isDamaged = false;
+    flippedX = false;
+}
+
 void Actor::destroy()
 {
     for (unsigned i = 0; i < animations.count(); ++i)
@@ -14,7 +21,27 @@ void Actor::destroy()
         animations[i].frames.destroy();
     }
 
+    loot.destroy();
     animations.destroy();
+}
+
+void Actor::damage(int dmg)
+{
+    health -= dmg;
+    
+    if (health <= 0)
+    {
+        kill();
+    }
+}
+    
+void Actor::dropLoot(Room* room, GameMap* map)
+{
+    for (unsigned i = 0; i < loot.count(); ++i)
+    {
+        room->addItem(Vector3D(pos.x, pos.y, 0), loot[i]);
+        map->addItem(room->getItem(room->getItemCount() - 1));
+    }
 }
 
 void Actor::draw(float offsetX, float offsetY,
@@ -34,7 +61,7 @@ void Actor::draw(float offsetX, float offsetY,
               pos.y * scale + offsetY + animations[animationSubset].offsetY * scale,
               frame, 
               true, 
-              (isFlipedX)? -scale: scale, 
+              (flippedX)? -scale: scale, 
               scale,
               0.f,
               (isDamaged) ? COLOR(1,0,0,1) : COLOR(1,1,1,1),

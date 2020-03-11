@@ -5,6 +5,7 @@
 
 void Ghost::init(Vector3D& position)
 {
+    Actor::init();
     collisionBodyOffset = Vector3D(0.f, 45.f, 0.f);
     collisionBodyRadius = 20;
     animationFrame = 0;
@@ -13,8 +14,6 @@ void Ghost::init(Vector3D& position)
 
     pos = position;
 
-    isDead = false;
-    isDamaged = false;
 
     FrameSet side;
     side.frames.add(0);
@@ -31,7 +30,7 @@ void Ghost::init(Vector3D& position)
 void Ghost::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& actors)
 {
 
-    if (isDead)
+    if (isDead())
     {
         return;
     }
@@ -50,13 +49,13 @@ void Ghost::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& ac
     {
         if (direction.x > 0.f)
         {
-            isFlipedX = true;
+            flipX(true);
             animationSubset = 0;
         }
         
         if (direction.x < 0.f)
         {
-            isFlipedX = false;
+            flipX(false);
             animationSubset = 0;
         }
     }

@@ -63,9 +63,12 @@ void Room::addItemContainer(unsigned furnitureIndex, ItemContainer& container)
     itemContainers.add(container);
 }
 
-void Room::addEnemyPosition(Vector3D pos)
+void Room::addEnemy(Vector3D pos, unsigned type)
 {
-    enemies.add(pos);
+    EnemyPos enemy;
+    enemy.type = type;
+    enemy.position = pos;
+    enemies.add(enemy);
 }
 
 void Room::addAsset(Vector3D pos, 
@@ -244,7 +247,7 @@ ItemContainer* Room::getItemContainer(unsigned index)
     return nullptr;
 }
 
-Vector3D* Room::getEnemyPosition(unsigned index)
+EnemyPos* Room::getEnemyPosition(unsigned index)
 {
     if (index < enemies.count())
     {

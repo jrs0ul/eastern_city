@@ -33,14 +33,13 @@ void Dude::draw(float offsetX, float offsetY,
 
 void Dude::init(Vector3D& position, int ScreenWidth, int ScreenHeight, int scale)
 {
+    Actor::init();
     pathIndex = 0;
     animationFrame = 0;
     animationSubset = 0;
     animationProgress = 0.f;
     darknessProgress = 0.f;
     damageProgress = 0.f;
-    isDamaged = false;
-    isFlipedX = false;
     pos = position;
     playWalkAnimation = false;
     walkAnimationDone = true;
@@ -192,7 +191,7 @@ void Dude::update(float deltaTime,
     }
     else if (slingshotEquiped)
     {
-        pictureIndex = COAT_SLINGSHOT;
+        pictureIndex = (coatEquiped) ? COAT_SLINGSHOT : NAKED_SLINGSHOT;
     }
     else if (axeEquiped)
     {
@@ -589,7 +588,7 @@ void Dude::activateMeleeAttack()
             case 6: {
                 animationSubset = 9;
                 
-                if (isFlipedX)
+                if (isFlipedX())
                 {
                     attackBoxPos = Vector3D(pos.x + 8, pos.y - 16, 0);
                     attackBoxSize = Vector3D(attackBoxWidth, 64, 0);
@@ -740,6 +739,43 @@ bool Dude::isNoMorePlaceInBag(int freedSlotIndex)
 void Dude::addDoubleClickCallbackForItems(void (*func)(ItemInstance*, void**))
 {
     itemBag.setDoubleClickCallback(func);
+}
+
+
+void Dude::setAnimationSubsetByDirectionVector(Vector3D direction, bool useAxeAnims)
+{
+    const bool axeEquiped = (isWeaponEquiped() == 19 && !sleeping);
+
+    if (fabsf(direction.y) > fabsf(direction.x))
+    {
+        if (direction.y < 0.f)
+        {
+            animationSubset = (axeEquiped && useAxeAnims) ? 5 : 1;
+        }
+        else if (direction.y > 0.f)
+        {
+
+            animationSubset = (axeEquiped && useAxeAnims) ? 4 : 0;
+        }
+
+    }
+
+    if (fabsf(direction.y) < fabsf(direction.x))
+    {
+        if (direction.x < 0.f)
+        {
+            animationSubset = (axeEquiped && useAxeAnims) ? 6 : 2;;
+            flipX(false);
+        }
+        else if (direction.x > 0.f)
+        {
+            animationSubset = (axeEquiped && useAxeAnims) ? 6 : 2;
+            flipX(true);
+        }
+
+    }
+
+
 }
 
 void Dude::wearClothes(float deltaTime, ItemDatabase& itemdb)
@@ -934,8 +970,6 @@ void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, Game
         return;
     }
 
-    const bool axeEquiped = (isWeaponEquiped() == 19 && !sleeping);
-    
     float dudeSpeed = 1.8f;
 
     const bool followPath = pathIndex < path.getPathLength();
@@ -1002,37 +1036,7 @@ void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, Game
         }
     }
 
-    
-
-    if (fabsf(shift.y) > fabsf(shift.x))
-    {
-        if (shift.y < 0.f)
-        {
-            animationSubset = (axeEquiped) ? 5 : 1;
-        }
-        else if (shift.y > 0.f)
-        {
-            
-            animationSubset = (axeEquiped) ? 4 : 0;
-        }
-
-    }
-
-    if (fabsf(shift.y) < fabsf(shift.x))
-    {
-        if (shift.x < 0.f)
-        {
-            animationSubset = (axeEquiped) ? 6 : 2;;
-            isFlipedX = false;
-        }
-        else if (shift.x > 0.f)
-        {
-            animationSubset = (axeEquiped) ? 6 : 2;
-            isFlipedX = true;
-        }
-
-    }
-
+    setAnimationSubsetByDirectionVector(shift);
 
     Vector3D newPos = pos + shift;
 
@@ -1110,18 +1114,22 @@ void Dude::melleeAttacks(ActorContainer& actors,
                     Actor* actor = actors.getActor(i);
 
                     if (actor != this 
-                            && !actor->isDead 
+                            && !actor->isDead() 
                             && CollisionCircleRectangle(
                                 actor->pos.x + actor->collisionBodyOffset.x, 
                                 actor->pos.y + actor->collisionBodyOffset.y, 
-                                actor->collisionBodyRadius,
+                                actor->getCollisionBodyRadius(),
                                 attackBoxPos.x, attackBoxPos.y,
                                 attackBoxSize.x, attackBoxSize.y)
-                            && actor->getType() == 1)
+                            && (actor->getType() == 1 || actor->getType() == 3))
                     {
-                        actor->kill();
-                        currentRoom->addItem(Vector3D(actor->pos.x, actor->pos.y, 0), 1);
-                        map.addItem(currentRoom->getItem(currentRoom->getItemCount() - 1));
+                        actor->damage(20);
+
+                        if (actor->isDead())
+                        {
+                            actor->dropLoot(currentRoom, &map);
+                        }
+                        
                         wearWeapon(-8.f);
                     }
                 }

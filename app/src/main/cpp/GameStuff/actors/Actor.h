@@ -23,8 +23,12 @@ class Actor : public Drawable
 {
 public:
     virtual         ~Actor();
+    void            init();
     void            destroy();
-    void            kill(){isDead = true;}
+    void            damage(int dmg);
+    void            dropLoot(Room* room, GameMap* map);
+    void            kill(){dead = true;}
+    void            flipX(bool flip){flippedX = flip;}
 
     void            draw(float offsetX, float offsetY,
                          int scale,
@@ -32,6 +36,10 @@ public:
                          bool debugInfo = false) override;
 
     bool            isColiding(Vector3D newPos, Vector3D* movement, GameMap& map);
+    float           getCollisionBodyRadius(){return collisionBodyRadius;}
+    bool            isDead(){return dead;}
+    bool            isFlipedX(){return flippedX;}
+    int             getAnimationSubset(){return animationSubset;}
     virtual int     getType(){return -1;}
     void            setHealth(float newHealth);
 protected:
@@ -39,8 +47,9 @@ protected:
                                           float lineX1, float lineX2,
                                           float lineY1, float lineY2);
 
-public:
+protected:
     DArray<FrameSet> animations;
+    DArray<int>      loot;
     unsigned         pictureIndex;
     float            collisionBodyRadius;
     float            health;
@@ -48,8 +57,8 @@ public:
     float            damageProgress;
     int              animationFrame;
     int              animationSubset;
-    bool             isFlipedX;
-    bool             isDead;
+    bool             flippedX;
+    bool             dead;
     bool             isDamaged;
 
 };

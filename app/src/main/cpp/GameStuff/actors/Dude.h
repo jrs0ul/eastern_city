@@ -23,7 +23,8 @@ class Dude : public Actor
         COAT_FLASHLIGHT = 14,
         COAT_SLEEP = 17,
         COAT_AXE = 25,
-        COAT_SLINGSHOT = 28
+        COAT_SLINGSHOT = 28,
+        NAKED_SLINGSHOT = 30
     };
 
 
@@ -93,15 +94,16 @@ public:
 
     virtual int   getType() override {return 0;}
 
-    bool isColiding(Vector3D newPos, GameMap& map);
+    bool          isColiding(Vector3D newPos, GameMap& map);
 
-    void addItemToInventory(ItemInstance* item, int inventorySlotIndex);
-    int  findFreedInventorySlot();
-    bool isNoMorePlaceInBag(int freedSlotIndex);
-    void addDoubleClickCallbackForItems(void (*func)(ItemInstance*, void**));
+    void          addItemToInventory(ItemInstance* item, int inventorySlotIndex);
+    int           findFreedInventorySlot();
+    bool          isNoMorePlaceInBag(int freedSlotIndex);
+    void          addDoubleClickCallbackForItems(void (*func)(ItemInstance*, void**));
+    void          setAnimationSubsetByDirectionVector(Vector3D direction, bool useAxeAnims = true);
 private:
-    void wearClothes(float deltaTime, ItemDatabase& itemdb);
-    void drainBatteries(float deltaTime, ItemDatabase& itemdb);
+    void          wearClothes(float deltaTime, ItemDatabase& itemdb);
+    void          drainBatteries(float deltaTime, ItemDatabase& itemdb);
     
     //
     void doDarknessEffect(float deltaTime, float darkness);

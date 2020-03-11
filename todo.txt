@@ -2,20 +2,19 @@
 * Different item look in the map and the inventory
 * Ability to build a furnace
 * Ability to group items
---> * Make a hero's slingshot animation and a flying projectile
+* Make slinshot's shooting animation
 * Ability to build furniture/things in general
 * Ability to PAUSE the game
 * Saving
 * Flashlight preloaded with batteries?
 * wider beam for the flashlight
 * dead tree outside ??
-* A bear enemy deeper in the map.
 * more than one room in apartaments
 * a sleep confirmation dialog
 * Fix the broken pathfinding outside and pathfinding in general
 * lighter
 * candles. They can be lit when a lighter is equiped
-* ability too cook on the furnace
+* ability to cook on the furnace
 * draw the blanket's sprite on sleeping character.
 * Make a sprite for a wall carpet
 * Simple tutorial to teach doubleclicking on food if satiation is low or clothes if it's cold
@@ -25,3 +24,13 @@
 * make an electricity generator powered by rats or mice
 * mark visited building entrances on the mini map
 * Remove editing mode
+* maybe replace the equiped item's quality numbers with a progress bar?
+* Bear roars when sees a player
+* Bear attack animations
+* Invetigate forward declarations
+* Enemies got stuck in furniture(check enemy position generation)
+* syringe needles should damage the bear
+* add damage animation for other actors(red blink)
+* axe swing sound when axe hits nothing and something else when it hits a target
+* add separate hitbox for other actors for projectile attacks
+
