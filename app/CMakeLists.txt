@@ -7,52 +7,59 @@ cmake_minimum_required(VERSION 3.4.1)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 
+set(SRCDIR ../src/)
+
 add_library(app-glue STATIC
             ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
 
 add_library(game SHARED
 
-             src/main/cpp/game_android.cpp
-             src/main/cpp/Game.cpp
-             src/main/cpp/TextureLoader.cpp
+             ${SRCDIR}game_android.cpp
+             ${SRCDIR}Game.cpp
+             ${SRCDIR}TextureLoader.cpp
 
-             src/main/cpp/Vectors.cpp
+             ${SRCDIR}Vectors.cpp
 
-             src/main/cpp/Particles2D.cpp
-             src/main/cpp/Utils.cpp
-             src/main/cpp/Xml.cpp
-             src/main/cpp/SysConfig.cpp
-             src/main/cpp/Entity.cpp
+             ${SRCDIR}Particles2D.cpp
+             ${SRCDIR}OSTools.cpp
+        ${SRCDIR}Xml.cpp
+        ${SRCDIR}SysConfig.cpp
+        ${SRCDIR}Entity.cpp
 
-             src/main/cpp/Matrix.cpp
-             src/main/cpp/Shader.cpp
-             src/main/cpp/ShaderProgram.cpp
-             src/main/cpp/rm2.cpp
+        ${SRCDIR}Matrix.cpp
+        ${SRCDIR}Shader.cpp
+        ${SRCDIR}ShaderProgram.cpp
+        ${SRCDIR}rm2.cpp
 
-             src/main/cpp/Useful.cpp
-             src/main/cpp/Image.cpp
+        ${SRCDIR}MathTools.cpp
+        ${SRCDIR}Image.cpp
 
 
-             src/main/cpp/gui/Text.cpp
-             src/main/cpp/gui/Button.cpp
-             src/main/cpp/gui/OnScreenBoard.cpp
-             src/main/cpp/audio/AndroidSoundSystem.cpp
+        ${SRCDIR}gui/Text.cpp
+        ${SRCDIR}gui/Button.cpp
+        ${SRCDIR}gui/OnScreenBoard.cpp
+        ${SRCDIR}audio/AndroidSoundSystem.cpp
 
-             src/main/cpp/GameStuff/Dude.cpp
-             src/main/cpp/GameStuff/GameMap.cpp
-             src/main/cpp/GameStuff/GameMapGraph.cpp
-             src/main/cpp/GameStuff/ItemInstance.cpp
-             src/main/cpp/GameStuff/ItemContainer.cpp
-             src/main/cpp/GameStuff/Actor.cpp
-             src/main/cpp/GameStuff/Rat.cpp
-             src/main/cpp/GameStuff/Ghost.cpp
-             src/main/cpp/GameStuff/ActorContainer.cpp
-             src/main/cpp/GameStuff/GlobalItemList.cpp
-             src/main/cpp/GameStuff/ItemDatabase.cpp
-             src/main/cpp/GameStuff/CraftingRecipes.cpp
-             src/main/cpp/GameStuff/Dude.cpp
-             src/main/cpp/GameStuff/Furniture.cpp
-             src/main/cpp/FindPath.cpp
+        ${SRCDIR}GameStuff/map/GameMap.cpp
+        ${SRCDIR}GameStuff/map/GameMapGraph.cpp
+        ${SRCDIR}GameStuff/FurnitureData.cpp
+        ${SRCDIR}GameStuff/Projectile.cpp
+        ${SRCDIR}GameStuff/ProjectileContainer.cpp
+        ${SRCDIR}GameStuff/map/Room.cpp
+        ${SRCDIR}GameStuff/Statistics.cpp
+        ${SRCDIR}GameStuff/ItemInstance.cpp
+        ${SRCDIR}GameStuff/ItemContainer.cpp
+        ${SRCDIR}GameStuff/actors/Actor.cpp
+        ${SRCDIR}GameStuff/actors/Rat.cpp
+        ${SRCDIR}GameStuff/actors/Ghost.cpp
+        ${SRCDIR}GameStuff/actors/Dude.cpp
+        ${SRCDIR}GameStuff/actors/Bear.cpp
+        ${SRCDIR}GameStuff/ActorContainer.cpp
+        ${SRCDIR}GameStuff/GlobalItemList.cpp
+        ${SRCDIR}GameStuff/ItemDatabase.cpp
+        ${SRCDIR}GameStuff/CraftingRecipes.cpp
+        ${SRCDIR}GameStuff/Furniture.cpp
+        ${SRCDIR}FindPath.cpp
 
              )
 

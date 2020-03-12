@@ -3,7 +3,9 @@
 #include "../FurnitureData.h"
 #include "../../TextureLoader.h"
 #include "../../MathTools.h"
-#include "../../audio/SoundSystem.h"
+#ifndef __ANDROID__
+    #include "../../audio/SoundSystem.h"
+#endif
 #include "../../gui/Text.h"
 #include <cmath>
 
@@ -31,9 +33,14 @@ void Dude::draw(float offsetX, float offsetY,
 
 
 
-void Dude::init(Vector3D& position, int ScreenWidth, int ScreenHeight, int scale)
+void Dude::init(Vector3D& position, 
+                Room* currentRoom,
+                GameMap* currentMap,
+                int ScreenWidth, 
+                int ScreenHeight, 
+                int scale)
 {
-    Actor::init();
+    Actor::init(currentRoom, currentMap);
     pathIndex = 0;
     animationFrame = 0;
     animationSubset = 0;
@@ -172,16 +179,8 @@ void Dude::update(float deltaTime,
 
     equipedWeaponInLastFrame = isWeaponEquiped();
 
-    if (isDamaged)
-    {
-        damageProgress -= deltaTime;
-        
-        if (damageProgress <= 0.f)
-        {
-            isDamaged = false;
-        }
-    }
-
+    updateDamage(deltaTime);
+    
     int equipedItemIndex = isClothesEquiped();
     bool coatEquiped = (equipedItemIndex == 2 || equipedItemIndex == 16);
     
@@ -270,7 +269,7 @@ void Dude::update(float deltaTime,
        
         if (CollisionCircleCircle(shiftedPos.x, shiftedPos.y, 16, itm->getPosition()->x, itm->getPosition()->y, 8))
         {
-            if (itm->getIndex() == 23)
+            if (itm->getIndex() == 23)//syringe needles;
             {
                 health -= 3;
                 isDamaged = true;
@@ -329,10 +328,12 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
     {
         printf("satiationUp:%d hpUp:%d\n", data->hungerDecrease, data->hpUp);
 
+#ifndef __ANDROID__
         if (data->hungerDecrease > 0)
         {
             SoundSystem::getInstance()->playsound(0);
         }
+#endif
 
         satiation += data->hungerDecrease;
 
@@ -1124,12 +1125,6 @@ void Dude::melleeAttacks(ActorContainer& actors,
                             && (actor->getType() == 1 || actor->getType() == 3))
                     {
                         actor->damage(20);
-
-                        if (actor->isDead())
-                        {
-                            actor->dropLoot(currentRoom, &map);
-                        }
-                        
                         wearWeapon(-8.f);
                     }
                 }

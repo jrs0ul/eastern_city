@@ -1,9 +1,9 @@
 #include "Bear.h"
 #include "../../MathTools.h"
 
-void Bear::init(Vector3D& position)
+void Bear::init(Vector3D& position, Room* currentRoom, GameMap* currentMap)
 {
-    Actor::init();
+    Actor::init(currentRoom, currentMap);
     pos = position;
     pictureIndex = 32;
     animationSubset = 1;
@@ -13,10 +13,13 @@ void Bear::init(Vector3D& position)
     animationProgress = 0.f;
     health = 100;
 
-    loot.add(0);
-    loot.add(0);
-    loot.add(0);
-    loot.add(0);
+    loot.add(24);
+    loot.add(24);
+    loot.add(24);
+    loot.add(24);
+    loot.add(4);
+    loot.add(4);
+    loot.add(4);
 
     FrameSet walkUp;
     walkUp.frames.add(5);
@@ -68,6 +71,7 @@ void Bear::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& act
         return;
     }
 
+    updateDamage(deltaTime);
 
     Vector3D dudPos = *dude.getPos();
     dudPos.y += 39.f;
@@ -144,5 +148,32 @@ void Bear::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& act
         }
     }
 
+
+    //item pickup
+    
+
+     for (int i = 0; i < map.getItemCount(); ++i)
+    {
+        ItemInstance* itm = map.getItem(i);
+
+        if (itm->isRemoved())
+        {
+            continue;
+        }
+
+        if (CollisionCircleCircle(pos.x + collisionBodyOffset.x,
+                                  pos.y + collisionBodyOffset.y,
+                                  32,
+                                  itm->getPosition()->x,
+                                  itm->getPosition()->y, 8))
+        {
+            if (itm->getIndex() == 23)//syringe needles;
+            {
+                damage(10);
+                itm->setAsRemoved();
+            }
+
+        }
+    }
 
 }

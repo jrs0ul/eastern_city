@@ -187,9 +187,6 @@ static void engine_term_display(struct engine* engine) {
  */
 static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) {
     struct engine* engine = (struct engine*)app->userData;
-
-    float scaleX = 850.0f/engine->width;
-    float scaleY = 480.0f/engine->height;
     int32_t inputType = AInputEvent_getType(event);
     int32_t act = AMotionEvent_getAction(event);
 
@@ -203,18 +200,18 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) 
     if (inputType == AINPUT_EVENT_TYPE_MOTION) {
         switch(act) {
             case AMOTION_EVENT_ACTION_UP: {
-                Vector3D v = Vector3D(AMotionEvent_getX(event, 0) * scaleX, AMotionEvent_getY(event, 0) * scaleY, 0);
+                Vector3D v = Vector3D(AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0), 0);
                 engine->game->touches.up.add(v);
             }break;
             case AMOTION_EVENT_ACTION_DOWN :{
                     engine->game->touches.allfingersup = false;
-                    Vector3D v = Vector3D(AMotionEvent_getX(event, 0) * scaleX, AMotionEvent_getY(event, 0) * scaleY,
+                    Vector3D v = Vector3D(AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0),
                                           0);
                     engine->game->touches.down.add(v);
             }break;
             case AMOTION_EVENT_ACTION_MOVE: {
                 engine->game->touches.allfingersup = false;
-                Vector3D v = Vector3D(AMotionEvent_getX(event, 0) * scaleX, AMotionEvent_getY(event, 0) * scaleY,
+                Vector3D v = Vector3D(AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0),
                                           0);
                 engine->game->touches.move.add(v);
             }
@@ -254,7 +251,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
         case APP_CMD_GAINED_FOCUS: engine->animating = 1; break;
         case APP_CMD_LOST_FOCUS: {
             engine->animating = 0;
-            engine->game->ss.stopMusic();
+            //engine->game->ss.stopMusic();
             engine_draw_frame(engine);
         }
             break;

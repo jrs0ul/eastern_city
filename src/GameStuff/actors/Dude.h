@@ -36,7 +36,12 @@ public:
                          bool debugInfo = false) override;
 
 
-    void          init(Vector3D& position, int ScreenWidth, int ScreenHeight, int scale);
+    void          init(Vector3D& position,
+                       Room* currentRoom,
+                       GameMap* currentMap,
+                       int ScreenWidth, 
+                       int ScreenHeight, 
+                       int scale);
     void          destroy();
     void          update(float deltaTime, 
                          unsigned char* Keys, 

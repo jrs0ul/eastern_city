@@ -45,10 +45,6 @@ const float posX = 45;
 const float posY = 5;
 const float fieldWidth = 3.f;
 const float fieldHeight = 2.f;
-const float scale = 100.f;
-const float TouchScreenJoystickRadius = 45.f;
-const float TouchScreenJoystickX = 90;
-const float TouchScreenJoystickY = 400;
 const float dayLength = 480.f;
 
 

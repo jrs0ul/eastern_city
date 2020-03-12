@@ -112,7 +112,17 @@ void Game::init(){
     //glAlphaFunc(GL_GREATER, 0.5);
     //glEnable(GL_ALPHA_TEST);
 
+#ifdef __ANDROID__
+    int glData[4];
+    glGetIntegerv(GL_VIEWPORT, glData);
 
+    if (glData)
+    {
+        LOGI("%dx%d\n", glData[2], glData[3]);
+        ScreenWidth = glData[2];
+        ScreenHeight = glData[3];
+    }
+#endif
 
     MatrixOrtho(0.0, ScreenWidth, ScreenHeight, 0.0, -400, 400, OrthoMatrix);
 
@@ -129,22 +139,8 @@ void Game::init(){
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     //------------------
 
-#ifdef __ANDROID__
-    int glData[4];
-    glGetIntegerv(GL_VIEWPORT, glData);
 
-    if (glData)
-    {
-        LOGI("%d %d\n", glData[2], glData[3]);
-        ScreenWidth = glData[2];
-        ScreenHeight = glData[3];
-    }
-#endif
-
-    if (ScreenWidth / 2 >= 640)
-    {
-        pixelArtScale = 2;
-    }
+    pixelArtScale = ScreenWidth / 640;
 
 
 
@@ -158,12 +154,12 @@ void Game::init(){
 
 #else
     pics.load("pics/imagesToLoad.xml", AssetManager);
-    if (!ss.init()) {
+    /*if (!ss.init()) {
         LOGI("FAIL!\n");
         ss.exit();
     }
     ss.loadFiles("sfx/", "list.txt", AssetManager);
-    ss.playMusic("music/music.ogg", AssetManager);
+    ss.playMusic("music/music.ogg", AssetManager);*/
 
 
 
@@ -193,12 +189,14 @@ void Game::init(){
 #ifdef __ANDROID__
         itemDB.load("data/items.xml", AssetManager);
         recipes.load("data/recipes.xml", AssetManager);
+        furnitureDB.load("data/furniture.xml", AssetManager);
 #else
         itemDB.load("data/items.xml");
         recipes.load("data/recipes.xml");
+        furnitureDB.load("data/furniture.xml");
 #endif
 
-        furnitureDB.load("data/furniture.xml");
+
     }
 
 }
@@ -268,8 +266,8 @@ void Game::destroy(){
     ss->freeData();
     ss->exit();
 #else
-    ss.stopMusic();
-    ss.exit();
+    //ss.stopMusic();
+    //ss.exit();
 #endif
     pics.destroy();
 
@@ -392,7 +390,11 @@ void Game::renderGame()
 
     if (itemSelected)
     {
-        pics.draw(4, selectedItemPos.x, selectedItemPos.y, selectedItem->getIndex(), true, pixelArtScale, pixelArtScale);
+        pics.draw(4, 
+                  selectedItemPos.x, 
+                  selectedItemPos.y, 
+                  itemDB.get(selectedItem->getIndex())->imageIndex,
+                  true, pixelArtScale, pixelArtScale);
     }
 
 
@@ -427,9 +429,9 @@ void Game::renderGame()
     
     bool isSlingShot = (weaponInfo && weaponInfo->imageIndex == 9);
 
-
+#ifndef __ANDROID__
     pics.draw(31, MouseX, MouseY, (isSlingShot) ? 1 : 0, isSlingShot, scale, scale); 
-
+#endif
 }
 
 void Game::renderEditing()
@@ -444,6 +446,7 @@ void Game::renderTitle()
 #ifndef __ANDROID__
     WriteText(ScreenWidth/2.f - 120 * pixelArtScale,
               ScreenHeight/2.f + 120 * pixelArtScale, pics, 0, "click anywhere to continue...", pixelArtScale, pixelArtScale);
+    pics.draw(31, MouseX, MouseY, 0, false, pixelArtScale, pixelArtScale); 
 #else
     WriteText(ScreenWidth/2.f - 110 * pixelArtScale,
               ScreenHeight/2.f + 120 * pixelArtScale,
@@ -466,6 +469,7 @@ void Game::renderDefeat()
 
 #ifndef __ANDROID__
     WriteText(ScreenWidth/2.f - 120 * pixelArtScale, ScreenHeight/2.f + 120 * pixelArtScale, pics, 0, "click anywhere to continue...", pixelArtScale, pixelArtScale);
+    pics.draw(31, MouseX, MouseY, 0, false, pixelArtScale, pixelArtScale); 
 #else
     WriteText(ScreenWidth/2.f - 110 * pixelArtScale, ScreenHeight/2.f + 120 * pixelArtScale, pics, 0, "tap anywhere to continue...", pixelArtScale, pixelArtScale);
 #endif
@@ -528,7 +532,7 @@ void Game::gameLogic()
                         Ghost* ghost;
                         ghost = new Ghost();
                         Vector3D pos = Vector3D(371, 170, 0);
-                        ghost->init(pos);
+                        ghost->init(pos, currentRoom, &map);
                         actors.addActor(ghost);
                     }
 
@@ -704,6 +708,7 @@ void Game::gameLogic()
             printf("THERE'S A ROOM CONNECTED TO THIS REGION\n");
             activeContainer = nullptr;
             currentRoom = rae->room;
+            printf("ROOM: %d\n", currentRoom);
             currentPlayerEntryPoint = rae->entryIndex;
             path.destroy();
 
@@ -832,7 +837,7 @@ void Game::titleLogic()
 #else
         map.load(currentRoom->getMapName(), &itemsInWorld, currentRoom);
 #endif
-        dude.init(*map.getPlayerPos(0), ScreenWidth, ScreenHeight, pixelArtScale);
+        dude.init(*map.getPlayerPos(0), currentRoom, &map, ScreenWidth, ScreenHeight, pixelArtScale);
         dude.addDoubleClickCallbackForItems(&useItem);
 
         createEnemies();
@@ -1231,12 +1236,12 @@ void Game::createEnemies()
         {
             case 1: {
                 Rat* rat = new Rat();
-                rat->init(enemy->position);
+                rat->init(enemy->position, currentRoom, &map);
                 actors.addActor(rat);
             } break;
             case 3: {
                 Bear* bear = new Bear();
-                bear->init(enemy->position);
+                bear->init(enemy->position, currentRoom, &map);
                 actors.addActor(bear);
             } break;
             default: break;

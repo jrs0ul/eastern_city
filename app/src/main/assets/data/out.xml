@@ -19,8 +19,6 @@
     <AdditionalPathNodes>
         <Point x="705" y="270" />
         <Point x="305" y="504" />
-        <Point x="369" y="354" />
-        <Point x="985" y="330" />
         <Point x="1049" y="462" />
     </AdditionalPathNodes>
     <Temperature >-10</Temperature>

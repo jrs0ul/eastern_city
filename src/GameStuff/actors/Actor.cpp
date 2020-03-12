@@ -1,17 +1,27 @@
 #include "Actor.h"
 #include "../../MathTools.h"
 #include <cmath>
+#include <cassert>
+
+Actor::Actor()
+: roomIsIn(nullptr)
+, mapIsIn(nullptr)
+{
+}
 
 Actor::~Actor()
 {
     destroy();
 }
 
-void Actor::init()
+void Actor::init(Room* currentRoom, GameMap* currentMap)
 {
     dead = false;
     isDamaged = false;
     flippedX = false;
+
+    roomIsIn = currentRoom;
+    mapIsIn = currentMap;
 }
 
 void Actor::destroy()
@@ -25,21 +35,17 @@ void Actor::destroy()
     animations.destroy();
 }
 
-void Actor::damage(int dmg)
-{
-    health -= dmg;
-    
-    if (health <= 0)
-    {
-        kill();
-    }
-}
     
 void Actor::dropLoot(Room* room, GameMap* map)
 {
+    assert(room && map);
+
+    printf("currentRoom %d\n", room);
+    printf("Dropping LOOT:\n");
     for (unsigned i = 0; i < loot.count(); ++i)
     {
-        room->addItem(Vector3D(pos.x, pos.y, 0), loot[i]);
+        printf("item %d\n", loot[i]);
+        room->addItem(Vector3D(pos.x + rand() % 10, pos.y + rand() % 10, 0), loot[i]);
         map->addItem(room->getItem(room->getItemCount() - 1));
     }
 }
@@ -159,4 +165,30 @@ void Actor::setHealth(float newHealth)
     }
 
     health = newHealth;
+
+    if (health <= 0 && !dead)
+    {
+        kill();
+        dropLoot(roomIsIn, mapIsIn);
+    }
+
+}
+
+void Actor::damage(float dmg)
+{
+    setHealth(health - dmg);
+}
+    
+void Actor::updateDamage(float deltaTime)
+{
+    if (isDamaged)
+    {
+        damageProgress -= deltaTime;
+
+        if (damageProgress <= 0.f)
+        {
+            isDamaged = false;
+        }
+    }
+
 }

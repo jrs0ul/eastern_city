@@ -1,6 +1,7 @@
 #ifndef FURNITURE_DATA_H
 #define FURNITURE_DATA_H
 
+#include "../Xml.h"
 #include "../DArray.h"
 
 struct FurnitureData
@@ -16,7 +17,11 @@ struct FurnitureData
 class FurnitureDatabase
 {
 public:
-    void           load(const char* path);
+#ifndef __ANDROID__
+    void load(const char* path);
+#else
+    void load(const char* path, AAssetManager* assman);
+#endif
     unsigned       getFurnitureCount(){return data.count();}
     FurnitureData* getFurniture(unsigned index);
     void           destroy();

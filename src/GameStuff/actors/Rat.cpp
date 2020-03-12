@@ -2,9 +2,9 @@
 #include "../../MathTools.h"
 #include <cmath>
 
-void Rat::init(Vector3D& position)
+void Rat::init(Vector3D& position, Room* currentRoom, GameMap* currentMap)
 {
-    Actor::init();
+    Actor::init(currentRoom, currentMap);
 
     pos = position;
     animationSubset = 1;

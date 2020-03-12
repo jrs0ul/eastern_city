@@ -1,10 +1,18 @@
 #include "FurnitureData.h"
-#include "../Xml.h"
 
+
+#ifndef __ANDROID__
 void FurnitureDatabase::load(const char* path)
+#else
+void FurnitureDatabase::load(const char* path, AAssetManager* assman)
+#endif
 {
     Xml datafile;
+#ifndef __ANDROID__
     datafile.load(path);
+#else
+    datafile.load(path, assman);
+#endif
 
     XmlNode* furnitureNode = datafile.root.getNode(L"Furniture");
 

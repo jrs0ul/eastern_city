@@ -2,25 +2,28 @@
 <Items>
     <Item name="Canned food" isConsumable="1" imageIndex="0" hungerDecrease="20" hpUp="1"/>
     <Item name="Rat meat" isConsumable="1" spoilageSpeed="1" imageIndex="1" hungerDecrease="15"/>
-    <Item name="Puffy Coat" isWearable="1" coldDecrease="25" spoilageSpeed="0.7" imageIndex="2"/>
+    <Item name="Puffy Coat" isWearable="1" coldDecrease="25" spoilageSpeed="0.2" imageIndex="2"/>
     <Item name="Medicine" isConsumable="1" imageIndex="3" hpUp="40"/>
     <Item name="Rags" imageIndex="4"/>
     <Item name="Sewing kit" isConsumable="1" imageIndex="5" clothingQualityIncrease="20"/>
     <Item name="Wood" imageIndex="6"/>
     <Item name="Rubber band" imageIndex="7"/>
     <Item name="Junk" imageIndex="8"/>
-    <Item name="Slingshot" imageIndex="9" isWeapon="1" ammoItemIndex="8"/>
-    <Item name="Alcohol" isConsumable="1" imageIndex="10" hungerDecrease="2" hpUp="5"/>
+    <Item name="Slingshot" imageIndex="9" isWeapon="1" attack="10" ammoItemIndex="8"/>
+    <Item name="Alcohol" isConsumable="1" imageIndex="10" hungerDecrease="2" hpUp="5" sleepynessDecrease="-10"/>
     <Item name="Dead plant" imageIndex="11"/>
     <Item name="Flashlight" imageIndex="12" isWeapon="1" ammoItemIndex="13"/>
-    <Item name="Batteries" imageIndex="13" spoilageSpeed="0.7"/>
+    <Item name="Batteries" imageIndex="13" spoilageSpeed="1.2"/>
     <Item name="Roten cheese" imageIndex="14" isConsumable="1" hungerDecrease="30"/>
     <Item name="Bread" imageIndex="15" isConsumable="1" hungerDecrease="18"/>
-    <Item name="Thin Coat" isWearable="1" coldDecrease="15" spoilageSpeed="0.4" imageIndex="16"/>
+    <Item name="Thin Coat" isWearable="1" coldDecrease="15" spoilageSpeed="0.1" imageIndex="16"/>
     <Item name="Cotton wool" imageIndex="17"/>
     <Item name="Anticeptic" imageIndex="18" isConsumable="1" hpUp="10"/>
-    <Item name="Makeshift Axe" imageIndex="19" isWeapon="1"/>
+    <Item name="Axe" imageIndex="19" isWeapon="1" attack="10"/>
     <Item name="Metal scrap" imageIndex="20"/>
-    <Item name="Blanket" imageIndex="21"/>
+    <Item name="Blanket" imageIndex="21" coldDecrease="25"/>
+    <Item name="Caffeine pills" isConsumable="1" imageIndex="22" sleepynessDecrease="50"/>
+    <Item name="Used syringe" imageIndex="23" imageIndexSecond="24" />
+    <Item name="Bear meat" imageIndex="25" isConsumable="1" hungerDecrease="25" hpUp="2"/>
 </Items>
 

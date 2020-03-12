@@ -26,11 +26,7 @@
 * Remove editing mode
 * maybe replace the equiped item's quality numbers with a progress bar?
 * Bear roars when sees a player
-* Bear attack animations
-* Invetigate forward declarations
+* Investigate forward declarations
 * Enemies got stuck in furniture(check enemy position generation)
-* syringe needles should damage the bear
-* add damage animation for other actors(red blink)
 * axe swing sound when axe hits nothing and something else when it hits a target
 * add separate hitbox for other actors for projectile attacks
-

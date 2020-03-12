@@ -3,9 +3,9 @@
 #include <cmath>
 
 
-void Ghost::init(Vector3D& position)
+void Ghost::init(Vector3D& position, Room* currentRoom, GameMap* currentMap)
 {
-    Actor::init();
+    Actor::init(currentRoom, currentMap);
     collisionBodyOffset = Vector3D(0.f, 45.f, 0.f);
     collisionBodyRadius = 20;
     animationFrame = 0;

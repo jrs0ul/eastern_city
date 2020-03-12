@@ -67,11 +67,6 @@ void Projectile::update(float deltaTime, ActorContainer& actors, Room* currentRo
         {
             alive = false;
             actor->damage(10);
-            
-            if (actor->isDead())
-            {
-                actor->dropLoot(currentRoom, map);
-            }
         }
     }
 

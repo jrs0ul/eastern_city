@@ -24,5 +24,6 @@
     <Item name="Blanket" imageIndex="21" coldDecrease="25"/>
     <Item name="Caffeine pills" isConsumable="1" imageIndex="22" sleepynessDecrease="50"/>
     <Item name="Used syringe" imageIndex="23" imageIndexSecond="24" />
+    <Item name="Bear meat" imageIndex="25" isConsumable="1" hungerDecrease="25" hpUp="2"/>
 </Items>
 

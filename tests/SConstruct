@@ -1,21 +1,24 @@
-env = Environment()
+import os
+
+OBJ_DIR = os.path.join(os.getcwd(), '../obj/');
+env = Environment(OBJPREFIX = OBJ_DIR)
 
 common_libs = ['gtest', 'SDL', 'GL', 'pthread']
 env.Append( LIBS = common_libs )
 
 env.Program(target="test", source = ["test.cpp",
-                                     "../app/src/main/cpp/GameStuff/map/GameMapGraph.cpp",
-                                     "../app/src/main/cpp/GameStuff/FurnitureData.cpp",
-                                     "../app/src/main/cpp/Xml.cpp",
-                                     "../app/src/main/cpp/GameStuff/map/Room.cpp",
-                                     "../app/src/main/cpp/GameStuff/Furniture.cpp",
-                                     "../app/src/main/cpp/GameStuff/ItemContainer.cpp",
-                                     "../app/src/main/cpp/TextureLoader.cpp",
-                                     "../app/src/main/cpp/OSTools.cpp",
-                                     "../app/src/main/cpp/ShaderProgram.cpp",
-                                     "../app/src/main/cpp/Image.cpp",
-                                     "../app/src/main/cpp/GameStuff/ItemDatabase.cpp",
-                                     "../app/src/main/cpp/GameStuff/ItemInstance.cpp",
-                                     "../app/src/main/cpp/gui/Text.cpp",
-                                     "../app/src/main/cpp/Extensions.cpp",
+                                     "../src/GameStuff/map/GameMapGraph.cpp",
+                                     "../src/GameStuff/FurnitureData.cpp",
+                                     "../src/Xml.cpp",
+                                     "../src/GameStuff/map/Room.cpp",
+                                     "../src/GameStuff/Furniture.cpp",
+                                     "../src/GameStuff/ItemContainer.cpp",
+                                     "../src/TextureLoader.cpp",
+                                     "../src/OSTools.cpp",
+                                     "../src/ShaderProgram.cpp",
+                                     "../src/Image.cpp",
+                                     "../src/GameStuff/ItemDatabase.cpp",
+                                     "../src/GameStuff/ItemInstance.cpp",
+                                     "../src/gui/Text.cpp",
+                                     "../src/Extensions.cpp",
                                      ])

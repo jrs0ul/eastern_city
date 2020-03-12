@@ -22,10 +22,10 @@ class GameMap;
 class Actor : public Drawable
 {
 public:
+                    Actor();
     virtual         ~Actor();
-    void            init();
+    void            init(Room* currentRoom, GameMap* currentMap);
     void            destroy();
-    void            damage(int dmg);
     void            dropLoot(Room* room, GameMap* map);
     void            kill(){dead = true;}
     void            flipX(bool flip){flippedX = flip;}
@@ -42,12 +42,16 @@ public:
     int             getAnimationSubset(){return animationSubset;}
     virtual int     getType(){return -1;}
     void            setHealth(float newHealth);
+    void            damage(float dmg);
+    void            updateDamage(float deltaTime);
 protected:
     void            calcCollisionResponce(Vector3D* movement,
                                           float lineX1, float lineX2,
                                           float lineY1, float lineY2);
 
 protected:
+    Room*            roomIsIn;
+    GameMap*         mapIsIn;
     DArray<FrameSet> animations;
     DArray<int>      loot;
     unsigned         pictureIndex;
