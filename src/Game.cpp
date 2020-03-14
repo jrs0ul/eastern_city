@@ -708,7 +708,6 @@ void Game::gameLogic()
             printf("THERE'S A ROOM CONNECTED TO THIS REGION\n");
             activeContainer = nullptr;
             currentRoom = rae->room;
-            printf("ROOM: %d\n", currentRoom);
             currentPlayerEntryPoint = rae->entryIndex;
             path.destroy();
 
@@ -1314,8 +1313,14 @@ bool Game::handleAttack(float x, float y)
             continue;
         }
 
+        BoundingBox* bbox = actor->getCurrentTargetingBBox();
 
-        if (CollisionCircleCircle(x, y, 1.f, actor->pos.x, actor->pos.y, 30))
+
+        if (CollisionCircleRectangle(x, y, 1.f,
+                                     actor->pos.x + bbox->pos.x, 
+                                     actor->pos.y + bbox->pos.y,
+                                     bbox->size.x,
+                                     bbox->size.y))
         {
             if (weaponInfo->imageIndex == 19) //axe - mellee
             {

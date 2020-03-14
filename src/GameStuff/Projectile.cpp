@@ -60,10 +60,13 @@ void Projectile::update(float deltaTime, ActorContainer& actors, Room* currentRo
             continue;
         }
 
-        if (CollisionCircleCircle(pos.x, pos.y, 4,
-                    actor->pos.x + actor->collisionBodyOffset.x,
-                    actor->pos.y + actor->collisionBodyOffset.y,
-                    actor->getCollisionBodyRadius()))
+        BoundingBox* bbox = actor->getCurrentTargetingBBox();
+
+        if (CollisionCircleRectangle(pos.x, pos.y, 4,
+                    actor->pos.x + bbox->pos.x,
+                    actor->pos.y + bbox->pos.y,
+                    bbox->size.x,
+                    bbox->size.y))
         {
             alive = false;
             actor->damage(10);

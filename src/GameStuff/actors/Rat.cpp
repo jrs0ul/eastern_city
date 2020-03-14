@@ -20,34 +20,48 @@ void Rat::init(Vector3D& position, Room* currentRoom, GameMap* currentMap)
     up.frames.add(1);
     up.frames.add(2);
     up.frames.add(1);
+    up.targetingBox.pos = Vector3D(-16, -10, 0);
+    up.targetingBox.size = Vector3D(32, 25, 0);
+
     FrameSet down;
     down.frames.add(5);
     down.frames.add(6);
     down.frames.add(7);
     down.frames.add(6);
+    down.targetingBox.pos = Vector3D(-16, -10, 0);
+    down.targetingBox.size = Vector3D(32, 25, 0);
+
     FrameSet side;
     side.frames.add(10);
     side.frames.add(11);
     side.frames.add(12);
     side.frames.add(11);
+    side.targetingBox.pos = Vector3D(-24, -10, 0);
+    side.targetingBox.size = Vector3D(48, 25, 0);
 
     FrameSet attackUp;
     attackUp.frames.add(1);
     attackUp.frames.add(3);
     attackUp.frames.add(4);
     attackUp.frames.add(1);
+    attackUp.targetingBox.pos = Vector3D(-16, -10, 0);
+    attackUp.targetingBox.size = Vector3D(32, 25, 0);
 
     FrameSet attackDown;
     attackDown.frames.add(6);
     attackDown.frames.add(8);
     attackDown.frames.add(9);
     attackDown.frames.add(6);
+    attackDown.targetingBox.pos = Vector3D(-16, -10, 0);
+    attackDown.targetingBox.size = Vector3D(32, 25, 0);
 
     FrameSet attackSide;
     attackSide.frames.add(11);
     attackSide.frames.add(13);
     attackSide.frames.add(14);
     attackSide.frames.add(11);
+    attackSide.targetingBox.pos = Vector3D(-24, -10, 0);
+    attackSide.targetingBox.size = Vector3D(48, 25, 0);
 
     animations.add(up);
     animations.add(down);

@@ -29,4 +29,3 @@
 * Investigate forward declarations
 * Enemies got stuck in furniture(check enemy position generation)
 * axe swing sound when axe hits nothing and something else when it hits a target
-* add separate hitbox for other actors for projectile attacks

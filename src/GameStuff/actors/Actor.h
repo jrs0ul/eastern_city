@@ -5,12 +5,18 @@
 #include "../map/GameMap.h"
 #include "../../Vectors.h"
 
+struct BoundingBox
+{
+    Vector3D pos;
+    Vector3D size;
+};
+
 struct FrameSet
 {
     DArray<int> frames;
+    BoundingBox targetingBox;
     float offsetX;
     float offsetY;
-
     FrameSet()
     : offsetX(0.f)
     , offsetY(0.f)
@@ -37,6 +43,7 @@ public:
 
     bool            isColiding(Vector3D newPos, Vector3D* movement, GameMap& map);
     float           getCollisionBodyRadius(){return collisionBodyRadius;}
+    BoundingBox*    getCurrentTargetingBBox();
     bool            isDead(){return dead;}
     bool            isFlipedX(){return flippedX;}
     int             getAnimationSubset(){return animationSubset;}

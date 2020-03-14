@@ -26,34 +26,48 @@ void Bear::init(Vector3D& position, Room* currentRoom, GameMap* currentMap)
     walkUp.frames.add(6);
     walkUp.frames.add(7);
     walkUp.frames.add(6);
+    walkUp.targetingBox.pos = Vector3D(-40, -50, 0);
+    walkUp.targetingBox.size = Vector3D(80, 100, 0);
+
     FrameSet walkDown;
     walkDown.frames.add(0);
     walkDown.frames.add(1);
     walkDown.frames.add(2);
     walkDown.frames.add(1);
+    walkDown.targetingBox.pos = Vector3D(-40, -50, 0);
+    walkDown.targetingBox.size = Vector3D(80, 100, 0);
+
     FrameSet walkSide;
     walkSide.frames.add(10);
     walkSide.frames.add(11);
     walkSide.frames.add(12);
     walkSide.frames.add(11);
+    walkSide.targetingBox.pos = Vector3D(-90, -50, 0);
+    walkSide.targetingBox.size = Vector3D(170, 100, 0);
 
     FrameSet attackUp;
     attackUp.frames.add(6);
     attackUp.frames.add(8);
     attackUp.frames.add(9);
     attackUp.frames.add(6);
+    attackUp.targetingBox.pos = Vector3D(-40, -50, 0);
+    attackUp.targetingBox.size = Vector3D(80, 100, 0);
 
     FrameSet attackDown;
     attackDown.frames.add(1);
     attackDown.frames.add(3);
     attackDown.frames.add(4);
     attackDown.frames.add(1);
+    attackDown.targetingBox.pos = Vector3D(-40, -50, 0);
+    attackDown.targetingBox.size = Vector3D(80, 100, 0);
 
     FrameSet attackSide;
     attackSide.frames.add(11);
     attackSide.frames.add(13);
     attackSide.frames.add(14);
     attackSide.frames.add(11);
+    attackSide.targetingBox.pos = Vector3D(-90, -50, 0);
+    attackSide.targetingBox.size = Vector3D(170, 100, 0);
 
 
     animations.add(walkUp);

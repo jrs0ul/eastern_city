@@ -40,7 +40,6 @@ void Actor::dropLoot(Room* room, GameMap* map)
 {
     assert(room && map);
 
-    printf("currentRoom %d\n", room);
     printf("Dropping LOOT:\n");
     for (unsigned i = 0; i < loot.count(); ++i)
     {
@@ -76,6 +75,21 @@ void Actor::draw(float offsetX, float offsetY,
 
     if (debugInfo)
     {
+        assert(animationSubset >= 0 && animationSubset < (int)animations.count());
+        BoundingBox* currentBBox = &animations[animationSubset].targetingBox;
+        pics.draw(-1,
+                  (pos.x + currentBBox->pos.x) * scale + offsetX,
+                  (pos.y + currentBBox->pos.y) * scale + offsetY,
+                  0,
+                  false,
+                  currentBBox->size.x * scale,
+                  currentBBox->size.y * scale,
+                  0.f,
+                  COLOR(0.f, 1.f, 0.f, 0.5f),
+                  COLOR(0.f, 1.f, 0.f, 0.5f));
+
+
+
         pics.draw(-1, 
                   pos.x * scale + offsetX + collisionBodyOffset.x * scale,
                   pos.y * scale + offsetY + collisionBodyOffset.y * scale,
@@ -153,7 +167,12 @@ bool Actor::isColiding(Vector3D newPos, Vector3D* movement, GameMap& map)
 
     return colides;
 
+}
 
+BoundingBox* Actor::getCurrentTargetingBBox()
+{
+    assert(animationSubset < (int)animations.count() && animationSubset >= 0);
+    return &animations[animationSubset].targetingBox;
 }
  
 void Actor::setHealth(float newHealth)
