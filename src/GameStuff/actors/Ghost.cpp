@@ -27,7 +27,7 @@ void Ghost::init(Vector3D& position, Room* currentRoom, GameMap* currentMap)
     pictureIndex = 18;
 }
 
-void Ghost::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& actors)
+void Ghost::update(float deltaTime, GameMap* map, Actor* dude, ActorContainer* actors)
 {
 
     if (isDead())
@@ -36,7 +36,7 @@ void Ghost::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& ac
     }
 
 
-    Vector3D dudPos = *dude.getPos();
+    Vector3D dudPos = *(dude->getPos());
     Vector3D myPos = pos;
     myPos = myPos + collisionBodyOffset;
     dudPos.y += 39.f;
@@ -74,7 +74,7 @@ void Ghost::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& ac
     if (CollisionCircleCircle(dudPos.x, dudPos.y, 16,
                               myPos.x, myPos.y, 10))
     {
-        dude.setHealth(dude.getHealth() - 1);
+        dude->setHealth(dude->getHealth() - 1);
         return;
     }
 

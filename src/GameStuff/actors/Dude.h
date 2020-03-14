@@ -47,7 +47,6 @@ public:
                          unsigned char* Keys, 
                          GameMap& map,
                          Room* currentRoom,
-                         ActorContainer& actors,
                          float darkness,
                          ItemDatabase& itemDb,
                          CraftingRecipes& recipes,
@@ -88,8 +87,6 @@ public:
     unsigned      getItemCount(){return itemBag.getItemCount();}
     ItemInstance* getItem(unsigned index);
 
-    Vector3D*     getPos(){return &pos;}
-    int           getHealth(){return health;}
     int           getWarmth(){return warmth;}
     int           getSatiation(){return satiation;}
     int           getWakefullness(){return wakefullness;}
@@ -120,8 +117,7 @@ private:
                       GameMap& map,
                       FindPath& path);
 
-    void melleeAttacks(ActorContainer& actors,
-                       GameMap& map,
+    void melleeAttacks(GameMap& map,
                        Room* currentRoom,
                        ItemDatabase& itemdb,
                        CraftingRecipes& recipes,

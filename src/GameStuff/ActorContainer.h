@@ -11,6 +11,7 @@ class ActorContainer
 public:
     void     destroy();
     void     addActor(Actor* actor);
+    void     createAndAddActor(Vector3D& pos, unsigned type, Room* room, GameMap* map);
     void     draw(float offsetX, float offsetY,
                   int scale,
                   PicsContainer& pics,
@@ -24,6 +25,7 @@ public:
 private:
 
     DArray<Actor*> actors;
+    DArray<Actor*> actorsToDelete;
 };
 
 

@@ -28,7 +28,7 @@ void Projectile::setDestination(Vector3D& dest)
 }
 
 
-void Projectile::update(float deltaTime, ActorContainer& actors, Room* currentRoom, GameMap* map)
+void Projectile::update(float deltaTime, Room* currentRoom, GameMap* map)
 {
     if (!alive)
     {
@@ -51,9 +51,11 @@ void Projectile::update(float deltaTime, ActorContainer& actors, Room* currentRo
         alive = false;
     }
 
-    for (unsigned i = 0; i < actors.getActorCount(); ++i)
+    ActorContainer* actors = map->getActorContainer();
+
+    for (unsigned i = 0; i < actors->getActorCount(); ++i)
     {
-        Actor* actor = actors.getActor(i);
+        Actor* actor = actors->getActor(i);
 
         if (actor->isDead() || actor->getType() == 0 || actor->getType() == 2)
         {

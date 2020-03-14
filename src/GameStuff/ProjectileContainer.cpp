@@ -12,13 +12,12 @@ void ProjectileContainer::destroy()
 }
 
 void ProjectileContainer::update(float deltaTime,
-                                 ActorContainer& actors,
                                  Room* currentRoom, 
                                  GameMap* map)
 {
     for (unsigned i = 0; i < projectiles.count(); ++i)
     {
-        projectiles[i]->update(deltaTime, actors, currentRoom, map);
+        projectiles[i]->update(deltaTime, currentRoom, map);
     }
 
     for (int i = (int)projectiles.count() - 1; i >= 0; --i)

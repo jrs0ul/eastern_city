@@ -232,7 +232,6 @@ private:
 
 
     Dude dude;
-    ActorContainer actors;
     ProjectileContainer projectiles;
     GameMap map;
     float mapPosX;

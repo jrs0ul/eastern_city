@@ -2,10 +2,16 @@
 #include "../Statistics.h"
 #include "../../Xml.h"
 #include "../../MathTools.h"
+#include "../ActorContainer.h"
+#include "../actors/Rat.h"
+#include "../actors/Ghost.h"
+#include "../actors/Bear.h"
 #include <cwchar>
+#include <cassert>
 
 
 GameMap::GameMap()
+: actors(nullptr)
 {
 }
 
@@ -14,6 +20,13 @@ void GameMap::destroy()
     for (unsigned long i = 0; i < polygons.count(); ++i)
     {
         polygons[i].points.destroy();
+    }
+
+    if (actors)
+    {
+        actors->destroy();
+        delete actors;
+        actors = nullptr;
     }
 
     polygons.destroy();
@@ -31,12 +44,21 @@ void GameMap::destroy()
 }
 
 #ifdef __ANDROID__
-void GameMap::load(const char* file,  AAssetManager* assman, GlobalItemList* worldItems , Room* room)
+void GameMap::load(const char* file,  
+                   AAssetManager* assman,
+                   Dude* dude,
+                   GlobalItemList* worldItems , 
+                   Room* room)
 #else
-void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
+void GameMap::load(const char* file,
+                   Dude* dude,
+                   GlobalItemList* worldItems,
+                   Room* room)
 #endif
 {
     destroy();
+
+    actors = new ActorContainer();
 
     Xml mapfile;
     printf("loading file %s\n", file);
@@ -537,6 +559,22 @@ void GameMap::load(const char* file, GlobalItemList* worldItems, Room* room)
                 polygons.add(poly);
             }
         }
+
+        for (unsigned i = 0; i < room->getConstantEnemyCount(); ++i)
+        {
+            Actor* actor = room->getConstantEnemy(i);
+            assert(actor);
+            actor->setRoom(room, this);
+            actors->addActor(actor);
+        }
+
+        for (unsigned i = 0; i < room->getRespawningEnemyCount(); ++i)
+        {
+            EnemyPos* enemy = room->getRespawningEnemy(i);
+            actors->createAndAddActor(enemy->position, enemy->type, room, this);
+        }
+
+        actors->addActor(dude);
     }
 
     mapfile.destroy();
@@ -708,9 +746,13 @@ void GameMap::draw(float posX,
 
     }
 
+    actors->draw(posX, posY, scale, pics, getFurnitureData(), isDebug);
+
 }
 
-void GameMap::update(float deltaTime, Actor* mainguy, PicsContainer& pics)
+void GameMap::update(float deltaTime, 
+                     Actor* mainguy,
+                     PicsContainer& pics)
 {
 
     itemFrameProgress += deltaTime;
@@ -749,6 +791,33 @@ void GameMap::update(float deltaTime, Actor* mainguy, PicsContainer& pics)
             fur->colidedWithHero = true;
         }
     }
+
+    //---
+    for (unsigned i = 0; i < actors->getActorCount(); ++i)
+    {
+        Actor* actr = actors->getActor(i);
+
+        if (actr)
+        {
+            if (actr->getType() == 1)
+            {
+                Rat* rat = static_cast<Rat*>(actr);
+                rat->update(deltaTime, this, mainguy, actors);
+            }
+            else if (actr->getType() == 2)
+            {
+                Ghost* ghost = static_cast<Ghost*>(actr);
+                ghost->update(deltaTime, this, mainguy, actors);
+            }
+            else if (actr->getType() == 3)
+            {
+                Bear* bear = static_cast<Bear*>(actr);
+                bear->update(deltaTime, this, mainguy, actors);
+
+            }
+        }
+    }
+
 }
 
 void GameMap::updateFurniturePolygons(Room* currentRoom)
@@ -905,6 +974,12 @@ void GameMap::drawDarknessBorder(float offsetX, float offsetY,
 void GameMap::addItem(ItemInstance* item)
 {
     items.add(item);
+}
+
+
+void GameMap::addActor(Actor* actor)
+{
+    actors->addActor(actor);
 }
 
 bool GameMap::getFurnitureInBBox(DArray<Furniture*>& result, Vector3D bboxPos, Vector3D bboxSize)

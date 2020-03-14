@@ -175,29 +175,16 @@ void Game::init(){
     srand((unsigned int)time(0));
 
     printf("game mode:%d\n", gameMode);
-    if (gameMode == EDITING)
-    {
-        printf("about to load %s\n", fileName);
-#ifdef __ANDROID__
-        map.load(fileName, AssetManager);
-#else
-        map.load(fileName);
-#endif
-    }
-    else
-    {
-#ifdef __ANDROID__
-        itemDB.load("data/items.xml", AssetManager);
-        recipes.load("data/recipes.xml", AssetManager);
-        furnitureDB.load("data/furniture.xml", AssetManager);
-#else
-        itemDB.load("data/items.xml");
-        recipes.load("data/recipes.xml");
-        furnitureDB.load("data/furniture.xml");
-#endif
 
-
-    }
+#ifdef __ANDROID__
+    itemDB.load("data/items.xml", AssetManager);
+    recipes.load("data/recipes.xml", AssetManager);
+    furnitureDB.load("data/furniture.xml", AssetManager);
+#else
+    itemDB.load("data/items.xml");
+    recipes.load("data/recipes.xml");
+    furnitureDB.load("data/furniture.xml");
+#endif
 
 }
 
@@ -271,7 +258,6 @@ void Game::destroy(){
 #endif
     pics.destroy();
 
-    actors.destroy();
     map.destroy();
     path.destroy();
 
@@ -312,7 +298,6 @@ void Game::renderGame()
     const int scale = pixelArtScale;
 
     map.draw(mapPosX, mapPosY, scale, ScreenWidth, ScreenHeight, pics, itemDB, DebugMode);
-    actors.draw(mapPosX, mapPosY, scale, pics, map.getFurnitureData(), DebugMode);
     projectiles.draw(mapPosX, mapPosY, scale, pics);
     map.drawFrontLayerAssets(mapPosX, mapPosY, scale, *dude.getPos(), pics);
     map.drawDarknessBorder(mapPosX, mapPosY, scale, ScreenWidth, ScreenHeight, pics);
@@ -502,12 +487,11 @@ void Game::gameLogic()
                 {
 
 #ifdef __ANDROID__
-                    map.load(currentRoom->getMapName(), AssetManager, &itemsInWorld, currentRoom);
+                    map.load(currentRoom->getMapName(), AssetManager, &dude, &itemsInWorld, currentRoom);
 #else
-                    map.load(currentRoom->getMapName(), &itemsInWorld, currentRoom);
+                    map.load(currentRoom->getMapName(), &dude, &itemsInWorld, currentRoom);
 #endif
                     dude.setPosition(*map.getPlayerPos(currentPlayerEntryPoint));
-                    createEnemies();
                     unsigned regionIndex = 0;
                     unsigned entryIndex = 0;
 
@@ -529,11 +513,8 @@ void Game::gameLogic()
 
                     if (darkness > 0.6f)
                     {
-                        Ghost* ghost;
-                        ghost = new Ghost();
-                        Vector3D pos = Vector3D(371, 170, 0);
-                        ghost->init(pos, currentRoom, &map);
-                        actors.addActor(ghost);
+                        currentRoom->addConstantEnemy(Vector3D(371, 170, 0), 2);
+                        map.addActor(currentRoom->getConstantEnemy(currentRoom->getConstantEnemyCount() - 1));
                     }
 
                     return;
@@ -741,36 +722,9 @@ void Game::updateWorld(float deltaT)
         worldTime = (worldTime - daysPassed * dayLength);
     }
     
-    dude.update(deltaT, Keys, map, currentRoom, actors, darkness, itemDB, recipes, furnitureDB, path);
-    projectiles.update(deltaT, actors, currentRoom, &map);
-    
-    for (unsigned i = 0; i < actors.getActorCount(); ++i)
-    {
-        Actor* actr = actors.getActor(i);
-
-        if (actr)
-        {
-            if (actr->getType() == 1)
-            {
-                Rat* rat = static_cast<Rat*>(actr);
-                rat->update(deltaT, map, dude, actors);
-            }
-            else if (actr->getType() == 2)
-            {
-                Ghost* ghost = static_cast<Ghost*>(actr);
-                ghost->update(deltaT, map, dude, actors);
-            }
-            else if (actr->getType() == 3)
-            {
-                Bear* bear = static_cast<Bear*>(actr);
-                bear->update(deltaT, map, dude, actors);
-
-            }
-        }
-    }
-
+    dude.update(deltaT, Keys, map, currentRoom, darkness, itemDB, recipes, furnitureDB, path);
+    projectiles.update(deltaT, currentRoom, &map); 
     map.update(DeltaTime, &dude, pics);
-
 }
 
 void Game::editingLogic()
@@ -832,14 +786,12 @@ void Game::titleLogic()
         sessionStarted = time(0);
         dude.destroy();
 #ifdef __ANDROID__
-        map.load(currentRoom->getMapName(), AssetManager, &itemsInWorld, currentRoom);
+        map.load(currentRoom->getMapName(), AssetManager, &dude, &itemsInWorld, currentRoom);
 #else
-        map.load(currentRoom->getMapName(), &itemsInWorld, currentRoom);
+        map.load(currentRoom->getMapName(), &dude, &itemsInWorld, currentRoom);
 #endif
         dude.init(*map.getPlayerPos(0), currentRoom, &map, ScreenWidth, ScreenHeight, pixelArtScale);
         dude.addDoubleClickCallbackForItems(&useItem);
-
-        createEnemies();
 
         glClearColor(0.f, 0.0f, 0.0f, 0.0f);
         
@@ -1223,35 +1175,6 @@ void Game::centerCamera(float x, float y, int scale)
 
 }
 
-void Game::createEnemies()
-{
-    actors.destroy();
-
-    for (unsigned i = 0; i < currentRoom->getEnemyCount(); ++i)
-    {
-        EnemyPos* enemy = currentRoom->getEnemyPosition(i);
-
-        switch (enemy->type)
-        {
-            case 1: {
-                Rat* rat = new Rat();
-                rat->init(enemy->position, currentRoom, &map);
-                actors.addActor(rat);
-            } break;
-            case 3: {
-                Bear* bear = new Bear();
-                bear->init(enemy->position, currentRoom, &map);
-                actors.addActor(bear);
-            } break;
-            default: break;
-        }
-
-    }
-
-    actors.addActor(&dude);
-
-}
-
 void Game::drawPolygon(SPolygon* poly, int scale, ShaderProgram& shader, int method, COLOR c)
 {
     DArray<float> vertices;
@@ -1303,10 +1226,12 @@ bool Game::handleAttack(float x, float y)
         return false;
     }
 
+    ActorContainer* actors = map.getActorContainer();
 
-    for (unsigned i = 0; i < actors.getActorCount(); ++i)
+
+    for (unsigned i = 0; i < actors->getActorCount(); ++i)
     {
-        Actor* actor = actors.getActor(i);
+        Actor* actor = actors->getActor(i);
 
         if (actor->getType() != 1 || actor->isDead())
         {

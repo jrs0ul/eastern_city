@@ -8,6 +8,7 @@
 #include "../ItemContainer.h"
 
 class Room;
+class Actor;
 
 struct RoomAndEntry
 {
@@ -42,7 +43,8 @@ public:
     void              addItem(Vector3D pos, int index);
     void              addItem(Vector3D pos, ItemInstance* item);
     void              addItemContainer(unsigned furnitureIndex, ItemContainer& container);
-    void              addEnemy(Vector3D pos, unsigned type);
+    void              addRespawningEnemy(Vector3D pos, unsigned type);
+    void              addConstantEnemy(Vector3D pos, unsigned type);
     void              addAsset(Vector3D pos, 
                                const char* name,
                                unsigned spriteIndex,
@@ -57,7 +59,8 @@ public:
     void              removeItem(unsigned index);
     unsigned          getItemCount();
     unsigned          getItemContainerCount();
-    unsigned          getEnemyCount();
+    unsigned          getRespawningEnemyCount();
+    unsigned          getConstantEnemyCount();
     unsigned          getChildRoomCount();
     unsigned          getAssetCount();
     unsigned          getFurnitureCount();
@@ -68,7 +71,8 @@ public:
     unsigned          getDoorHoleCount();
     ItemInstance*     getItem(unsigned index);
     ItemContainer*    getItemContainer(unsigned index);
-    EnemyPos*         getEnemyPosition(unsigned index);
+    EnemyPos*         getRespawningEnemy(unsigned index);
+    Actor*            getConstantEnemy(unsigned index);
     RoomAndEntry*     getChildRoom(unsigned index);
     RoomAndEntry*     findChildRoomByRegionIndex(unsigned regionIndex);
     Asset*            getAsset(unsigned index);
@@ -88,7 +92,8 @@ private:
     //data
     DArray<ItemContainer>       itemContainers;
     DArray<ItemInstance>        items;
-    DArray<EnemyPos>            enemies;
+    DArray<EnemyPos>            respawningEnemies;
+    DArray<Actor*>              constantEnemies;
     DArray<Asset>               assets;
     DArray<Furniture*>          furniture;
     DArray<SPolygon>            collisionPolygons;

@@ -22,7 +22,7 @@ struct FrameSet
     , offsetY(0.f)
     {}
 };
-
+class Room;
 class GameMap;
 
 class Actor : public Drawable
@@ -30,6 +30,7 @@ class Actor : public Drawable
 public:
                     Actor();
     virtual         ~Actor();
+    void            setRoom(Room* currentRoom, GameMap* currentMap);
     void            init(Room* currentRoom, GameMap* currentMap);
     void            destroy();
     void            dropLoot(Room* room, GameMap* map);
@@ -48,6 +49,8 @@ public:
     bool            isFlipedX(){return flippedX;}
     int             getAnimationSubset(){return animationSubset;}
     virtual int     getType(){return -1;}
+    Vector3D*       getPos(){return &pos;}
+    int             getHealth(){return health;}
     void            setHealth(float newHealth);
     void            damage(float dmg);
     void            updateDamage(float deltaTime);

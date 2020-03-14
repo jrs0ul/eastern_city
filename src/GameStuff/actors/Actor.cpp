@@ -14,14 +14,18 @@ Actor::~Actor()
     destroy();
 }
 
+void Actor::setRoom(Room* currentRoom, GameMap* currentMap)
+{
+    roomIsIn = currentRoom;
+    mapIsIn = currentMap;
+}
+
 void Actor::init(Room* currentRoom, GameMap* currentMap)
 {
     dead = false;
     isDamaged = false;
     flippedX = false;
-
-    roomIsIn = currentRoom;
-    mapIsIn = currentMap;
+    setRoom(currentRoom, currentMap);
 }
 
 void Actor::destroy()

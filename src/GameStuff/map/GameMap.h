@@ -14,6 +14,8 @@
 #include "../Furniture.h"
 
 class Actor;
+class Dude;
+class ActorContainer;
 
 
 class GameMap
@@ -22,9 +24,17 @@ public:
     GameMap();
     void        destroy();
 #ifdef __ANDROID__
-    void load(const char* file,  AAssetManager* assman, GlobalItemList* worldItems = nullptr, Room* room = nullptr);
+    void load(const char* file,  
+              AAssetManager* assman, 
+              Dude* dude,
+              GlobalItemList* worldItems = nullptr, 
+              Room* room = nullptr
+              );
 #else
-    void load(const char* filename, GlobalItemList* worldItems = nullptr, Room* room = nullptr);
+    void load(const char* filename,
+              Dude* dude,
+              GlobalItemList* worldItems = nullptr,
+              Room* room = nullptr);
 #endif
 
     void        save(const char* file);
@@ -49,6 +59,7 @@ public:
                                    unsigned screenWidth, unsigned screenHeight,
                                    PicsContainer& pics);
     void        addItem(ItemInstance* item);
+    void        addActor(Actor* actor);
     bool        getFurnitureInBBox(DArray<Furniture*>& result, Vector3D bboxPos, Vector3D bboxSize);
     Furniture*  getClickedFurniture(int x, int y,
                                     bool returnIfColidesWithHero);
@@ -61,6 +72,7 @@ public:
     Vector3D*   getAdditionalPathPoints(){return (Vector3D*)addititionalNodePoints.getData();}
     SPolygon*    getPolygonData(){return (SPolygon*)polygons.getData();}
     Vector3D*   getPlayerPos(unsigned index);
+    ActorContainer* getActorContainer(){return actors;}
     int         getRegionCount(){return regions.count();}
     Region*     getRegion(int index){return &regions[index];}
     int         getItemCount(){return items.count();}
@@ -86,8 +98,10 @@ private:
     DArray<ItemContainer*> containers;
     DArray<Furniture*>     furniture;
 
-    DArray<SPolygon>        polygons;
+    DArray<SPolygon>       polygons;
     DArray<Vector3D>       addititionalNodePoints;
+
+    ActorContainer*        actors;
 
     int                    temperature;
     unsigned               polygonsBeforeFurnitureAdded;

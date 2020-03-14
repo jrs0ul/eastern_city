@@ -1,21 +1,59 @@
 #include "ActorContainer.h"
 #include "../MathTools.h"
+#include "actors/Rat.h"
+#include "actors/Ghost.h"
+#include "actors/Bear.h"
+#include <cassert>
 
 void ActorContainer::destroy()
 {
-    for (unsigned i = 0; i < actors.count(); ++i)
+    for (unsigned i = 0; i < actorsToDelete.count(); ++i)
     {
-        if (actors[i]->getType())//don't delete main character
+        if (actorsToDelete[i])
         {
-            delete actors[i];
+            delete actorsToDelete[i];
         }
     }
+   
+    actorsToDelete.destroy();
     actors.destroy();
 }
 
 void ActorContainer::addActor(Actor* actor)
 {
+    assert(actor);
     actors.add(actor);
+}
+
+void ActorContainer::createAndAddActor(Vector3D& pos,
+                                       unsigned type, 
+                                       Room* room, 
+                                       GameMap* map)
+{
+    switch (type)
+    {
+        case 1: {
+                    Rat* rat = new Rat();
+                    rat->init(pos, room, map);
+                    actors.add(rat);
+                    actorsToDelete.add(rat);
+                } break;
+        case 2: {
+                    Ghost* ghost = new Ghost();
+                    ghost->init(pos, room, map);
+                    actors.add(ghost);
+                    actorsToDelete.add(ghost);
+                } break;
+
+        case 3: {
+                    Bear* bear = new Bear();
+                    bear->init(pos, room, map);
+                    actors.add(bear);
+                    actorsToDelete.add(bear);
+                } break;
+        default: break;
+    }
+
 }
 
 void ActorContainer::draw(float offsetX, float offsetY,
@@ -34,7 +72,7 @@ void ActorContainer::draw(float offsetX, float offsetY,
     {
         Drawable* dude = static_cast<Drawable*>(actors[i]);
         
-        if (actors[i]->isDead())
+        if (dude && actors[i]->isDead())
         {
             continue;
         }
@@ -57,6 +95,11 @@ void ActorContainer::draw(float offsetX, float offsetY,
 
         for (int i = 0; i < (int)renderUnits.count(); ++i)
         {
+            if (!renderUnits[i])
+            {
+                continue;
+            }
+
             float currentY = renderUnits[i]->pos.y + renderUnits[i]->collisionBodyOffset.y;
 
             if ( currentY < minY)
@@ -90,6 +133,8 @@ Actor* ActorContainer::getActor(unsigned index)
     {
         return actors[index];
     }
+
+    assert(true);
 
     return nullptr;
 }

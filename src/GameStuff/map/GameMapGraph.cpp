@@ -114,14 +114,14 @@ void GameMapGraph::makeYard(Room* yard, Room* parent, int reachedFrom, iPos yard
 
     if (yards == 1 || yards == 0)
     {
-        yard->addEnemy(Vector3D(400 + 2 * 32, 400 + rand() % 100, 0 ), 3);
+        yard->addConstantEnemy(Vector3D(400 + 2 * 32, 400 + rand() % 100, 0 ), 3);
         printf("Adding a motherf*king BEAR!\n");
     }
     else
     {
         for (int i = 0; i < rand() % 15; ++i)
         {
-            yard->addEnemy(Vector3D(400 + i * 32, 400 + rand() % 100, 0 ), 1);
+            yard->addRespawningEnemy(Vector3D(400 + i * 32, 400 + rand() % 100, 0 ), 1);
         }
     }
 
@@ -578,7 +578,7 @@ void GameMapGraph::generateRoom(Room* floor,
     {
         for (int i = 0; i < rand() % 4; ++i)
         {
-            genericRoom->addEnemy(Vector3D(200 + i * 32, 260 + rand() % 100, 0 ), 1);
+            genericRoom->addConstantEnemy(Vector3D(200 + i * 32, 260 + rand() % 100, 0 ), 1);
         }
     }
 

@@ -1,4 +1,7 @@
 #include "Room.h"
+#include "../actors/Rat.h"
+#include "../actors/Ghost.h"
+#include "../actors/Bear.h"
 
 static int roomCount = 0;
 
@@ -63,13 +66,36 @@ void Room::addItemContainer(unsigned furnitureIndex, ItemContainer& container)
     itemContainers.add(container);
 }
 
-void Room::addEnemy(Vector3D pos, unsigned type)
+void Room::addRespawningEnemy(Vector3D pos, unsigned type)
 {
     EnemyPos enemy;
     enemy.type = type;
     enemy.position = pos;
-    enemies.add(enemy);
+    respawningEnemies.add(enemy);
 }
+
+void Room::addConstantEnemy(Vector3D pos, unsigned type)
+{
+    switch (type)
+    {
+        case 1 : {
+                    Rat* rat = new Rat();
+                    rat->init(pos, nullptr, nullptr);
+                    constantEnemies.add(rat);
+                 } break;
+        case 2 : {
+                    Ghost* ghost = new Ghost();
+                    ghost->init(pos, nullptr, nullptr);
+                    constantEnemies.add(ghost);
+                 } break;
+        case 3 : {
+                    Bear* bear = new Bear();
+                    bear->init(pos, nullptr, nullptr);
+                    constantEnemies.add(bear);
+                 } break;
+    }
+}
+
 
 void Room::addAsset(Vector3D pos, 
                     const char* name, 
@@ -187,9 +213,14 @@ unsigned Room::getItemContainerCount()
     return itemContainers.count();
 }
 
-unsigned Room::getEnemyCount()
+unsigned Room::getRespawningEnemyCount()
 {
-    return enemies.count();
+    return respawningEnemies.count();
+}
+
+unsigned Room::getConstantEnemyCount()
+{
+    return constantEnemies.count();
 }
 
 unsigned Room::getChildRoomCount()
@@ -247,16 +278,25 @@ ItemContainer* Room::getItemContainer(unsigned index)
     return nullptr;
 }
 
-EnemyPos* Room::getEnemyPosition(unsigned index)
+EnemyPos* Room::getRespawningEnemy(unsigned index)
 {
-    if (index < enemies.count())
+    if (index < respawningEnemies.count())
     {
-        return &enemies[index];
+        return &respawningEnemies[index];
     }
 
     return nullptr;
 }
 
+Actor* Room::getConstantEnemy(unsigned index)
+{
+    if (index < constantEnemies.count())
+    {
+        return constantEnemies[index];
+    }
+
+    return nullptr;
+}
 
 RoomAndEntry* Room::getChildRoom(unsigned index)
 {
@@ -409,7 +449,15 @@ void Room::destroy(Room* parent, int level)
 
     childRooms.destroy();
     items.destroy();
-    enemies.destroy();
+    
+    for (unsigned i = 0; i < constantEnemies.count(); ++i)
+    {
+        delete constantEnemies[i];
+    }
+
+    constantEnemies.destroy();
+
+    respawningEnemies.destroy();
     assets.destroy();
     doorHoles.destroy();
 

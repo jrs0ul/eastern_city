@@ -72,7 +72,7 @@ void Rat::init(Vector3D& position, Room* currentRoom, GameMap* currentMap)
     pictureIndex = 1;
 }
 
-void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& actors)
+void Rat::update(float deltaTime, GameMap* map, Actor* dude, ActorContainer* actors)
 {
     if (isDead())
     {
@@ -91,7 +91,7 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
     }
 
 
-    Vector3D dudPos = *dude.getPos();
+    Vector3D dudPos = *(dude->getPos());
     dudPos.y += 39.f;
     Vector3D direction = dudPos - pos;
     direction.normalize();
@@ -141,7 +141,7 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
 
     Vector3D newPos = pos + direction;
 
-    if (!Actor::isColiding(newPos, nullptr, map) && !actors.isColidingWithOthers(this, direction) && !colidesWithHero)
+    if (!Actor::isColiding(newPos, nullptr, *map) && !actors->isColidingWithOthers(this, direction) && !colidesWithHero)
     {
         pos = newPos;
     }
@@ -160,7 +160,7 @@ void Rat::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& acto
                 && animationSubset <= 5 
                 && CollisionCircleCircle(pos.x, pos.y, 8, dudPos.x, dudPos.y, 30))
             {
-                dude.setHealth(dude.getHealth() - 1);
+                dude->setHealth(dude->getHealth() - 1);
             }
             animationFrame = 0;
         }

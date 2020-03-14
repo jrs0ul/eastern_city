@@ -14,7 +14,6 @@ class ProjectileContainer
 public:
     void destroy();
     void update(float deltaTime, 
-                ActorContainer& actors,
                 Room* currentRoom, 
                 GameMap* map);
     void addProjectile(Vector3D origin, Vector3D destination);

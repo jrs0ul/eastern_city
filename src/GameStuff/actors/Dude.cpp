@@ -8,6 +8,7 @@
 #endif
 #include "../../gui/Text.h"
 #include <cmath>
+#include <cassert>
 
 void Dude::draw(float offsetX, float offsetY,
                          int scale,
@@ -160,7 +161,6 @@ void Dude::update(float deltaTime,
                   unsigned char* Keys,
                   GameMap& map,
                   Room* currentRoom,
-                  ActorContainer& actors,
                   float darkness,
                   ItemDatabase& itemdb,
                   CraftingRecipes& recipes,
@@ -228,7 +228,7 @@ void Dude::update(float deltaTime,
     if (!sleeping)
     {
         walkingLogic(deltaTime, useKeys, Keys, map, path);
-        melleeAttacks(actors, map, currentRoom, itemdb, recipes, furnitureDb, Keys, deltaTime);
+        melleeAttacks(map, currentRoom, itemdb, recipes, furnitureDb, Keys, deltaTime);
     }
 
     
@@ -1080,8 +1080,7 @@ void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, Game
     }
 }
 
-void Dude::melleeAttacks(ActorContainer& actors,
-        GameMap& map,
+void Dude::melleeAttacks(GameMap& map,
         Room* currentRoom,
         ItemDatabase& itemdb,
         CraftingRecipes& recipes,
@@ -1110,9 +1109,13 @@ void Dude::melleeAttacks(ActorContainer& actors,
                 animationFrame = 0;
                 doAttack = false;
                 //----------hit rats
-                for (unsigned i = 0; i < actors.getActorCount(); ++i)
+                
+                ActorContainer* actors = map.getActorContainer();
+
+                for (unsigned i = 0; i < actors->getActorCount(); ++i)
                 {
-                    Actor* actor = actors.getActor(i);
+                    Actor* actor = actors->getActor(i);
+                    assert(actor && actors);
 
                     if (actor != this 
                             && !actor->isDead() 

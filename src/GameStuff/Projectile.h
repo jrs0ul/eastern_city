@@ -18,7 +18,6 @@ public:
     void setSource(Vector3D& v);
     void setDestination(Vector3D& dest);
     void update(float deltaTime, 
-                ActorContainer& actors,
                 Room* currentRoom,
                 GameMap* map);
     bool isAlive(){return alive;}

@@ -78,7 +78,7 @@ void Bear::init(Vector3D& position, Room* currentRoom, GameMap* currentMap)
     animations.add(attackSide);
 }
 
-void Bear::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& actors)
+void Bear::update(float deltaTime, GameMap* map, Actor* dude, ActorContainer* actors)
 {
     if (isDead())
     {
@@ -87,7 +87,7 @@ void Bear::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& act
 
     updateDamage(deltaTime);
 
-    Vector3D dudPos = *dude.getPos();
+    Vector3D dudPos = *(dude->getPos());
     dudPos.y += 39.f;
     Vector3D direction = dudPos - pos;
     direction.normalize();
@@ -137,7 +137,7 @@ void Bear::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& act
 
     Vector3D newPos = pos + direction;
     
-     if (!Actor::isColiding(newPos, nullptr, map) && !actors.isColidingWithOthers(this, direction) && !colidesWithHero)
+     if (!Actor::isColiding(newPos, nullptr, *map) && !actors->isColidingWithOthers(this, direction) && !colidesWithHero)
     {
         pos = newPos;
     }
@@ -156,7 +156,7 @@ void Bear::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& act
                 && animationSubset <= 5 
                 && CollisionCircleCircle(pos.x, pos.y, 64, dudPos.x, dudPos.y, 30))
             {
-                dude.setHealth(dude.getHealth() - 20);
+                dude->setHealth(dude->getHealth() - 20);
             }
             animationFrame = 0;
         }
@@ -166,9 +166,9 @@ void Bear::update(float deltaTime, GameMap& map, Dude& dude, ActorContainer& act
     //item pickup
     
 
-     for (int i = 0; i < map.getItemCount(); ++i)
+     for (int i = 0; i < map->getItemCount(); ++i)
     {
-        ItemInstance* itm = map.getItem(i);
+        ItemInstance* itm = map->getItem(i);
 
         if (itm->isRemoved())
         {
