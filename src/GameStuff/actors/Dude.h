@@ -90,13 +90,13 @@ public:
     int           getWarmth(){return warmth;}
     int           getSatiation(){return satiation;}
     int           getWakefullness(){return wakefullness;}
+    Vector3D*     getDirection(){return &direction;}
+    SPolygon*     getCurrentHelperPolygon();
 
     bool          isSleeping(){return sleeping;}
     bool          isSleepAnimationDone(){return sleepAnimationDone;}
 
     virtual int   getType() override {return 0;}
-
-    bool          isColiding(Vector3D newPos, GameMap& map);
 
     void          addItemToInventory(ItemInstance* item, int inventorySlotIndex);
     int           findFreedInventorySlot();
@@ -138,6 +138,7 @@ private:
     ItemContainer        itemBag;
     Vector3D             attackBoxPos;
     Vector3D             attackBoxSize;
+    Vector3D             direction;
     unsigned             pathIndex;
     bool                 playWalkAnimation;
     bool                 walkAnimationDone;

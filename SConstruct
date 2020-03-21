@@ -28,6 +28,7 @@ code = [
         "src/GameStuff/Statistics.cpp",
         "src/GameStuff/Projectile.cpp",
         "src/GameStuff/ProjectileContainer.cpp",
+        "src/GameStuff/Consts.cpp",
         "src/FindPath.cpp",
         "src/MathTools.cpp",
         "src/SDLVideo.cpp",

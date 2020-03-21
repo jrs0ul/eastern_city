@@ -1,5 +1,6 @@
 #include "Dude.h"
 #include "../Statistics.h"
+#include "../Consts.h"
 #include "../FurnitureData.h"
 #include "../../TextureLoader.h"
 #include "../../MathTools.h"
@@ -75,18 +76,30 @@ void Dude::init(Vector3D& position,
     up.frames.add(1);
     up.frames.add(2);
     up.frames.add(1);
+    up.helperPolygon.points.add(Vector3D(0, 0, 0));
+    up.helperPolygon.points.add(Vector3D(-20, 100, 0));
+    up.helperPolygon.points.add(Vector3D(20, 100, 0));
+    up.helperPolygon.points.add(Vector3D(0, 0, 0));
 
     FrameSet down;
     down.frames.add(3);
     down.frames.add(4);
     down.frames.add(5);
     down.frames.add(4);
+    down.helperPolygon.points.add(Vector3D(0, 0, 0));
+    down.helperPolygon.points.add(Vector3D(-20, -80, 0));
+    down.helperPolygon.points.add(Vector3D(20, -80, 0));
+    down.helperPolygon.points.add(Vector3D(0, 0, 0));
 
     FrameSet side;
     side.frames.add(6);
     side.frames.add(7);
     side.frames.add(8);
     side.frames.add(7);
+    side.helperPolygon.points.add(Vector3D(0, 0, 0));
+    side.helperPolygon.points.add(Vector3D(100, 20, 0));
+    side.helperPolygon.points.add(Vector3D(100, -20, 0));
+    side.helperPolygon.points.add(Vector3D(0, 0, 0));
 
     FrameSet sleep;
     sleep.offsetX = -17;
@@ -174,7 +187,7 @@ void Dude::update(float deltaTime,
     }
 
     const bool axeEquiped        = (isWeaponEquiped() == 19 && !sleeping);
-    const bool flashlightEquiped = (isWeaponEquiped() == 12 && !sleeping);
+    const bool flashlightEquiped = (isWeaponEquiped() == Consts::flashLightId && !sleeping);
     const bool slingshotEquiped  = (isWeaponEquiped() == 9 && !sleeping);
 
     equipedWeaponInLastFrame = isWeaponEquiped();
@@ -416,7 +429,7 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
     }
     else if (data->imageIndex == 13) // batteries
     {
-        if (isWeaponEquiped() != -1 && isWeaponEquiped() == 12)
+        if (isWeaponEquiped() != -1 && isWeaponEquiped() == Consts::flashLightId)
         {
             equipedItems.getItem(1)->setAmmoLoaded(1);
             equipedItems.getItem(1)->setQuality(100.f);
@@ -707,6 +720,19 @@ ItemInstance* Dude::getItem(unsigned index)
     return itemBag.getItem(index);
 }
 
+
+SPolygon* Dude::getCurrentHelperPolygon()
+{
+    if (animations[animationSubset].helperPolygon.points.count() > 2)
+    {
+        return &animations[animationSubset].helperPolygon;
+    }
+    else 
+    {
+        return nullptr;
+    }
+}
+
 void Dude::addItemToInventory(ItemInstance* item, int inventorySlotIndex)
 {
     itemBag.addItem(*item, inventorySlotIndex);
@@ -743,17 +769,22 @@ void Dude::addDoubleClickCallbackForItems(void (*func)(ItemInstance*, void**))
 }
 
 
-void Dude::setAnimationSubsetByDirectionVector(Vector3D direction, bool useAxeAnims)
+void Dude::setAnimationSubsetByDirectionVector(Vector3D dir, bool useAxeAnims)
 {
+    if (!(fabs(dir.x) <= 0 && fabs(dir.y) <= 0.f))
+    {
+        direction = dir;
+    }
+
     const bool axeEquiped = (isWeaponEquiped() == 19 && !sleeping);
 
-    if (fabsf(direction.y) > fabsf(direction.x))
+    if (fabsf(dir.y) > fabsf(dir.x))
     {
-        if (direction.y < 0.f)
+        if (dir.y < 0.f)
         {
             animationSubset = (axeEquiped && useAxeAnims) ? 5 : 1;
         }
-        else if (direction.y > 0.f)
+        else if (dir.y > 0.f)
         {
 
             animationSubset = (axeEquiped && useAxeAnims) ? 4 : 0;
@@ -761,14 +792,14 @@ void Dude::setAnimationSubsetByDirectionVector(Vector3D direction, bool useAxeAn
 
     }
 
-    if (fabsf(direction.y) < fabsf(direction.x))
+    if (fabsf(dir.y) < fabsf(dir.x))
     {
-        if (direction.x < 0.f)
+        if (dir.x < 0.f)
         {
             animationSubset = (axeEquiped && useAxeAnims) ? 6 : 2;;
             flipX(false);
         }
-        else if (direction.x > 0.f)
+        else if (dir.x > 0.f)
         {
             animationSubset = (axeEquiped && useAxeAnims) ? 6 : 2;
             flipX(true);
@@ -806,7 +837,7 @@ void Dude::drainBatteries(float deltaTime, ItemDatabase& itemdb)
         ItemInstance* weapon = equipedItems.getItem(1);
         int itemID = weapon->getIndex();
 
-        if (itemID != 12)
+        if (itemID != Consts::flashLightId)
         {
             return; //only works with flashlight
         }
@@ -837,7 +868,7 @@ void Dude::doDarknessEffect(float deltaTime, float darkness)
 
     if (sleeping)
     {
-        wakefullness += deltaTime * 0.6f;
+        wakefullness += deltaTime * 0.65f;
 
         if (wakefullness > 100)
         {
@@ -849,12 +880,10 @@ void Dude::doDarknessEffect(float deltaTime, float darkness)
 
 
     timeAwake += deltaTime;
-    //TODO: use const file
-    const float dayLength = 480.f;
     
-    if (timeAwake > (dayLength / 24) * 4)
+    if (timeAwake > (Consts::dayLength / 24) * 5)
     {
-        darknessProgress += deltaTime;
+        darknessProgress += deltaTime * 0.7f;
 
         if (darknessProgress >= 1.f)
         {
@@ -936,7 +965,7 @@ void Dude::doTemperatureDamage(float deltaTime, int temperature, ItemDatabase& i
 
 void Dude::doHungerDamage(float deltaTime)
 {
-    satiationProgress += deltaTime * 0.5f;
+    satiationProgress += deltaTime * 0.6f;
 
     if (satiationProgress >= 1.f)
     {
@@ -1038,6 +1067,7 @@ void Dude::walkingLogic(float deltaTime, bool useKeys, unsigned char* Keys, Game
     }
 
     setAnimationSubsetByDirectionVector(shift);
+
 
     Vector3D newPos = pos + shift;
 

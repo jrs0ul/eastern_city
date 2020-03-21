@@ -1,4 +1,5 @@
 #include "GameMapGraph.h"
+#include "../Consts.h"
 
 
 static int yards = 0;
@@ -64,6 +65,7 @@ void GameMapGraph::makeYard(Room* yard, Room* parent, int reachedFrom, iPos yard
     //printf("YARD %d, located at (%d %d)\n", yards, yardPos.x, yardPos.y);
     yardPos.room = yard;
     yardPositions.add(yardPos);
+    int addedPosIndex = (int)yardPositions.count() - 1;
 
 
     int entriesInThisYard = rand() % 2 + 1;
@@ -135,11 +137,13 @@ void GameMapGraph::makeYard(Room* yard, Room* parent, int reachedFrom, iPos yard
                 yard->addChildRoom("data/out.xml", 3, 0);
                 addTunnelFront(yard);
                 makeYard(yard->getChildRoom(0)->room, yard, 0, iPos(yardPos.x, yardPos.y - 1));
+                yardPositions[addedPosIndex].yardEntrances[FRONT_ENTRANCE] = yard->getChildRoom(0)->room;
             }
             else
             {
                 addFrontBuidingDoor(yard);
-                addBuilding(yard, 0);
+                yardPositions[addedPosIndex].buildingEntrances[FRONT_ENTRANCE] = addBuilding(yard, 0);
+
             }
 
         }
@@ -157,15 +161,15 @@ void GameMapGraph::makeYard(Room* yard, Room* parent, int reachedFrom, iPos yard
         {
             addTunnelLeft(yard);
             yard->addChildRoom("data/out.xml", 2, 1);
-
             makeYard(yard->getChildRoom(1)->room, yard, 1, iPos(yardPos.x - 1, yardPos.y));
+            yardPositions[addedPosIndex].yardEntrances[LEFT_ENTRANCE] = yard->getChildRoom(1)->room;
 
 
         }
         else
         {
             addLeftBuildingDoor(yard);
-            addBuilding(yard, 1);
+            yardPositions[addedPosIndex].buildingEntrances[LEFT_ENTRANCE] = addBuilding(yard, 1);
         }
     }
     else
@@ -182,11 +186,12 @@ void GameMapGraph::makeYard(Room* yard, Room* parent, int reachedFrom, iPos yard
             addTunnelRight(yard);
             yard->addChildRoom("data/out.xml", 1, 2);
             makeYard(yard->getChildRoom(2)->room, yard, 2, iPos(yardPos.x + 1, yardPos.y));
+            yardPositions[addedPosIndex].yardEntrances[RIGHT_ENTRANCE] = yard->getChildRoom(2)->room;
         }
         else
         {
             addRightBuildingDoor(yard);
-            addBuilding(yard,2);
+            yardPositions[addedPosIndex].buildingEntrances[RIGHT_ENTRANCE] = addBuilding(yard,2);
         }
 
     }
@@ -204,6 +209,7 @@ void GameMapGraph::makeYard(Room* yard, Room* parent, int reachedFrom, iPos yard
             addTunnelBottom(yard);
             yard->addChildRoom("data/out.xml", 0, 3);
             makeYard(yard->getChildRoom(3)->room, yard, 3, iPos(yardPos.x, yardPos.y + 1));
+            yardPositions[addedPosIndex].yardEntrances[BOTTOM_ENTRANCE] = yard->getChildRoom(3)->room;
         }
 
     }
@@ -250,6 +256,8 @@ bool GameMapGraph::isYardPositionTaken(iPos pos)
 
 void GameMapGraph::drawYardMap(float x, float y, PicsContainer& pics, Room* currentRoom)
 {
+    const float squareSize = 20.f;
+    COLOR yardColor = COLOR(0.f, 0.f, 0.3f, 0.5f);
     
     for (unsigned i = 0; i < yardPositions.count(); ++i)
     {
@@ -261,12 +269,91 @@ void GameMapGraph::drawYardMap(float x, float y, PicsContainer& pics, Room* curr
             }
 
             continue;
+
         }
 
-        COLOR roomColor = (currentRoom == yardPositions[i].room) ? COLOR(1,0,0, 0.6f) : COLOR(1,1,1,0.8f);
-        pics.draw(-1, x + firstPointX * 16 + yardPositions[i].x * 16 ,
-                      y + firstPointY * 16 + yardPositions[i].y * 16, 0, false, 16.f, 16.f, 0.f,
+        COLOR roomColor = (currentRoom == yardPositions[i].room) ? COLOR(1,0,0, 0.6f) : yardColor;
+        pics.draw(-1, x + firstPointX * squareSize + yardPositions[i].x * squareSize ,
+                      y + firstPointY * squareSize + yardPositions[i].y * squareSize, 0, false, 16.f, 16.f, 0.f,
                   roomColor, roomColor);
+
+        for (unsigned j = 0; j < COUNT_ENTRANCE; ++j)
+        {
+            if (yardPositions[i].yardEntrances[j])
+            { 
+                float yardEntrancePosX = 6.f;
+                float yardEntrancePosY = -4.f;
+
+                if (j == BOTTOM_ENTRANCE)
+                {
+                    yardEntrancePosX = 6.f;
+                    yardEntrancePosY = 16.f;
+                }
+                else if (j == RIGHT_ENTRANCE)
+                {
+                    yardEntrancePosX = 16.f;
+                    yardEntrancePosY = 6.f;
+                }
+                else if (j == LEFT_ENTRANCE)
+                {
+                    yardEntrancePosX = -4.f;
+                    yardEntrancePosY = 6.f;
+                }
+
+                pics.draw(-1, 
+                      x + firstPointX * squareSize + yardPositions[i].x * squareSize + yardEntrancePosX,
+                      y + firstPointY * squareSize + yardPositions[i].y * squareSize + yardEntrancePosY,
+                      0,
+                      false,
+                      4.f,
+                      4.f, 0.f,
+                  yardColor, yardColor);
+            }
+
+            if (j == BOTTOM_ENTRANCE || yardPositions[i].buildingEntrances[j] == nullptr)
+            {
+                continue;
+            }
+            
+            COLOR buildingEntranceColor = COLOR(1.f, 1.f, 1.f, 0.85f);
+            COLOR buildingEntranceColorVisited = COLOR(0.7f, 0.7f, 0.85f, 0.85f);
+
+            
+            if (currentRoom == yardPositions[i].buildingEntrances[j])
+            {
+                yardPositions[i].visitedBuildingEntrances[j] = true;
+            }
+
+
+            float buildingEntrancePosX = 6.f;
+            float buildingEntrancePosY = 0.f;
+
+            if (j == RIGHT_ENTRANCE)
+            {
+                buildingEntrancePosX = 12.f;
+                buildingEntrancePosY = 6.f;
+            }
+            else if (j == LEFT_ENTRANCE)
+            {
+                buildingEntrancePosX = 0.f;
+                buildingEntrancePosY = 6.f;
+            }
+
+            COLOR* entranceColor = (yardPositions[i].visitedBuildingEntrances[j])? 
+                                    &buildingEntranceColorVisited :
+                                    &buildingEntranceColor;
+
+            pics.draw(-1, 
+                      x + firstPointX * squareSize + yardPositions[i].x * squareSize + buildingEntrancePosX,
+                      y + firstPointY * squareSize + yardPositions[i].y * squareSize + buildingEntrancePosY,
+                      0,
+                      false,
+                      4.f,
+                      4.f, 0.f,
+                  *entranceColor, *entranceColor);
+
+        }
+
     }
 }
 
@@ -481,7 +568,7 @@ void GameMapGraph::addRightBuildingDoor(Room* room)
 }
 
 
-void GameMapGraph::addBuilding(Room* outside, unsigned regionIndex)
+Room* GameMapGraph::addBuilding(Room* outside, unsigned regionIndex)
 {
     outside->addChildRoom("data/stairwell2.xml", 0, regionIndex);
 
@@ -493,6 +580,7 @@ void GameMapGraph::addBuilding(Room* outside, unsigned regionIndex)
     building->addAsset(Vector3D(462, 104, 0), "pics/test.tga", 18);
     addFloors(building, 1);
     addDoorway(building, 672, 115, 2, 0, 2, 20, nullptr, 4);
+    return building;
 }
 
 void GameMapGraph::addStairsUp(Room* stairwell)
@@ -647,7 +735,7 @@ void GameMapGraph::addWardrobe(Room* room)
     wardrobe.addItem(itemArray[rand() % 9]);
     wardrobe.addItem(itemArray[rand() % 9]);
     wardrobe.addItem(itemArray[rand() % 9]);
-    wardrobe.addItem(12);
+    wardrobe.addItem(Consts::flashLightId);
     wardrobe.addItem(13);
     wardrobe.addItem(2);
     wardrobe.addItem(19);

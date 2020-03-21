@@ -45,15 +45,13 @@ const float posX = 45;
 const float posY = 5;
 const float fieldWidth = 3.f;
 const float fieldHeight = 2.f;
-const float dayLength = 480.f;
 
 
 enum GameModes
 {
     TITLE,
     GAME,
-    DEFEAT,
-    EDITING
+    DEFEAT
 };
 
 enum GameStates
@@ -179,14 +177,12 @@ private:
 
     //scenes rendering
     void renderGame();
-    void renderEditing();
     void renderTitle();
     void renderDefeat();
 
     //scenes logic
     void gameLogic();
     void updateWorld(float deltaTime);
-    void editingLogic();
     void titleLogic();
     void defeatLogic();
     //------------------

@@ -7,12 +7,23 @@
 
 struct RoomAndEntry;
 
+enum EntranceEnum
+{
+    FRONT_ENTRANCE = 0,
+    LEFT_ENTRANCE,
+    RIGHT_ENTRANCE,
+    BOTTOM_ENTRANCE,
+    COUNT_ENTRANCE
+};
 
 struct iPos
 {
     int x;
     int y;
     Room* room;
+    Room* buildingEntrances[COUNT_ENTRANCE];
+    Room* yardEntrances[COUNT_ENTRANCE];
+    bool visitedBuildingEntrances[COUNT_ENTRANCE];
     bool visited;
 
     iPos(int nx, int ny)
@@ -20,7 +31,14 @@ struct iPos
     , y(ny)
     , room(nullptr)
     , visited(false)
-    {}
+    {
+        for (int i = 0; i < COUNT_ENTRANCE; ++i)
+        {
+            buildingEntrances[i] = nullptr;
+            visitedBuildingEntrances[i] = false;
+            yardEntrances[i] = nullptr;
+        }
+    }
 };
 
 class GameMapGraph
@@ -49,7 +67,7 @@ public:
     void addLeftBuildingDoor(Room* room);
     void addRightBuildingDoor(Room* room);
 
-    void addBuilding(Room* outside, unsigned regionIndex);
+    Room* addBuilding(Room* outside, unsigned regionIndex);
 
     void addStairsUp(Room* stairwell);
     void addStairsOutside(Room* stairwell);

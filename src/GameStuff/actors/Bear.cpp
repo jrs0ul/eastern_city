@@ -11,7 +11,7 @@ void Bear::init(Vector3D& position, Room* currentRoom, GameMap* currentMap)
     collisionBodyRadius = 32;
     collisionBodyOffset = Vector3D(0, 28, 0);
     animationProgress = 0.f;
-    health = 100;
+    health = 120;
 
     loot.add(24);
     loot.add(24);

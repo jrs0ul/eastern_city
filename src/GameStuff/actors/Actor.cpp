@@ -42,11 +42,11 @@ void Actor::destroy()
     
 void Actor::dropLoot(Room* room, GameMap* map)
 {
-    assert(room && map);
 
     printf("Dropping LOOT:\n");
     for (unsigned i = 0; i < loot.count(); ++i)
     {
+        assert(room && map);
         printf("item %d\n", loot[i]);
         room->addItem(Vector3D(pos.x + rand() % 10, pos.y + rand() % 10, 0), loot[i]);
         map->addItem(room->getItem(room->getItemCount() - 1));

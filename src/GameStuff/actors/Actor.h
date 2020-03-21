@@ -15,6 +15,7 @@ struct FrameSet
 {
     DArray<int> frames;
     BoundingBox targetingBox;
+    SPolygon    helperPolygon;
     float offsetX;
     float offsetY;
     FrameSet()

@@ -2,6 +2,7 @@
 #include <cwchar>
 #include <cmath>
 #include "Game.h"
+#include "GameStuff/Consts.h"
 #include "GameStuff/actors/Ghost.h"
 #include "GameStuff/actors/Bear.h"
 
@@ -241,7 +242,7 @@ void Game::logic(){
 //-------------------------
 void Game::destroy(){
 
-    Statistics::getInstance()->send(days * dayLength + worldTime - ((dayLength / 24) * 10), time(0) - sessionStarted, true, statsPostRequest);
+    Statistics::getInstance()->send(days * Consts::dayLength + worldTime - ((Consts::dayLength / 24) * 10), time(0) - sessionStarted, true, statsPostRequest);
     sendStats = true;
 
     glDeleteFramebuffers(1, &fbo);
@@ -302,6 +303,8 @@ void Game::renderGame()
     map.drawFrontLayerAssets(mapPosX, mapPosY, scale, *dude.getPos(), pics);
     map.drawDarknessBorder(mapPosX, mapPosY, scale, ScreenWidth, ScreenHeight, pics);
 
+    drawDarkness(scale);
+
     if (DebugMode)
     {
         pics.drawBatch(&colorShader, &defaultShader, 666);
@@ -351,11 +354,25 @@ void Game::renderGame()
         pp.points.destroy();
 
 
+        SPolygon* flashlightPoly = dude.getCurrentHelperPolygon();
+
+        if (flashlightPoly)
+        {
+            for (unsigned i = 0; i < flashlightPoly->points.count(); ++i)
+            {
+                Vector3D* p = &(flashlightPoly->points[i]);
+                pp.points.add(Vector3D(dude.getPos()->x + p->x * (dude.isFlipedX() ? 1 : -1),
+                                       dude.getPos()->y + p->y, 0));
+            }
+
+            drawPolygon(&pp, scale, colorShader, GL_LINE_STRIP, COLOR(1, 0, 1, 1));
+            pp.points.destroy();
+        }
+
         
         glEnable(GL_TEXTURE_2D);
     }
 
-    drawDarkness(scale);
 
     if (stateInTheGame != GAMEPLAY)
     {
@@ -365,7 +382,7 @@ void Game::renderGame()
                   );
     }
 
-    mapGraph.drawYardMap(ScreenWidth - (yardMapWidth + 2) * 16,
+    mapGraph.drawYardMap(ScreenWidth - (yardMapWidth + 2) * 18,
                          64,
                          pics, currentRoom);
     
@@ -406,7 +423,7 @@ void Game::renderGame()
 
     sprintf(buf, "Temperature:%d", map.getTemperature());
     WriteText(ScreenWidth - (scale * 150), 2 * scale, pics, 0, buf, 0.8f * scale, 0.8f * scale);
-    sprintf(buf, "Day %d %dh", days, (int)(worldTime / (dayLength / 24)));
+    sprintf(buf, "Day %d %dh", days, (int)(worldTime / (Consts::dayLength / 24)));
     WriteText(ScreenWidth - (150 * scale), 20 * scale, pics, 0, buf, 0.8f * scale, 0.8f * scale);
 
     int weaponEquiped = dude.isWeaponEquiped();
@@ -417,11 +434,6 @@ void Game::renderGame()
 #ifndef __ANDROID__
     pics.draw(31, MouseX, MouseY, (isSlingShot) ? 1 : 0, isSlingShot, scale, scale); 
 #endif
-}
-
-void Game::renderEditing()
-{
-    map.draw(mapPosX, mapPosY, 2, ScreenWidth, ScreenHeight, pics, itemDB, DebugMode);
 }
 
 void Game::renderTitle()
@@ -445,11 +457,11 @@ void Game::renderDefeat()
     
     char buf[255];
 
-    float totalTime = days * dayLength + worldTime - ((dayLength / 24) * 10);
+    float totalTime = days * Consts::dayLength + worldTime - ((Consts::dayLength / 24) * 10);
 
-    int survivedDays = totalTime / dayLength;
+    int survivedDays = totalTime / Consts::dayLength;
 
-    sprintf(buf, "You have survived for %d days %d hours", survivedDays, (int)((totalTime - (survivedDays * dayLength)) / (dayLength / 24)));
+    sprintf(buf, "You have survived for %d days %d hours", survivedDays, (int)((totalTime - (survivedDays * Consts::dayLength)) / (Consts::dayLength / 24)));
     WriteText(ScreenWidth/2.f - 120 * pixelArtScale, 100 * pixelArtScale, pics, 0, buf, pixelArtScale, pixelArtScale);
 
 #ifndef __ANDROID__
@@ -507,13 +519,13 @@ void Game::gameLogic()
                 {
                     stateInTheGame = FADEIN;
                     printf("WELCOME TO THE WORLD OF TOMOROW!\n");
-                    updateWorld(dayLength/24 * 6);
+                    updateWorld(Consts::dayLength/24 * 6);
                     calcDarknessValue();
                     dude.stopSleep();
 
                     if (darkness > 0.6f)
                     {
-                        currentRoom->addConstantEnemy(Vector3D(371, 170, 0), 2);
+                        currentRoom->addConstantEnemy(Vector3D(371, 187, 0), 2);
                         map.addActor(currentRoom->getConstantEnemy(currentRoom->getConstantEnemyCount() - 1));
                     }
 
@@ -703,7 +715,7 @@ void Game::gameLogic()
     if (dude.getHealth() <= 0)
     {
         gameMode = DEFEAT;
-        Statistics::getInstance()->send(days * dayLength + worldTime - (dayLength / 24) * 10,
+        Statistics::getInstance()->send(days * Consts::dayLength + worldTime - (Consts::dayLength / 24) * 10,
                                         time(0) - sessionStarted, false, statsPostRequest);
         sendStats = true;
         Statistics::getInstance()->reset();
@@ -715,55 +727,16 @@ void Game::updateWorld(float deltaT)
 {
     worldTime += deltaT;
 
-    if (worldTime >= dayLength)
+    if (worldTime >= Consts::dayLength)
     {
-        int daysPassed = worldTime / dayLength;
+        int daysPassed = worldTime / Consts::dayLength;
         days += daysPassed;
-        worldTime = (worldTime - daysPassed * dayLength);
+        worldTime = (worldTime - daysPassed * Consts::dayLength);
     }
     
     dude.update(deltaT, Keys, map, currentRoom, darkness, itemDB, recipes, furnitureDB, path);
     projectiles.update(deltaT, currentRoom, &map); 
     map.update(DeltaTime, &dude, pics);
-}
-
-void Game::editingLogic()
-{
-    if (touches.down.count())
-    {
-        
-    }
-    else if (touches.move.count())
-    {
-      
-    }
-
-    if (Keys[0])
-    {
-        mapPosY += 4;
-    }
-
-    if (Keys[1])
-    {
-        mapPosY -= 4;
-    }
-
-    if (Keys[2])
-    {
-        mapPosX += 4;
-    }
-
-    if (Keys[3])
-    {
-        mapPosX -= 4;
-    }
-
-    if (OldKeys[5] && !Keys[5])
-    {
-        printf("SAVING %s...\n", fileName);
-        map.save(fileName);
-    }
-
 }
 
 void Game::titleLogic()
@@ -800,7 +773,7 @@ void Game::titleLogic()
         itemSelected = false;
         selectedItemPos = Vector3D(0,0,0);
         activeContainer = nullptr;
-        worldTime = dayLength/24 * 10;
+        worldTime = Consts::dayLength/24 * 10;
         days = 0;
         clickOnItem = -1;
         stateInTheGame = FADEIN;
@@ -949,7 +922,7 @@ void Game::drawDarkness(int scale)
               COLOR(1,1,1,0.6f));
 
 
-    if (dude.isWeaponEquiped() == 12 && dude.getAmmoInWeaponCount()) //flashlight equiped
+    if (dude.isWeaponEquiped() == Consts::flashLightId && dude.getAmmoInWeaponCount()) //flashlight equiped
     {
 
         if (dude.getAnimationSubset() == 0)
@@ -1049,9 +1022,9 @@ void Game::drawDarkness(int scale)
 
 void Game::calcDarknessValue()
 {
-    float sixOClock = dayLength/24 * 6;
-    float eightOClock = dayLength/24 * 20;
-    float daylightDuration = dayLength/24 * 14;
+    float sixOClock = Consts::dayLength/24 * 6;
+    float eightOClock = Consts::dayLength/24 * 20;
+    float daylightDuration = Consts::dayLength/24 * 14;
     darkness = (worldTime >= sixOClock && worldTime < eightOClock) ? 1.f - sinf(((worldTime - sixOClock) / daylightDuration) * M_PI) : 1.f;
 }
 
@@ -1316,7 +1289,6 @@ void Game::GameLoop(){
         case GAME    : gameLogic(); break;
         case TITLE   : titleLogic(); break;
         case DEFEAT  : defeatLogic(); break;
-        case EDITING : editingLogic(); break;
     }
 }
 
@@ -1329,7 +1301,6 @@ void Game::Render2D()
         case GAME    : renderGame(); break;
         case TITLE   : renderTitle(); break;
         case DEFEAT  : renderDefeat(); break;
-        case EDITING : renderEditing(); break;
     }
 }
 

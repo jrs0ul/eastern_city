@@ -69,8 +69,8 @@ void Logic(){
 static void  process_events(){
     
     SDL_Event event;
-    float scaleX = 1.f;//850.f/Game.ScreenWidth;
-    float scaleY = 1.f;//480.f/Game.ScreenHeight;
+    float scaleX = 1.f;
+    float scaleY = 1.f;
 
     while( SDL_PollEvent( &event ) ) {
 
@@ -119,8 +119,8 @@ static void  process_events(){
 //--------------------
 void CheckKeys()
 {
-    float scaleX = 1.f;//850.0f/Game.ScreenWidth;
-    float scaleY = 1.f;//480.0f/Game.ScreenHeight;
+    float scaleX = 1.f;
+    float scaleY = 1.f;
     
     int JoyNum = 0;
     
@@ -255,15 +255,6 @@ int main( int   argc, char *argv[] ){
     if (!SDL.InitWindow(title, "icon.bmp", Game.windowed)){
         Game.Works = false;
     }
-
-    if (argc > 1)
-    {
-        strcpy(Game.fileName, argv[1]);
-        Game.gameMode = EDITING;
-        printf("Entering edit mode\n");
-    }
-    
-
 
     SDL_InitSubSystem(SDL_INIT_JOYSTICK);
     if(SDL_NumJoysticks() > 0)

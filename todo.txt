@@ -22,8 +22,6 @@
 * When you start dragging an item from a container, you should set item as removed in the container
 * BUG: Destroyed furniture clones items that were inside of it.
 * make an electricity generator powered by rats or mice
-* mark visited building entrances on the mini map
-* Remove editing mode
 * maybe replace the equiped item's quality numbers with a progress bar?
 * Bear roars when sees a player
 * Investigate forward declarations
