@@ -7,6 +7,7 @@
  */
 
 #include "SDLVideo.h"
+#include <cstdio>
 
 bool SDLVideo::InitWindow(const char * title, const char * iconPath,
                           bool isWindowed, bool resizable){
@@ -32,7 +33,6 @@ bool SDLVideo::InitWindow(const char * title, const char * iconPath,
 
     if (!isWindowed){
         _flags = _flags |SDL_WINDOW_FULLSCREEN;
-        puts("lolscreen");
     }
 
     icon = SDL_LoadBMP(iconPath);

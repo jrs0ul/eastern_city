@@ -9,7 +9,7 @@
 #ifndef _SDL_VIDEO_WRAP_H
 #define _SDL_VIDEO_WRAP_H
 
-#ifdef WIN32
+#ifdef _WIN32
     #ifdef _MSC_VER
         #include <SDL.h>
     #else

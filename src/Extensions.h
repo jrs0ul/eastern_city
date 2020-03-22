@@ -4,7 +4,7 @@
 #ifndef GL_EXTENSIONS_H_
 #define GL_EXTENSIONS_H_
 
-#ifdef WIN32
+#ifdef _WIN32
     #ifdef _MSC_VER
         #include <SDL.h>
         #include <SDL_opengl.h>

@@ -9,7 +9,7 @@
 #define _UTILS_H
 
 
-#ifdef WIN32
+#ifdef _WIN32
     #include <windows.h>
 #else
 #ifndef __ANDROID__

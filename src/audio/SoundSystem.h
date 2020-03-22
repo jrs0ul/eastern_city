@@ -20,7 +20,7 @@
 #ifndef SOUND_SYSTEM_H
 #define SOUND_SYSTEM_H
 
-#ifdef WIN32
+#ifdef _WIN32
     #ifdef _MSC_VER
         #include <alc.h>
         #include <al.h>

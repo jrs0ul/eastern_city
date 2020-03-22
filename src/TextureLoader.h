@@ -8,7 +8,7 @@
 #ifndef TEXTURE_LOADER_H
 #define TEXTURE_LOADER_H
 
-#ifdef WIN32
+#ifdef _WIN32
     #ifdef _MSC_VER
         #include <SDL_opengl.h>
     #else

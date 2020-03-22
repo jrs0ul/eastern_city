@@ -3,6 +3,7 @@
 */
 
 #include "ShaderProgram.h"
+#include <cstdio>
 
 #ifdef __ANDROID__
 #include <android/log.h>

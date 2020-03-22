@@ -1,20 +1,26 @@
-#ifdef WIN32
+#ifdef _WIN32
     #ifdef  _MSC_VER
         #define _CRT_SECURE_NO_DEPRECATE 1
-        #pragma comment(lib,"SDL.lib")
-        #pragma comment(lib,"SDLmain.lib")
+        #define CURL_STATICLIB
+        #pragma comment(lib,"SDL2.lib")
+        #pragma comment(lib,"SDL2main.lib")
         #pragma comment(lib,"OpenGl32.lib")
-        #pragma comment(lib,"GLU32.lib")
+        //#pragma comment(lib,"GLU32.lib")
         #pragma comment(lib,"openal32.lib")
+        #pragma comment(lib,"libcurl_a.lib")
+        #pragma comment(lib,"Ws2_32.lib") 
+        #pragma comment(lib,"Crypt32.lib")
+        #pragma comment(lib,"Wldap32.lib")
+        #pragma comment(lib,"Normaliz.lib")
 
         #ifdef _DEBUG
-            #pragma comment(lib,"ogg_d.lib")
-            #pragma comment(lib,"vorbis_d.lib")
-            #pragma comment(lib,"vorbisfile_d.lib")
+            #pragma comment(lib,"libogg_d.lib")
+            #pragma comment(lib,"libvorbis_d.lib")
+            #pragma comment(lib,"libvorbisfile_d.lib")
         #else
-            #pragma comment(lib,"ogg.lib")
-            #pragma comment(lib,"vorbis.lib")
-            #pragma comment(lib,"vorbisfile.lib")
+            #pragma comment(lib,"libogg.lib")
+            #pragma comment(lib,"libvorbis.lib")
+            #pragma comment(lib,"libvorbisfile.lib")
         #endif
     #endif
 #endif

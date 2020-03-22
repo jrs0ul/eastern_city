@@ -21,7 +21,7 @@
 #define __ogg_h__
 
 
-#ifdef WIN32
+#ifdef _WIN32
     #ifdef _MSC_VER
         #include <al.h>
     #else
