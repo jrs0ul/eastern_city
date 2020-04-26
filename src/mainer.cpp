@@ -29,7 +29,6 @@
 
 #include <ctime>
 #include "Game.h"
-#include "Threads.h"
 #include "SDLVideo.h"
 #include "OSTools.h"
 #ifdef __APPLE__
@@ -39,6 +38,7 @@
 #endif
 #include <curl/curl.h>
 #include <string>
+#include <thread>
 
 
 SDLVideo SDL;
@@ -195,7 +195,7 @@ static int writer(char *data, size_t size, size_t nmemb,
         return result;
 }
 
-THREADFUNC sendStats(void * args){
+void sendStats(){
 
     CURLcode result;
     CURL * cu = 0;
@@ -224,13 +224,13 @@ THREADFUNC sendStats(void * args){
 
     if (cu)
     {
+        printf("data sent\n");
         curl_easy_cleanup(cu);
     }
 
-    return 0;
 }
 //--------------------
-int main( int   argc, char *argv[] ){
+int main(){
 
     srand(time(0));
 
@@ -302,8 +302,8 @@ int main( int   argc, char *argv[] ){
 
         if (Game.sendStats)
         {
-            Thread t;
-            t.create(&sendStats, 0);
+            std::thread t(&sendStats);
+            t.detach();
             Game.sendStats = false;
         }
 
@@ -315,7 +315,8 @@ int main( int   argc, char *argv[] ){
 
     if (Game.sendStats)
     {
-        sendStats(nullptr);
+        std::thread t(&sendStats);
+        t.join();
     }
 
 

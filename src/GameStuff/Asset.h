@@ -1,6 +1,8 @@
 #ifndef ASSET_H
 #define ASSET_H
 
+#include "../Vectors.h"
+
 struct Asset
 {
     char name[256];

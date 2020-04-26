@@ -2,14 +2,16 @@
 #define DUDE_H
 
 #include "Actor.h"
-#include "../../Vectors.h"
-#include "../../TextureLoader.h"
-#include "../ActorContainer.h"
-#include "../../FindPath.h"
-#include "../map/GameMap.h"
-#include "../FurnitureData.h"
-#include "../CraftingRecipes.h"
-#include "../ItemInstance.h"
+
+class  FindPath;
+class  CraftingRecipes;
+struct Recipe;
+class  FurnitureDatabase;
+class  ItemDatabase;
+class  ItemInstance;
+struct TouchData;
+class  ItemContainer;
+class  Furniture;
 
 class Dude : public Actor
 {
@@ -29,6 +31,8 @@ class Dude : public Actor
 
 
 public:
+
+    Dude() : itemBag(nullptr), equipedItems(nullptr){}
 
     void          draw(float offsetX, float offsetY,
                          int scale,
@@ -84,7 +88,7 @@ public:
     int           getAmmoInWeaponCount();
     int           getItemCountByTypeIndex(int index);
 
-    unsigned      getItemCount(){return itemBag.getItemCount();}
+    unsigned      getItemCount();
     ItemInstance* getItem(unsigned index);
 
     int           getWarmth(){return warmth;}
@@ -135,7 +139,7 @@ private:
     void onWeaponUnequip();
 
 private:
-    ItemContainer        itemBag;
+    ItemContainer*       itemBag;
     Vector3D             attackBoxPos;
     Vector3D             attackBoxSize;
     Vector3D             direction;
@@ -150,7 +154,7 @@ private:
     float                darknessProgress;
     float                timeAwake;
 
-    ItemContainer        equipedItems;
+    ItemContainer*       equipedItems;
 
     int                  satiation;
     float                wakefullness;

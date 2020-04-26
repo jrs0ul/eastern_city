@@ -2,8 +2,8 @@
 #define ACTOR_H
 
 #include "../Drawable.h"
-#include "../map/GameMap.h"
 #include "../../Vectors.h"
+#include "../Polygon.h"
 
 struct BoundingBox
 {

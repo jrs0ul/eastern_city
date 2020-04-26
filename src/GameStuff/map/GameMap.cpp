@@ -6,6 +6,7 @@
 #include "../actors/Rat.h"
 #include "../actors/Ghost.h"
 #include "../actors/Bear.h"
+#include "Room.h"
 #include <cwchar>
 #include <cassert>
 

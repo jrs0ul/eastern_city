@@ -2,8 +2,8 @@
 #define RAT_H
 
 #include "Actor.h"
-#include "Dude.h"
-#include "../ActorContainer.h"
+
+class ActorContainer;
 
 class Rat : public Actor
 {

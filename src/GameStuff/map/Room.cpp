@@ -2,6 +2,7 @@
 #include "../actors/Rat.h"
 #include "../actors/Ghost.h"
 #include "../actors/Bear.h"
+#include "../Furniture.h"
 
 static int roomCount = 0;
 

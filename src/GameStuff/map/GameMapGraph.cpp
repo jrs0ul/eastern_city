@@ -1,4 +1,7 @@
 #include "GameMapGraph.h"
+#include "Room.h"
+#include "../FurnitureData.h"
+#include "../Furniture.h"
 #include "../Consts.h"
 
 

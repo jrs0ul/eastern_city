@@ -2,11 +2,20 @@
 #include "../Statistics.h"
 #include "../Consts.h"
 #include "../FurnitureData.h"
+#include "../../FindPath.h"
 #include "../../TextureLoader.h"
+#include "../map/GameMap.h"
+#include "../map/Room.h"
 #include "../../MathTools.h"
+#include "../CraftingRecipes.h"
+#include "../FurnitureData.h"
+#include "../../TextureLoader.h"
+#include "../ActorContainer.h"
+
 #ifndef __ANDROID__
-    #include "../../audio/SoundSystem.h"
+#include "../../audio/SoundSystem.h"
 #endif
+
 #include "../../gui/Text.h"
 #include <cmath>
 #include <cassert>
@@ -54,10 +63,25 @@ void Dude::init(Vector3D& position,
     walkAnimationDone = true;
     sleeping = false;
     sleepAnimationDone = true;
-    itemBag.init(10, 10);
-    itemBag.setPosition(Vector3D(100 * scale, ScreenHeight - (32 + 3) * scale, 0));
-    equipedItems.init(2, 2);
-    equipedItems.setPosition(Vector3D(ScreenWidth - (3 * 32) * scale, ScreenHeight - (32 + 3) * scale, 0));
+
+    if (itemBag)
+    {
+        delete itemBag;
+    }
+
+    itemBag = new ItemContainer();
+
+    if (equipedItems)
+    {
+        delete equipedItems;
+    }
+
+    equipedItems = new ItemContainer();
+
+    itemBag->init(10, 10);
+    itemBag->setPosition(Vector3D(100 * scale, ScreenHeight - (32 + 3) * scale, 0));
+    equipedItems->init(2, 2);
+    equipedItems->setPosition(Vector3D(ScreenWidth - (3 * 32) * scale, ScreenHeight - (32 + 3) * scale, 0));
     satiationProgress = 0.f;
     freezingProgress = 0.f;
     satiation = 100;
@@ -165,8 +189,12 @@ void Dude::init(Vector3D& position,
 
 void Dude::destroy()
 {
-    itemBag.destroy();
-    equipedItems.destroy();
+    itemBag->destroy();
+    delete itemBag;
+    itemBag = nullptr;
+    equipedItems->destroy();
+    delete equipedItems;
+    equipedItems = nullptr;
     Actor::destroy();
 }
 
@@ -306,19 +334,19 @@ void Dude::drawInventory(PicsContainer& pics,
                          ItemInstance* selectedItem,
                          int scale)
 {
-    itemBag.draw(pics, itemDb, selectedItem, scale, false);
-    equipedItems.draw(pics, itemDb, selectedItem, scale, true);
+    itemBag->draw(pics, itemDb, selectedItem, scale, false);
+    equipedItems->draw(pics, itemDb, selectedItem, scale, true);
 }
 
 
 int Dude::hasItem(unsigned itemId)
 {
-    return itemBag.hasItem(itemId);
+    return itemBag->hasItem(itemId);
 }
 
 void Dude::removeItem(unsigned index)
 {
-    ItemInstance* itm = itemBag.getItem(index);
+    ItemInstance* itm = itemBag->getItem(index);
 
     if (itm)
     {
@@ -373,7 +401,7 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
         {
             if (isClothesEquiped() != -1)
             {
-                float quality = equipedItems.getItem(0)->getQuality();
+                float quality = equipedItems->getItem(0)->getQuality();
                 quality += data->clothingQualityIncrease;
 
                 if (quality > 100.f)
@@ -381,7 +409,7 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
                     quality = 100.f;
                 }
 
-                equipedItems.getItem(0)->setQuality(quality);
+                equipedItems->getItem(0)->setQuality(quality);
             }
             else
             {
@@ -394,7 +422,7 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
     }
     else if (data->isWearable)
     {
-        if (equipedItems.addItem(*item, 0))
+        if (equipedItems->addItem(*item, 0))
         {
             item->setAsRemoved();
             Statistics::getInstance()->increaseEquipedTimes();
@@ -413,13 +441,13 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
                 return;
             }
 
-            addItemToInventory(equipedItems.getItem(1), freedSlot);
+            addItemToInventory(equipedItems->getItem(1), freedSlot);
 
-            equipedItems.getItem(1)->setAsRemoved();
+            equipedItems->getItem(1)->setAsRemoved();
             onWeaponUnequip();
         }
 
-        if (equipedItems.addItem(*item, 1))
+        if (equipedItems->addItem(*item, 1))
         {
             item->setAsRemoved();
             Statistics::getInstance()->increaseEquipedTimes();
@@ -431,8 +459,8 @@ void Dude::useItem(ItemInstance* item, ItemDatabase* itemDb)
     {
         if (isWeaponEquiped() != -1 && isWeaponEquiped() == Consts::flashLightId)
         {
-            equipedItems.getItem(1)->setAmmoLoaded(1);
-            equipedItems.getItem(1)->setQuality(100.f);
+            equipedItems->getItem(1)->setAmmoLoaded(1);
+            equipedItems->getItem(1)->setQuality(100.f);
             item->setAsRemoved();
             Statistics::getInstance()->increaseItemUsage();
         }
@@ -456,9 +484,9 @@ void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
 
         int itemCountToFind = ingredient->count;
 
-        for (unsigned j = 0; j < itemBag.getItemCount(); ++j)
+        for (unsigned j = 0; j < itemBag->getItemCount(); ++j)
         {
-            ItemInstance* itm = itemBag.getItem(j);
+            ItemInstance* itm = itemBag->getItem(j);
 
             if (itm && itm->getIndex() == ingredient->itemIndex && !itm->isRemoved())
             {
@@ -490,7 +518,7 @@ void Dude::craftItem(Recipe* recipe, ItemDatabase& itemDb)
 
     for (unsigned i = 0; i < itemsToRemove.count(); ++i)
     {
-        itemBag.getItem(itemsToRemove[i])->setAsRemoved();
+        itemBag->getItem(itemsToRemove[i])->setAsRemoved();
     }
 
     ItemInstance craftedItem;
@@ -515,29 +543,29 @@ bool Dude::checkInventoryInput(int scale,
                                Vector3D& itemPos,
                                void** doubleClickCallbackData)
 {
-    itemBag.setActive(true);
-    unsigned  itemsBefore = itemBag.getActualItemCount();
+    itemBag->setActive(true);
+    unsigned  itemsBefore = itemBag->getActualItemCount();
 
     bool clickedOnInventoryItems = false;
     bool clickedOnEquipedItems = false;
 
-    bool res = itemBag.checkInput(scale, deltaTime, touches, selectedItem, itemSelected, clickedOnInventoryItems, itemPos, doubleClickCallbackData);
+    bool res = itemBag->checkInput(scale, deltaTime, touches, selectedItem, itemSelected, clickedOnInventoryItems, itemPos, doubleClickCallbackData);
 
    
-    unsigned itemsAfter = itemBag.getActualItemCount();
+    unsigned itemsAfter = itemBag->getActualItemCount();
     
     if (itemsBefore < itemsAfter)
     {
         Statistics::getInstance()->increaseItemAddition();
     }
 
-    equipedItems.setActive(true);
-    itemsBefore = equipedItems.getActualItemCount();
+    equipedItems->setActive(true);
+    itemsBefore = equipedItems->getActualItemCount();
     bool isWeaponEquipedBefore = (isWeaponEquiped() != -1);
      
 
-    res = equipedItems.checkInput(scale, deltaTime, touches, selectedItem, itemSelected, clickedOnEquipedItems, itemPos, nullptr);
-    itemsAfter = equipedItems.getActualItemCount();
+    res = equipedItems->checkInput(scale, deltaTime, touches, selectedItem, itemSelected, clickedOnEquipedItems, itemPos, nullptr);
+    itemsAfter = equipedItems->getActualItemCount();
     bool isWeaponEquipedNow = (isWeaponEquiped() != -1);
 
         
@@ -641,7 +669,7 @@ void Dude::goToSleep()
 
 void Dude::wearWeapon(float damage)
 {
-    ItemInstance* wep = equipedItems.getItem(1);
+    ItemInstance* wep = equipedItems->getItem(1);
 
     if (wep && !wep->isRemoved())
     {
@@ -663,7 +691,7 @@ void Dude::setPosition(Vector3D& position)
 
 int Dude::isClothesEquiped()
 {
-    ItemInstance* clothes = equipedItems.getItem(0);
+    ItemInstance* clothes = equipedItems->getItem(0);
 
     if (!clothes)
     {
@@ -676,7 +704,7 @@ int Dude::isClothesEquiped()
 
 int Dude::isWeaponEquiped()
 {
-    ItemInstance* weapon = equipedItems.getItem(1);
+    ItemInstance* weapon = equipedItems->getItem(1);
     if (!weapon)
     {
         return -1;
@@ -687,7 +715,7 @@ int Dude::isWeaponEquiped()
 
 int  Dude::getAmmoInWeaponCount()
 {
-    ItemInstance* weapon = equipedItems.getItem(1);
+    ItemInstance* weapon = equipedItems->getItem(1);
 
     if (!weapon)
     {
@@ -702,9 +730,9 @@ int Dude::getItemCountByTypeIndex(int index)
 {
     int count = 0;
 
-    for (unsigned j = 0; j < itemBag.getItemCount(); ++j)
+    for (unsigned j = 0; j < itemBag->getItemCount(); ++j)
     {
-        ItemInstance* itm = itemBag.getItem(j);
+        ItemInstance* itm = itemBag->getItem(j);
 
         if (itm && itm->getIndex() == index && !itm->isRemoved())
         {
@@ -715,9 +743,14 @@ int Dude::getItemCountByTypeIndex(int index)
     return count;
 }
 
+unsigned Dude::getItemCount()
+{
+    return itemBag->getItemCount();
+}
+
 ItemInstance* Dude::getItem(unsigned index)
 {
-    return itemBag.getItem(index);
+    return itemBag->getItem(index);
 }
 
 
@@ -735,7 +768,7 @@ SPolygon* Dude::getCurrentHelperPolygon()
 
 void Dude::addItemToInventory(ItemInstance* item, int inventorySlotIndex)
 {
-    itemBag.addItem(*item, inventorySlotIndex);
+    itemBag->addItem(*item, inventorySlotIndex);
 }
 
 
@@ -743,9 +776,9 @@ int Dude::findFreedInventorySlot()
 {
     int replacableItemIndex = -1;
 
-    for (unsigned i = 0; i < itemBag.getItemCount(); ++i)
+    for (unsigned i = 0; i < itemBag->getItemCount(); ++i)
     {
-        ItemInstance* itm = itemBag.getItem(i);
+        ItemInstance* itm = itemBag->getItem(i);
 
         if (itm->isRemoved())
         {
@@ -760,12 +793,12 @@ int Dude::findFreedInventorySlot()
 
 bool Dude::isNoMorePlaceInBag(int freedSlotIndex)
 {
-    return (itemBag.getItemCount() >= itemBag.getSlotCount()) ? (freedSlotIndex == -1 ?  true : false) : false;
+    return (itemBag->getItemCount() >= itemBag->getSlotCount()) ? (freedSlotIndex == -1 ?  true : false) : false;
 }
 
 void Dude::addDoubleClickCallbackForItems(void (*func)(ItemInstance*, void**))
 {
-    itemBag.setDoubleClickCallback(func);
+    itemBag->setDoubleClickCallback(func);
 }
 
 
@@ -816,7 +849,7 @@ void Dude::wearClothes(float deltaTime, ItemDatabase& itemdb)
 
     if (isClothesEquiped() != -1)
     {
-        ItemInstance* clothes = equipedItems.getItem(0);
+        ItemInstance* clothes = equipedItems->getItem(0);
         clothingInfo = itemdb.get(clothes->getIndex());
         clothes->setQuality(clothes->getQuality() - deltaTime * clothingInfo->spoilageSpeed);
 
@@ -834,7 +867,7 @@ void Dude::drainBatteries(float deltaTime, ItemDatabase& itemdb)
 {
     if (isWeaponEquiped() != -1)
     {
-        ItemInstance* weapon = equipedItems.getItem(1);
+        ItemInstance* weapon = equipedItems->getItem(1);
         int itemID = weapon->getIndex();
 
         if (itemID != Consts::flashLightId)
@@ -924,10 +957,10 @@ void Dude::doTemperatureDamage(float deltaTime, int temperature, ItemDatabase& i
 
         if (isClothesEquiped() != -1)
         {
-            clothingTemperature = itemdb.get(equipedItems.getItem(0)->getIndex())->coldDecrease;
+            clothingTemperature = itemdb.get(equipedItems->getItem(0)->getIndex())->coldDecrease;
         }
 
-        if (itemBag.hasItem(21) != -1 && sleeping)
+        if (itemBag->hasItem(21) != -1 && sleeping)
         {
             clothingTemperature = itemdb.get(21)->coldDecrease;
         }

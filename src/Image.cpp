@@ -11,6 +11,7 @@
 #include "Image.h"
 #ifdef __ANDROID__
 #include <android/log.h>
+#include <android/asset_manager.h>
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "native-activity", __VA_ARGS__))
 #endif
 
@@ -40,6 +41,7 @@ bool Image::loadTga(const char *name, unsigned short& _imageBits, AAssetManager*
     unsigned char header[18];
 #ifndef __ANDROID__
     result = fread(header, 18, 1, TGAfile);
+
     if ((header[2] != 2)&&(header[2] != 10)){
         fclose(TGAfile);
         return false;

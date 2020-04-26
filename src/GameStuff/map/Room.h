@@ -1,7 +1,6 @@
 #ifndef ROOM_H
 #define ROOM_H
 
-#include "../Furniture.h"
 #include "../Asset.h"
 #include "AdditionalVertices.h"
 #include "Region.h"
@@ -29,6 +28,7 @@ struct DoorHole
     float    topX1Offset;
 };
 
+class Furniture;
 
 class Room
 {

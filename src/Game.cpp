@@ -1,17 +1,58 @@
-#include <vector>
-#include <cwchar>
-#include <cmath>
 #include "Game.h"
 #include "GameStuff/Consts.h"
 #include "GameStuff/actors/Ghost.h"
 #include "GameStuff/actors/Bear.h"
+#include "GameStuff/actors/Dude.h"
+#include "GameStuff/Statistics.h"
+#include "GameStuff/map/Room.h"
+#include "gui/Text.h"
+#include "OSTools.h"
+#include "MathTools.h"
+#include <vector>
+#include <cwchar>
+#include <cmath>
+#include <ctime>
 
 const int boardX = 16;
 const int boardY = 445;
 const int tileSize = 64;
 
+static const char* GameVersion = "0.02";
 
-//--------------------------------------
+Game::Game()
+{
+    Statistics::getInstance()->init(GameVersion,
+#ifdef WIN32
+            1
+#else
+            0
+#endif
+            );
+
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+    ScreenWidth = 850;
+    ScreenHeight = 480;
+#else
+    ScreenWidth = 1280;
+    ScreenHeight = 720;
+    windowed = false;
+#endif
+
+    Accumulator = 0;
+    DT = 1000.0f/60.0f/1000.0f;
+    oldMoveTouch = Vector3D(-1, -1, 0);
+    Works = true;
+    tick = 0;
+    TimeTicks = 0;
+
+    DebugMode = 0;
+    sendStats = false;
+    pixelArtScale = 1;
+
+    dude = nullptr;
+
+}
+
 void Game::loadConfig(){
 #ifndef __ANDROID__
     char buf[1024];
@@ -265,7 +306,8 @@ void Game::destroy(){
     recipes.destroy();
     furnitureDB.destroy();
     itemDB.destroy();
-    dude.destroy();
+    dude->destroy();
+    delete dude;
     itemsInWorld.destroy();
     mapGraph.destroy();
 
@@ -300,7 +342,7 @@ void Game::renderGame()
 
     map.draw(mapPosX, mapPosY, scale, ScreenWidth, ScreenHeight, pics, itemDB, DebugMode);
     projectiles.draw(mapPosX, mapPosY, scale, pics);
-    map.drawFrontLayerAssets(mapPosX, mapPosY, scale, *dude.getPos(), pics);
+    map.drawFrontLayerAssets(mapPosX, mapPosY, scale, *dude->getPos(), pics);
     map.drawDarknessBorder(mapPosX, mapPosY, scale, ScreenWidth, ScreenHeight, pics);
 
     drawDarkness(scale);
@@ -354,15 +396,15 @@ void Game::renderGame()
         pp.points.destroy();
 
 
-        SPolygon* flashlightPoly = dude.getCurrentHelperPolygon();
+        SPolygon* flashlightPoly = dude->getCurrentHelperPolygon();
 
         if (flashlightPoly)
         {
             for (unsigned i = 0; i < flashlightPoly->points.count(); ++i)
             {
                 Vector3D* p = &(flashlightPoly->points[i]);
-                pp.points.add(Vector3D(dude.getPos()->x + p->x * (dude.isFlipedX() ? 1 : -1),
-                                       dude.getPos()->y + p->y, 0));
+                pp.points.add(Vector3D(dude->getPos()->x + p->x * (dude->isFlipedX() ? 1 : -1),
+                                       dude->getPos()->y + p->y, 0));
             }
 
             drawPolygon(&pp, scale, colorShader, GL_LINE_STRIP, COLOR(1, 0, 1, 1));
@@ -386,7 +428,7 @@ void Game::renderGame()
                          64,
                          pics, currentRoom);
     
-    dude.drawInventory(pics, itemDB, selectedItem, pixelArtScale);
+    dude->drawInventory(pics, itemDB, selectedItem, pixelArtScale);
 
     drawActiveContainer();
 
@@ -409,7 +451,7 @@ void Game::renderGame()
         DrawDebugText();
     }
     
-    int stats[] = {dude.getHealth(), dude.getSatiation(), dude.getWarmth(), dude.getWakefullness()};
+    int stats[] = {dude->getHealth(), dude->getSatiation(), dude->getWarmth(), dude->getWakefullness()};
 
     const float hudStartX = (ScreenWidth / 2) - ((2 * 68 + 16) * scale);
 
@@ -426,7 +468,7 @@ void Game::renderGame()
     sprintf(buf, "Day %d %dh", days, (int)(worldTime / (Consts::dayLength / 24)));
     WriteText(ScreenWidth - (150 * scale), 20 * scale, pics, 0, buf, 0.8f * scale, 0.8f * scale);
 
-    int weaponEquiped = dude.isWeaponEquiped();
+    int weaponEquiped = dude->isWeaponEquiped();
     ItemData* weaponInfo = itemDB.get(weaponEquiped);
     
     bool isSlingShot = (weaponInfo && weaponInfo->imageIndex == 9);
@@ -477,7 +519,7 @@ void Game::gameLogic()
 {
     int scale = pixelArtScale;
 
-    centerCamera(dude.pos.x, dude.pos.y, scale);
+    centerCamera(dude->pos.x, dude->pos.y, scale);
     calcDarknessValue();
 
     //---
@@ -495,19 +537,19 @@ void Game::gameLogic()
             }
             else
             {
-                if (!dude.isSleeping())
+                if (!dude->isSleeping())
                 {
 
 #ifdef __ANDROID__
                     map.load(currentRoom->getMapName(), AssetManager, &dude, &itemsInWorld, currentRoom);
 #else
-                    map.load(currentRoom->getMapName(), &dude, &itemsInWorld, currentRoom);
+                    map.load(currentRoom->getMapName(), dude, &itemsInWorld, currentRoom);
 #endif
-                    dude.setPosition(*map.getPlayerPos(currentPlayerEntryPoint));
+                    dude->setPosition(*map.getPlayerPos(currentPlayerEntryPoint));
                     unsigned regionIndex = 0;
                     unsigned entryIndex = 0;
 
-                    if (dude.colidesWithRegion(map, &regionIndex, &entryIndex))
+                    if (dude->colidesWithRegion(map, &regionIndex, &entryIndex))
                     {
                         ignoreRegion = true;
                         printf("REGION IGNORED\n");
@@ -521,7 +563,7 @@ void Game::gameLogic()
                     printf("WELCOME TO THE WORLD OF TOMOROW!\n");
                     updateWorld(Consts::dayLength/24 * 6);
                     calcDarknessValue();
-                    dude.stopSleep();
+                    dude->stopSleep();
 
                     if (darkness > 0.6f)
                     {
@@ -537,7 +579,7 @@ void Game::gameLogic()
         return;
     }
     //--
-    if (dude.isSleeping() && dude.isSleepAnimationDone())
+    if (dude->isSleeping() && dude->isSleepAnimationDone())
     {
         stateInTheGame = FADEOUT;
         return;
@@ -550,7 +592,7 @@ void Game::gameLogic()
 
     if (activeContainer)
     {
-        void* data[] = {&dude};
+        void* data[] = {dude};
 
         bool clickedOn = false;
 
@@ -560,10 +602,10 @@ void Game::gameLogic()
         }
     }
 
-    void* data[] = {&dude, &itemDB}; 
+    void* data[] = {dude, &itemDB}; 
 
     bool clickedInventory = false;
-    dude.checkInventoryInput(pixelArtScale,
+    dude->checkInventoryInput(pixelArtScale,
                              DeltaTime,
                              touches,
                              &selectedItem,
@@ -585,7 +627,7 @@ void Game::gameLogic()
             }
 
             if (!CollisionCircleCircle(itm->getPosition()->x + mapPosX, itm->getPosition()->y + mapPosY, 16,
-                                      dude.getPos()->x + mapPosX, dude.getPos()->y + mapPosY, 100))
+                                      dude->getPos()->x + mapPosX, dude->getPos()->y + mapPosY, 100))
             {
                 continue;
             }
@@ -651,7 +693,7 @@ void Game::gameLogic()
             {
                 Recipe* recipe = recipes.getRecipe(recipeClicked);
                 recipeClicked = -1;
-                dude.craftItem(recipe, itemDB);
+                dude->craftItem(recipe, itemDB);
                 return;
             }
             else
@@ -672,9 +714,9 @@ void Game::gameLogic()
             return;
         }
 
-        Vector3D src = Vector3D(dude.getPos()->x, dude.getPos()->y + 39.0f, 0);
+        Vector3D src = Vector3D(dude->getPos()->x, dude->getPos()->y + 39.0f, 0);
         Vector3D destination = Vector3D((touches.up[0].x - mapPosX) / scale, (touches.up[0].y - mapPosY) / scale, 0);
-        dude.resetPathIndex();
+        dude->resetPathIndex();
         path.find(src, 
                   destination, 
                   map.getPolygonData(), 
@@ -689,7 +731,7 @@ void Game::gameLogic()
     unsigned entryIndex = 0;
     unsigned regionIndex = 0;
 
-    bool colidesWithRegion = dude.colidesWithRegion(map, &regionIndex, &entryIndex);
+    bool colidesWithRegion = dude->colidesWithRegion(map, &regionIndex, &entryIndex);
 
     if ( colidesWithRegion && !ignoreRegion)
     {
@@ -712,7 +754,7 @@ void Game::gameLogic()
         ignoreRegion = false;
     }
 
-    if (dude.getHealth() <= 0)
+    if (dude->getHealth() <= 0)
     {
         gameMode = DEFEAT;
         Statistics::getInstance()->send(days * Consts::dayLength + worldTime - (Consts::dayLength / 24) * 10,
@@ -734,9 +776,9 @@ void Game::updateWorld(float deltaT)
         worldTime = (worldTime - daysPassed * Consts::dayLength);
     }
     
-    dude.update(deltaT, Keys, map, currentRoom, darkness, itemDB, recipes, furnitureDB, path);
+    dude->update(deltaT, Keys, map, currentRoom, darkness, itemDB, recipes, furnitureDB, path);
     projectiles.update(deltaT, currentRoom, &map); 
-    map.update(DeltaTime, &dude, pics);
+    map.update(DeltaTime, dude, pics);
 }
 
 void Game::titleLogic()
@@ -757,14 +799,22 @@ void Game::titleLogic()
 #endif
         gameMode = GAME;
         sessionStarted = time(0);
-        dude.destroy();
+
+        if (dude)
+        {
+            dude->destroy();
+            delete dude;
+        }
+
+        dude = new Dude();
+
 #ifdef __ANDROID__
         map.load(currentRoom->getMapName(), AssetManager, &dude, &itemsInWorld, currentRoom);
 #else
-        map.load(currentRoom->getMapName(), &dude, &itemsInWorld, currentRoom);
+        map.load(currentRoom->getMapName(), dude, &itemsInWorld, currentRoom);
 #endif
-        dude.init(*map.getPlayerPos(0), currentRoom, &map, ScreenWidth, ScreenHeight, pixelArtScale);
-        dude.addDoubleClickCallbackForItems(&useItem);
+        dude->init(*map.getPlayerPos(0), currentRoom, &map, ScreenWidth, ScreenHeight, pixelArtScale);
+        dude->addDoubleClickCallbackForItems(&useItem);
 
         glClearColor(0.f, 0.0f, 0.0f, 0.0f);
         
@@ -871,7 +921,7 @@ void Game::drawRecipes(int scale)
                           scale);
                 sprintf(buf, "%d", recipe->ingredients[j].count);
 
-                bool haveEnough = (dude.getItemCountByTypeIndex(recipe->ingredients[j].itemIndex) >= recipe->ingredients[j].count);
+                bool haveEnough = (dude->getItemCountByTypeIndex(recipe->ingredients[j].itemIndex) >= recipe->ingredients[j].count);
 
                 COLOR countColor = (haveEnough) ? COLOR(1, 1, 1, 1) : COLOR(1, 0, 0, 1);
 
@@ -912,8 +962,8 @@ void Game::drawDarkness(int scale)
     map.drawLights(mapPosX, mapPosY, scale, pics);
 
     pics.draw(11,
-              dude.pos.x * scale + mapPosX,
-              (dude.pos.y - 20) * scale + mapPosY,
+              dude->pos.x * scale + mapPosX,
+              (dude->pos.y - 20) * scale + mapPosY,
               0,
               true,
               scale, scale,
@@ -922,23 +972,23 @@ void Game::drawDarkness(int scale)
               COLOR(1,1,1,0.6f));
 
 
-    if (dude.isWeaponEquiped() == Consts::flashLightId && dude.getAmmoInWeaponCount()) //flashlight equiped
+    if (dude->isWeaponEquiped() == Consts::flashLightId && dude->getAmmoInWeaponCount()) //flashlight equiped
     {
 
-        if (dude.getAnimationSubset() == 0)
+        if (dude->getAnimationSubset() == 0)
         {
             pics.draw(15,
-                    dude.pos.x * scale + mapPosX + ((dude.isFlipedX()) ? 89 * scale : -89 * scale),
-                    dude.pos.y * scale + mapPosY - 20 * scale,
+                    dude->pos.x * scale + mapPosX + ((dude->isFlipedX()) ? 89 * scale : -89 * scale),
+                    dude->pos.y * scale + mapPosY - 20 * scale,
                     0,
-                    false, (dude.isFlipedX()) ? -1.6 * scale : 1.6 * scale, 1.3 * scale);
+                    false, (dude->isFlipedX()) ? -1.6 * scale : 1.6 * scale, 1.3 * scale);
         }
-        else if (dude.getAnimationSubset() == 1)
+        else if (dude->getAnimationSubset() == 1)
         {
 
             pics.draw(7,
-                    dude.pos.x * scale + mapPosX,
-                    dude.pos.y * scale + mapPosY - 60,
+                    dude->pos.x * scale + mapPosX,
+                    dude->pos.y * scale + mapPosY - 60,
                     0,
                     true,
                     1.8f * scale, 1.5f * scale,
@@ -949,10 +999,10 @@ void Game::drawDarkness(int scale)
         {
 
             pics.draw(13,
-                    dude.pos.x * scale + mapPosX + ((dude.isFlipedX()) ? 335 * scale : -335 * scale),
-                    dude.pos.y * scale + mapPosY - 68 * scale,
+                    dude->pos.x * scale + mapPosX + ((dude->isFlipedX()) ? 335 * scale : -335 * scale),
+                    dude->pos.y * scale + mapPosY - 68 * scale,
                     0,
-                    false, (dude.isFlipedX()) ? -1.3f * scale : 1.3f * scale, 1.3f * scale );
+                    false, (dude->isFlipedX()) ? -1.3f * scale : 1.3f * scale, 1.3f * scale );
         }
     }
 
@@ -1075,9 +1125,9 @@ bool Game::interactWithFurniture(float clickX, float clickY)
 
     if (fur)
     {
-        if (dude.isWeaponEquiped() == 19) //destroying furniture whith an axe
+        if (dude->isWeaponEquiped() == 19) //destroying furniture whith an axe
         {
-            dude.activateMeleeAttack();
+            dude->activateMeleeAttack();
             return true;
         }
 
@@ -1091,10 +1141,10 @@ bool Game::interactWithFurniture(float clickX, float clickY)
         }
         else if (fur->isBed)
         {
-            dude.pos.x = fur->pos.x + 113.f;
-            dude.pos.y = fur->pos.y + 67.f;
-            dude.flipX(false);
-            dude.goToSleep();
+            dude->pos.x = fur->pos.x + 113.f;
+            dude->pos.y = fur->pos.y + 67.f;
+            dude->flipX(false);
+            dude->goToSleep();
         }
     }
 
@@ -1108,7 +1158,7 @@ void Game::centerCamera(float x, float y, int scale)
 
     if (mapWidth > ScreenWidth)
     {
-        mapPosX = ScreenWidth / 2.f - dude.pos.x * scale;
+        mapPosX = ScreenWidth / 2.f - x * scale;
 
         if (mapPosX > 0)
         {
@@ -1128,7 +1178,7 @@ void Game::centerCamera(float x, float y, int scale)
     if (mapHeight > ScreenHeight)
     {
 
-        mapPosY = ScreenHeight / 2.f - dude.pos.y * scale;
+        mapPosY = ScreenHeight / 2.f - y * scale;
 
         if (mapPosY > 0)
         {
@@ -1184,7 +1234,7 @@ void Game::drawPolygon(SPolygon* poly, int scale, ShaderProgram& shader, int met
 
 bool Game::handleAttack(float x, float y)
 {
-    int weaponEquiped = dude.isWeaponEquiped();
+    int weaponEquiped = dude->isWeaponEquiped();
     
     if (weaponEquiped == -1)
     {
@@ -1222,7 +1272,7 @@ bool Game::handleAttack(float x, float y)
         {
             if (weaponInfo->imageIndex == 19) //axe - mellee
             {
-                Vector3D dudePos = *dude.getPos();
+                Vector3D dudePos = *dude->getPos();
                 dudePos.y += 39.f;
 
                 printf("SWING!\n");
@@ -1232,7 +1282,7 @@ bool Game::handleAttack(float x, float y)
                             actor->pos.y + actor->collisionBodyOffset.y,
                             actor->getCollisionBodyRadius()))
                 {
-                    dude.activateMeleeAttack();
+                    dude->activateMeleeAttack();
                     return true;
                 }
             }
@@ -1243,18 +1293,18 @@ bool Game::handleAttack(float x, float y)
     if (weaponInfo->imageIndex == 9) //slingshot - ranged
     {
 
-        int ammoSlot = dude.hasItem(weaponInfo->ammoItemIndex);
+        int ammoSlot = dude->hasItem(weaponInfo->ammoItemIndex);
 
         if (ammoSlot != -1)
         {
             Vector3D destination = Vector3D(x, y, 0);
 
-            Vector3D diff = destination - dude.pos;
+            Vector3D diff = destination - dude->pos;
             diff.normalize();
-            dude.setAnimationSubsetByDirectionVector(diff, false); 
-            projectiles.addProjectile(dude.pos, destination);
-            dude.removeItem(ammoSlot);
-            dude.wearWeapon(-8.f);
+            dude->setAnimationSubsetByDirectionVector(diff, false); 
+            projectiles.addProjectile(dude->pos, destination);
+            dude->removeItem(ammoSlot);
+            dude->wearWeapon(-8.f);
 
             return true;
         }

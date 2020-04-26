@@ -1,5 +1,7 @@
 #include "Bear.h"
 #include "../../MathTools.h"
+#include "../ActorContainer.h"
+#include "../map/GameMap.h"
 
 void Bear::init(Vector3D& position, Room* currentRoom, GameMap* currentMap)
 {

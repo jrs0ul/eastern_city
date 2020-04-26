@@ -1,5 +1,7 @@
 #include "Actor.h"
 #include "../../MathTools.h"
+#include "../map/GameMap.h"
+#include "../map/Room.h"
 #include <cmath>
 #include <cassert>
 

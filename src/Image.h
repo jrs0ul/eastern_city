@@ -9,7 +9,7 @@
 #define IMAGE_H
 
 #ifdef __ANDROID__
-#include <android/asset_manager.h>
+class AAssetManager;
 #endif
 
 /*struct TgaHeader{

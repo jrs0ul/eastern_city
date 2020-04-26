@@ -2,7 +2,8 @@
 #define BEAR_H
 
 #include "Actor.h"
-#include "Dude.h"
+
+class ActorContainer;
 
 class Bear : public Actor
 {

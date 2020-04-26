@@ -1,20 +1,24 @@
 * Death animation
 * Different item look in the map and the inventory
-* Ability to build a furnace
+
 * Ability to group items
+
 * Make slinshot's shooting animation
+
 * Ability to build furniture/things in general
+* Ability to build a furnace
+* ability to cook on the furnace
+
 * Ability to PAUSE the game
 * Saving
 * Flashlight preloaded with batteries?
-* wider beam for the flashlight
+--> * wider beam for the flashlight
 * dead tree outside ??
 * more than one room in apartaments
 * a sleep confirmation dialog
 * Fix the broken pathfinding outside and pathfinding in general
 * lighter
 * candles. They can be lit when a lighter is equiped
-* ability to cook on the furnace
 * draw the blanket's sprite on sleeping character.
 * Make a sprite for a wall carpet
 * Simple tutorial to teach doubleclicking on food if satiation is low or clothes if it's cold
@@ -24,6 +28,6 @@
 * make an electricity generator powered by rats or mice
 * maybe replace the equiped item's quality numbers with a progress bar?
 * Bear roars when sees a player
-* Investigate forward declarations
+--> Minimize includes in headers
 * Enemies got stuck in furniture(check enemy position generation)
 * axe swing sound when axe hits nothing and something else when it hits a target

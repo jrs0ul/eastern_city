@@ -1,5 +1,7 @@
 #include "Rat.h"
 #include "../../MathTools.h"
+#include "Dude.h"
+#include "../ActorContainer.h"
 #include <cmath>
 
 void Rat::init(Vector3D& position, Room* currentRoom, GameMap* currentMap)

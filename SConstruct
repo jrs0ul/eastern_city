@@ -40,7 +40,6 @@ code = [
         "src/Particles2D.cpp",
         "src/Image.cpp",
         "src/Shader.cpp",
-        "src/Threads.cpp",
         "src/ShaderProgram.cpp",
         "src/TextureLoader.cpp",
         "src/SysConfig.cpp",

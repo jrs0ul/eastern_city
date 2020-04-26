@@ -2,10 +2,11 @@
 #define GAME_MAP_GRAPH_H
 
 #include "../Polygon.h"
-#include "Room.h"
-#include "../FurnitureData.h"
 
 struct RoomAndEntry;
+class Room;
+class FurnitureDatabase;
+class PicsContainer;
 
 enum EntranceEnum
 {

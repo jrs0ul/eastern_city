@@ -1,6 +1,7 @@
 #include "Projectile.h"
 #include "../MathTools.h"
 #include "ActorContainer.h"
+#include "map/GameMap.h"
 
 Projectile::Projectile()
 {
